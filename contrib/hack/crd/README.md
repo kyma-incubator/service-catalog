@@ -46,7 +46,7 @@ export namespace="qa"
 ```
 2. Create a Redis instance.
 ```bash
-kubectl create -f assets/scenario/redis-instance.yaml -n $namespace
+kubectl create -f assets/scenario/redis-instance-manual.yaml -n $namespace
 ```
 3. Check if the Redis instance is already provisioned.
 ```bash
@@ -54,7 +54,7 @@ watch -n 1 kubectl get serviceinstance/redis -n $namespace -o jsonpath='{ .statu
 ```
 4. Create Secrets for the Redis instance.
 ```bash
-kubectl create -f assets/scenario/redis-instance-binding.yaml -n $namespace
+kubectl create -f assets/scenario/redis-instance-binding-manual.yaml -n $namespace
 ```
 5. Create a deploy.
 ```bash
