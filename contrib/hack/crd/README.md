@@ -50,7 +50,7 @@ kubectl create -f assets/scenario/redis-instance-manual.yaml -n $namespace
 ```
 3. Check if the Redis instance is already provisioned.
 ```bash
-watch -n 1 kubectl get serviceinstance/redis -n $namespace -o jsonpath='{ .status.conditions[0].reason }'
+watch -n 1 "kubectl get serviceinstance/redis -n $namespace -o jsonpath='{ .status.conditions[0].reason }'"
 ```
 4. Create Secrets for the Redis instance.
 ```bash
