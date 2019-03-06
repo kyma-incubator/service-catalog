@@ -18,6 +18,7 @@ package controller
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/labels"
 	"time"
 
 	"k8s.io/klog"
@@ -25,7 +26,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/tools/cache"
 
@@ -698,13 +698,21 @@ func (c *controller) updateServiceBrokerFinalizers(
 }
 
 func (c *controller) getCurrentServiceClassesAndPlansForNamespacedBroker(broker *v1beta1.ServiceBroker) ([]v1beta1.ServiceClass, []v1beta1.ServicePlan, error) {
-	fieldSet := fields.Set{
-		v1beta1.FilterSpecServiceBrokerName: broker.Name,
-	}
-	fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	_ = metav1.ListOptions{FieldSelector: fieldSelector}
-	listOpts := metav1.ListOptions{}
+	//fieldSet := fields.Set{
+	//	v1beta1.FilterSpecServiceBrokerName: broker.Name,
+	//}
+	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
+	//_ = metav1.ListOptions{FieldSelector: fieldSelector}
+	//listOpts := metav1.ListOptions{}
+	//
 
+	labelSelector := labels.SelectorFromSet(labels.Set{
+		ServiceCatalogDomain+"/"+v1beta1.FilterSpecServiceBrokerName: broker.Name,
+	}).String()
+
+	listOpts := metav1.ListOptions{
+		LabelSelector: labelSelector,
+	}
 	existingServiceClasses, err := c.serviceCatalogClient.ServiceClasses(broker.Namespace).List(listOpts)
 	if err != nil {
 		c.recorder.Eventf(broker, corev1.EventTypeWarning, errorListingServiceClassesReason, "%v %v", errorListingServiceClassesMessage, err)

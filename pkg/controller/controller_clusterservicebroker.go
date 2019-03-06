@@ -18,6 +18,7 @@ package controller
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/labels"
 	"strings"
 	"time"
 
@@ -26,7 +27,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/tools/cache"
 
@@ -716,12 +716,20 @@ func (c *controller) updateClusterServiceBrokerFinalizers(
 }
 
 func (c *controller) getCurrentServiceClassesAndPlansForBroker(broker *v1beta1.ClusterServiceBroker) ([]v1beta1.ClusterServiceClass, []v1beta1.ClusterServicePlan, error) {
-	fieldSet := fields.Set{
-		"spec.clusterServiceBrokerName": broker.Name,
+	//fieldSet := fields.Set{
+	//	"spec.clusterServiceBrokerName": broker.Name,
+	//}
+	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
+	//_ = metav1.ListOptions{FieldSelector: fieldSelector}
+	//listOpts := metav1.ListOptions{}
+
+	labelSelector := labels.SelectorFromSet(labels.Set{
+		ServiceCatalogDomain+"/spec.clusterServiceBrokerName": broker.Name,
+	}).String()
+
+	listOpts := metav1.ListOptions{
+		LabelSelector: labelSelector,
 	}
-	fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	_ = metav1.ListOptions{FieldSelector: fieldSelector}
-	listOpts := metav1.ListOptions{}
 
 	existingServiceClasses, err := c.serviceCatalogClient.ClusterServiceClasses().List(listOpts)
 	if err != nil {

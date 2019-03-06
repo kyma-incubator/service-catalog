@@ -29,7 +29,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -1349,54 +1348,39 @@ func (c *controller) resolveClusterServiceClassRef(instance *v1beta1.ServiceInst
 			)
 		}
 	} else {
-		filterField := instance.Spec.GetClusterServiceClassFilterFieldName()
+		// TODO(adamwalach) check labels
+		filterLabel := instance.Spec.GetClusterServiceClassFilterLabelName()
 		filterValue := instance.Spec.GetSpecifiedClusterServiceClass()
-		klog.V(4).Info(pcb.Messagef("looking up a ClusterServiceClass from %s: %q", filterField, filterValue))
-		// TODO(mszostok): Replace FieldSelector with indexer
+		klog.V(4).Info(pcb.Messagef("looking up a ClusterServiceClass from %s: %q", filterLabel, filterValue))
+
 		//listOpts := metav1.ListOptions{
 		//	FieldSelector: fields.OneTermEqualSelector(filterField, filterValue).String(),
 		//}
-		//serviceClasses, err := c.serviceCatalogClient.ClusterServiceClasses().List(listOpts)
-		//if err == nil && len(serviceClasses.Items) == 1 {
-		//	sc = &serviceClasses.Items[0]
-		//	instance.Spec.ClusterServiceClassRef = &v1beta1.ClusterObjectReference{
-		//		Name: sc.Name,
-		//	}
-		//	klog.V(4).Info(pcb.Messagef(
-		//		"resolved %c to K8S ClusterServiceClass %q",
-		//		instance.Spec.PlanReference, sc.Name,
-		//	))
-		//} else {
-		//	return nil, fmt.Errorf(
-		//		"References a non-existent ClusterServiceClass %c or there is more than one (found: %d)",
-		//		instance.Spec.PlanReference, len(serviceClasses.Items),
-		//	)
-		//}
-		//
-		key := fmt.Sprintf("%s/%s", filterField, filterValue)
-		rawClasses, err := c.clusterServiceClassIndexer.ByIndex(clusterServiceClassFilterIndexName, key)
-		if err != nil {
-			return nil, fmt.Errorf("while getting %s by index %s: %v", pretty.ClusterServiceClass, clusterServiceClassFilterIndexName, err) // TODO errors wrap?
+		labelSelector := labels.SelectorFromSet(labels.Set{
+			filterLabel: filterValue,
+		}).String()
+
+		listOpts := metav1.ListOptions{
+			LabelSelector: labelSelector,
 		}
 
-		if len(rawClasses) == 0 {
-			return nil, fmt.Errorf("References a non-existent %s %c", pretty.ClusterServiceClass, instance.Spec.PlanReference)
+		serviceClasses, err := c.serviceCatalogClient.ClusterServiceClasses().List(listOpts)
+		if err == nil && len(serviceClasses.Items) == 1 {
+			sc = &serviceClasses.Items[0]
+			instance.Spec.ClusterServiceClassRef = &v1beta1.ClusterObjectReference{
+				Name: sc.Name,
+			}
+			klog.V(4).Info(pcb.Messagef(
+				"resolved %c to K8S ClusterServiceClass %q",
+				instance.Spec.PlanReference, sc.Name,
+			))
+		} else {
+			return nil, fmt.Errorf(
+				"References a non-existent ClusterServiceClass %c or there is more than one (found: %d)",
+				instance.Spec.PlanReference, len(serviceClasses.Items),
+			)
 		}
 
-		if len(rawClasses) > 1 {
-			return nil, fmt.Errorf("Multiple %s resources with the same %s", pretty.ClusterServiceClass, key)
-		}
-
-		rawClass := rawClasses[0]
-		class, ok := rawClass.(*v1beta1.ClusterServiceClass)
-		if !ok {
-			return nil, fmt.Errorf("Incorrect item type: %T, should be: *v1beta1.ClusterServiceClass", rawClass)
-		}
-
-		sc = class
-		instance.Spec.ClusterServiceClassRef = &v1beta1.ClusterObjectReference{
-			Name: sc.Name,
-		}
 		klog.V(4).Info(pcb.Messagef(
 			"resolved %c to K8S ClusterServiceClass %q",
 			instance.Spec.PlanReference, sc.Name,
@@ -1439,14 +1423,23 @@ func (c *controller) resolveServiceClassRef(instance *v1beta1.ServiceInstance) (
 			)
 		}
 	} else {
-		filterField := instance.Spec.GetServiceClassFilterFieldName()
+		// TODO(adamwalach) check labels
+		filterLabel := instance.Spec.GetServiceClassFilterLabelName()
 		filterValue := instance.Spec.GetSpecifiedServiceClass()
 
-		klog.V(4).Info(pcb.Messagef("looking up a ServiceClass from %s: %q", filterField, filterValue))
-		_ = metav1.ListOptions{
-			FieldSelector: fields.OneTermEqualSelector(filterField, filterValue).String(),
+		klog.V(4).Info(pcb.Messagef("looking up a ServiceClass from %s: %q", filterLabel, filterValue))
+		//listOpts := metav1.ListOptions{
+		//	FieldSelector: fields.OneTermEqualSelector(filterField, filterValue).String(),
+		//}
+
+		labelSelector := labels.SelectorFromSet(labels.Set{
+			filterLabel: filterValue,
+		}).String()
+
+		listOpts := metav1.ListOptions{
+			LabelSelector: labelSelector,
 		}
-		listOpts := metav1.ListOptions{}
+
 		serviceClasses, err := c.serviceCatalogClient.ServiceClasses(instance.Namespace).List(listOpts)
 		if err == nil && len(serviceClasses.Items) == 1 {
 			sc = &serviceClasses.Items[0]
@@ -1497,57 +1490,38 @@ func (c *controller) resolveClusterServicePlanRef(instance *v1beta1.ServiceInsta
 			)
 		}
 	} else {
-		// TODO(mszostok): Replace FieldSelector with indexer
+		// TODO(adamwalach) check labels
 		//fieldSet := fields.Set{
 		//	instance.Spec.GetClusterServicePlanFilterFieldName(): instance.Spec.GetSpecifiedClusterServicePlan(),
 		//	"spec.clusterServiceClassRef.name":                   instance.Spec.ClusterServiceClassRef.Name,
 		//	"spec.clusterServiceBrokerName":                      brokerName,
 		//}
 		//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-		//_ = metav1.ListOptions{FieldSelector: fieldSelector}
-		//listOpts := metav1.ListOptions{}
-		//servicePlans, err := c.serviceCatalogClient.ClusterServicePlans().List(listOpts)
-		//if err == nil && len(servicePlans.Items) == 1 {
-		//	sp := &servicePlans.Items[0]
-		//	instance.Spec.ClusterServicePlanRef = &v1beta1.ClusterObjectReference{
-		//		Name: sp.Name,
-		//	}
-		//	klog.V(4).Info(pcb.Messagef("resolved %v to ClusterServicePlan (K8S: %q)",
-		//		instance.Spec.PlanReference, sp.Name,
-		//	))
-		//} else {
-		//	return fmt.Errorf(
-		//		"References a non-existent ClusterServicePlan %b on ClusterServiceClass %s %c or there is more than one (found: %d)",
-		//		instance.Spec.PlanReference, instance.Spec.ClusterServiceClassRef.Name, instance.Spec.PlanReference, len(servicePlans.Items),
-		//	)
-		//}
+		//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
+		labelSelector := labels.SelectorFromSet(labels.Set{
+			instance.Spec.GetClusterServicePlanFilterLabelName():     instance.Spec.GetSpecifiedClusterServicePlan(),
+			ServiceCatalogDomain+"/spec.clusterServiceClassRef.name": instance.Spec.ClusterServiceClassRef.Name,
+			ServiceCatalogDomain+"/spec.clusterServiceBrokerName":    brokerName,
+		}).String()
 
-		key := fmt.Sprintf("%s/%s/%s", instance.Spec.GetSpecifiedClusterServicePlan(), instance.Spec.ClusterServiceClassRef.Name, brokerName)
-		rawPlans, err := c.clusterServicePlanIndexer.ByIndex(clusterServicePlanFilterIndexName, key)
-		if err != nil {
-			return fmt.Errorf("while getting %s by index %s: %v", pretty.ClusterServicePlan, clusterServicePlanFilterIndexName, err) // TODO errors wrap?
+		listOpts := metav1.ListOptions{
+			LabelSelector: labelSelector,
 		}
-
-		if len(rawPlans) == 0 {
-			return fmt.Errorf("References a non-existent %s %c", pretty.ClusterServicePlan, instance.Spec.PlanReference)
+		servicePlans, err := c.serviceCatalogClient.ClusterServicePlans().List(listOpts)
+		if err == nil && len(servicePlans.Items) == 1 {
+			sp := &servicePlans.Items[0]
+			instance.Spec.ClusterServicePlanRef = &v1beta1.ClusterObjectReference{
+				Name: sp.Name,
+			}
+			klog.V(4).Info(pcb.Messagef("resolved %v to ClusterServicePlan (K8S: %q)",
+				instance.Spec.PlanReference, sp.Name,
+			))
+		} else {
+			return fmt.Errorf(
+				"References a non-existent ClusterServicePlan %b on ClusterServiceClass %s %c or there is more than one (found: %d)",
+				instance.Spec.PlanReference, instance.Spec.ClusterServiceClassRef.Name, instance.Spec.PlanReference, len(servicePlans.Items),
+			)
 		}
-
-		if len(rawPlans) > 1 {
-			return fmt.Errorf("Multiple %s resources with the same %s", pretty.ClusterServicePlan, key)
-		}
-
-		rawPlan := rawPlans[0]
-		plan, ok := rawPlan.(*v1beta1.ClusterServicePlan)
-		if !ok {
-			return fmt.Errorf("Incorrect item type: %T, should be: *v1beta1.ClusterServiceClass", rawPlan)
-		}
-
-		instance.Spec.ClusterServicePlanRef = &v1beta1.ClusterObjectReference{
-			Name: plan.Name,
-		}
-		klog.V(4).Info(pcb.Messagef("resolved %v to ServicePlan (K8S: %q)",
-			instance.Spec.PlanReference, plan.Name,
-		))
 	}
 
 	return nil
@@ -1582,14 +1556,23 @@ func (c *controller) resolveServicePlanRef(instance *v1beta1.ServiceInstance, br
 			)
 		}
 	} else {
-		fieldSet := fields.Set{
-			instance.Spec.GetServicePlanFilterFieldName(): instance.Spec.GetSpecifiedServicePlan(),
-			"spec.serviceClassRef.name":                   instance.Spec.ServiceClassRef.Name,
-			"spec.serviceBrokerName":                      brokerName,
+		// TODO(adamwalach) check labels
+		//fieldSet := fields.Set{
+		//	instance.Spec.GetServicePlanFilterFieldName(): instance.Spec.GetSpecifiedServicePlan(),
+		//	"spec.serviceClassRef.name":                   instance.Spec.ServiceClassRef.Name,
+		//	"spec.serviceBrokerName":                      brokerName,
+		//}
+		//fieldSelector := fields.SelectorFromSet(fieldSet).String()
+		//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
+		labelSelector := labels.SelectorFromSet(labels.Set{
+			instance.Spec.GetServicePlanFilterLabelName():     instance.Spec.GetSpecifiedServicePlan(),
+			ServiceCatalogDomain+"/spec.serviceClassRef.name": instance.Spec.ServiceClassRef.Name,
+			ServiceCatalogDomain+"/spec.serviceBrokerName":    brokerName,
+		}).String()
+
+		listOpts := metav1.ListOptions{
+			LabelSelector: labelSelector,
 		}
-		fieldSelector := fields.SelectorFromSet(fieldSet).String()
-		_ = metav1.ListOptions{FieldSelector: fieldSelector}
-		listOpts := metav1.ListOptions{}
 		servicePlans, err := c.serviceCatalogClient.ServicePlans(instance.Namespace).List(listOpts)
 		if err == nil && len(servicePlans.Items) == 1 {
 			sp := &servicePlans.Items[0]
@@ -1605,6 +1588,7 @@ func (c *controller) resolveServicePlanRef(instance *v1beta1.ServiceInstance, br
 				instance.Spec.PlanReference, instance.Spec.ServiceClassRef.Name, instance.Spec.PlanReference, len(servicePlans.Items),
 			)
 		}
+
 	}
 
 	return nil

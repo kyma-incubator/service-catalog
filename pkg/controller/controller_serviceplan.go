@@ -18,12 +18,12 @@ package controller
 
 import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/klog"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/pretty"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -98,12 +98,18 @@ func (c *controller) reconcileServicePlan(servicePlan *v1beta1.ServicePlan) erro
 }
 
 func (c *controller) findServiceInstancesOnServicePlan(servicePlan *v1beta1.ServicePlan) (*v1beta1.ServiceInstanceList, error) {
-	fieldSet := fields.Set{
-		"spec.servicePlanRef.name": servicePlan.Name,
+	//fieldSet := fields.Set{
+	//	"spec.servicePlanRef.name": servicePlan.Name,
+	//}
+	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
+	//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
+	labelSelector := labels.SelectorFromSet(labels.Set{
+		ServiceCatalogDomain+"/spec.servicePlanRef.name": servicePlan.Name,
+	}).String()
+
+	listOpts := metav1.ListOptions{
+		LabelSelector: labelSelector,
 	}
-	fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	_ = metav1.ListOptions{FieldSelector: fieldSelector}
-	listOpts := metav1.ListOptions{}
 
 	return c.serviceCatalogClient.ServiceInstances(metav1.NamespaceAll).List(listOpts)
 }

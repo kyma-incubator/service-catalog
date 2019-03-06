@@ -21,6 +21,10 @@ import (
 	"strings"
 )
 
+const (
+	ServiceCatalogDomain string = "servicecatalog.k8s.io"
+)
+
 // ClusterServiceClassSpecified checks that at least one class field is set.
 func (pr PlanReference) ClusterServiceClassSpecified() bool {
 	return pr.ClusterServiceClassExternalName != "" ||
@@ -133,13 +137,13 @@ func (pr PlanReference) GetSpecifiedServicePlan() string {
 
 // GetClusterServiceClassFilterFieldName returns the appropriate field name for filtering
 // a list of service catalog classes by the PlanReference.
-func (pr PlanReference) GetClusterServiceClassFilterFieldName() string {
+func (pr PlanReference) GetClusterServiceClassFilterLabelName() string {
 	if pr.ClusterServiceClassExternalName != "" {
-		return "spec.externalName"
+		return ServiceCatalogDomain+"spec.externalName"
 	}
 
 	if pr.ClusterServiceClassExternalID != "" {
-		return "spec.externalID"
+		return ServiceCatalogDomain+"spec.externalID"
 	}
 
 	return ""
@@ -147,7 +151,7 @@ func (pr PlanReference) GetClusterServiceClassFilterFieldName() string {
 
 // GetClusterServicePlanFilterFieldName returns the appropriate field name for filtering
 // a list of service catalog plans by the PlanReference.
-func (pr PlanReference) GetClusterServicePlanFilterFieldName() string {
+func (pr PlanReference) GetClusterServicePlanFilterLabelName() string {
 	if pr.ClusterServicePlanExternalName != "" {
 		return "spec.externalName"
 	}
@@ -161,13 +165,13 @@ func (pr PlanReference) GetClusterServicePlanFilterFieldName() string {
 
 // GetServiceClassFilterFieldName returns the appropriate field name for filtering
 // a list of service catalog classes by the PlanReference.
-func (pr PlanReference) GetServiceClassFilterFieldName() string {
+func (pr PlanReference) GetServiceClassFilterLabelName() string {
 	if pr.ServiceClassExternalName != "" {
-		return "spec.externalName"
+		return ServiceCatalogDomain+"/spec.externalName"
 	}
 
 	if pr.ServiceClassExternalID != "" {
-		return "spec.externalID"
+		return ServiceCatalogDomain+"/spec.externalID"
 	}
 
 	return ""
@@ -175,13 +179,13 @@ func (pr PlanReference) GetServiceClassFilterFieldName() string {
 
 // GetServicePlanFilterFieldName returns the appropriate field name for filtering
 // a list of service catalog plans by the PlanReference.
-func (pr PlanReference) GetServicePlanFilterFieldName() string {
+func (pr PlanReference) GetServicePlanFilterLabelName() string {
 	if pr.ServicePlanExternalName != "" {
-		return "spec.externalName"
+		return ServiceCatalogDomain+"/spec.externalName"
 	}
 
 	if pr.ServicePlanExternalID != "" {
-		return "spec.externalID"
+		return ServiceCatalogDomain+"/spec.externalID"
 	}
 
 	return ""

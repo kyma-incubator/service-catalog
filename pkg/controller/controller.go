@@ -71,9 +71,13 @@ const (
 	// DefaultClusterIDConfigMapNamespace is the k8s namespace that the clusterid configmap will be stored in.
 	DefaultClusterIDConfigMapNamespace string = "default"
 
+	ServiceCatalogDomain string = "servicecatalog.k8s.io"
+
 	// TODO(mszostok): WIP add indexes names
-	clusterServiceClassFilterIndexName = "clusterServiceClassFilterIndex"
-	clusterServicePlanFilterIndexName  = "clusterServicePlanFilterIndex"
+	//clusterServiceClassFilterIndexName = "clusterServiceClassFilterIndex"
+	//clusterServicePlanFilterIndexName  = "clusterServicePlanFilterIndex"
+	//servicePlanFilterIndexName  = "servicePlanFilterIndex"
+	//serviceClassFilterIndexName = "serviceClassFilterIndex"
 )
 
 // NewController returns a new Open Service Broker catalog controller.
@@ -132,63 +136,12 @@ func NewController(
 		UpdateFunc: controller.clusterServiceClassUpdate,
 		DeleteFunc: controller.clusterServiceClassDelete,
 	})
-
-	// TODO(mszostok): [start] WIP indexer for classes
-	// TODO: deep dive into indexers, it's a most effective way of doing this?
-	controller.clusterServiceClassIndexer = clusterServiceClassInformer.Informer().GetIndexer()
-	clusterServiceClassFilterIndexKeys := func(class *v1beta1.ClusterServiceClass) []string {
-
-		byID := fmt.Sprintf("class.Spec.ExternalID/%s", class.Spec.ExternalID)
-		byName := fmt.Sprintf("spec.externalName/%s", class.Spec.ExternalName)
-		return []string{byID, byName}
-	}
-	err := clusterServiceClassInformer.Informer().AddIndexers(cache.Indexers{
-		clusterServiceClassFilterIndexName: func(obj interface{}) ([]string, error) {
-			c, ok := obj.(*v1beta1.ClusterServiceClass)
-			if !ok {
-				return nil, fmt.Errorf("cannot covert obj [%+v] of type %T to *v1beta1.ClusterServiceClass", obj, obj)
-			}
-
-			keys := clusterServiceClassFilterIndexKeys(c)
-			return keys, nil
-		},
-	})
-	if err != nil {
-		return nil, err // TODO: error wrap
-	}
-	// TODO(mszostok): [end]
-
 	controller.clusterServicePlanLister = clusterServicePlanInformer.Lister()
 	clusterServicePlanInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    controller.clusterServicePlanAdd,
 		UpdateFunc: controller.clusterServicePlanUpdate,
 		DeleteFunc: controller.clusterServicePlanDelete,
 	})
-	// TODO(mszostok): [start] WIP indexer for plans
-	// TODO: deep dive into indexers, it's a most effective way of doing this?
-	controller.clusterServicePlanIndexer = clusterServicePlanInformer.Informer().GetIndexer()
-	clusterServicePlanFilterIndexKeys := func(p *v1beta1.ClusterServicePlan) []string {
-		// TODO: is sth like that a good practice?
-		byID := fmt.Sprintf("%s/%s/%s", p.Spec.ExternalID, p.Spec.ClusterServiceClassRef.Name, p.Spec.ClusterServiceBrokerName)
-		byName := fmt.Sprintf("%s/%s/%s", p.Spec.ExternalName, p.Spec.ClusterServiceClassRef.Name, p.Spec.ClusterServiceBrokerName)
-		return []string{byName, byID}
-	}
-	err = clusterServicePlanInformer.Informer().AddIndexers(cache.Indexers{
-		clusterServicePlanFilterIndexName: func(obj interface{}) ([]string, error) {
-			c, ok := obj.(*v1beta1.ClusterServicePlan)
-			if !ok {
-				return nil, fmt.Errorf("cannot covert obj [%+v] of type %T to *v1beta1.ClusterServiceClass", obj, obj)
-			}
-
-			keys := clusterServicePlanFilterIndexKeys(c)
-			return keys, nil
-		},
-	})
-	if err != nil {
-		return nil, err // TODO: error wrap
-	}
-	// TODO(mszostok): [end]
-
 	controller.instanceLister = instanceInformer.Lister()
 	instanceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    controller.instanceAdd,
@@ -244,9 +197,9 @@ type controller struct {
 	clusterServiceBrokerLister  listers.ClusterServiceBrokerLister
 	serviceBrokerLister         listers.ServiceBrokerLister
 	clusterServiceClassLister   listers.ClusterServiceClassLister
-	clusterServiceClassIndexer  cache.Indexer
+	//clusterServiceClassIndexer  cache.Indexer
 	serviceClassLister          listers.ServiceClassLister
-	clusterServicePlanIndexer   cache.Indexer
+	//clusterServicePlanIndexer   cache.Indexer
 	instanceLister              listers.ServiceInstanceLister
 	bindingLister               listers.ServiceBindingLister
 	clusterServicePlanLister    listers.ClusterServicePlanLister
