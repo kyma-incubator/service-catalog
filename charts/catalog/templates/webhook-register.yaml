@@ -24,43 +24,43 @@ webhooks:
     resources: ["clusterservicebrokers"]
 - name: mutating.servicebindings.servicecatalog.k8s.io
   clientConfig:
-  caBundle: {{ b64enc $ca.Cert }}
-  service:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
       name: {{ template "fullname" . }}-webhook
-        namespace: "{{ .Release.Namespace }}"
-        path: "/mutating-servicebindings"
+      namespace: "{{ .Release.Namespace }}"
+      path: "/mutating-servicebindings"
   failurePolicy: Fail
   rules:
   - operations: [ "CREATE", "UPDATE" ]
-  apiGroups: ["servicecatalog.k8s.io"]
-  apiVersions: ["v1beta1"]
-  resources: ["servicebindings"]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["servicebindings"]
 - name: mutating.servicebrokers.servicecatalog.k8s.io
   clientConfig:
-  caBundle: {{ b64enc $ca.Cert }}
-  service:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
       name: {{ template "fullname" . }}-webhook
-        namespace: "{{ .Release.Namespace }}"
-        path: "/mutating-servicebrokers"
+      namespace: "{{ .Release.Namespace }}"
+      path: "/mutating-servicebrokers"
   failurePolicy: Fail
   rules:
   - operations: [ "CREATE", "UPDATE" ]
-  apiGroups: ["servicecatalog.k8s.io"]
-  apiVersions: ["v1beta1"]
-  resources: ["servicebrokers"]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["servicebrokers"]
 - name: mutating.serviceinstances.servicecatalog.k8s.io
   clientConfig:
-  caBundle: {{ b64enc $ca.Cert }}
-  service:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
       name: {{ template "fullname" . }}-webhook
-        namespace: "{{ .Release.Namespace }}"
-        path: "/mutating-serviceinstances"
+      namespace: "{{ .Release.Namespace }}"
+      path: "/mutating-serviceinstances"
   failurePolicy: Fail
   rules:
   - operations: [ "CREATE", "UPDATE" ]
-  apiGroups: ["servicecatalog.k8s.io"]
-  apiVersions: ["v1beta1"]
-  resources: ["serviceinstances"]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["serviceinstances"]
 ---
 apiVersion: v1
 kind: Secret
