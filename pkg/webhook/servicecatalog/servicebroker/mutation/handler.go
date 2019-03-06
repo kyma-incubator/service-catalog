@@ -22,6 +22,7 @@ import (
 	"net/http"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -69,6 +70,10 @@ func (h *CreateUpdateHandler) InjectDecoder(d *admission.Decoder) error {
 
 func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, req admission.Request, sb *sc.ServiceBroker) {
 	sb.Finalizers = []string{sc.FinalizerServiceCatalog}
+
+	if sb.Spec.RelistBehavior == "" {
+		sb.Spec.RelistBehavior = sc.ServiceBrokerRelistBehaviorDuration
+	}
 }
 
 func (h *CreateUpdateHandler) mutateOnUpdate(ctx context.Context, obj *sc.ServiceBroker) {

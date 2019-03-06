@@ -61,7 +61,7 @@ spec:
           httpGet:
             port: 8080
             path: /healthz
-            scheme: HTTPS
+            scheme: HTTP
           failureThreshold: 1
           initialDelaySeconds: 10
           periodSeconds: 10
@@ -71,7 +71,7 @@ spec:
           httpGet:
             port: 8080
             path: /healthz
-            scheme: HTTPS
+            scheme: HTTP
           failureThreshold: 3
           initialDelaySeconds: 10
           periodSeconds: 10

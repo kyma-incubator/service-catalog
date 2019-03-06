@@ -18,13 +18,15 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+
 	csbmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/clusterservicebroker/mutation"
 	sbmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebinding/mutation"
 	brmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebroker/mutation"
 	simutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
+
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/server/healthz"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -69,8 +71,8 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		webhookSvr.Register(path, &webhook.Admission{Handler: handler})
 	}
 
-	// setup healtz server
-	healtzSvr := manager.RunnableFunc(func(stopCh <-chan struct{}) error {
+	// setup healthz server
+	healthzSvr := manager.RunnableFunc(func(stopCh <-chan struct{}) error {
 		mux := http.NewServeMux()
 		// liveness registered at /healthz indicates if the container is responding
 		healthz.InstallHandler(mux, healthz.PingHealthz)
@@ -88,7 +90,7 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		return errors.Wrap(err, "while registering webhook server with manager")
 	}
 
-	if err := mgr.Add(healtzSvr); err != nil {
+	if err := mgr.Add(healthzSvr); err != nil {
 		return errors.Wrap(err, "while registering webhook server with manager")
 	}
 

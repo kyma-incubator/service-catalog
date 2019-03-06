@@ -22,6 +22,7 @@ import (
 	"net/http"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -84,17 +85,8 @@ func (h *CreateUpdateHandler) InjectDecoder(d *admission.Decoder) error {
 }
 
 func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, obj *sc.ClusterServiceBroker) {
-	// moved from github.com/kubernetes-incubator/service-catalog/pkg/registry/servicecatalog/clusterservicebroker/strategy.go
-	// TODO: status is a sub-resource so main api-server will take care of it
-	// Creating a brand new object, thus it must have no
-	// status. We can't fail here if they passed a status in, so
-	// we just wipe it clean.
-	//cbroker.Status = sc.ClusterServiceBrokerStatus{}
-	// TODO: this is done by main api-server
-	//cbroker.Generation = 1
 	obj.Finalizers = []string{sc.FinalizerServiceCatalog}
 
-	// moved from github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1/defaults.go
 	obj.Spec.RelistBehavior = sc.ServiceBrokerRelistBehaviorDuration
 }
 
