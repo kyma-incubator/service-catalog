@@ -84,10 +84,12 @@ func (h *CreateUpdateHandler) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, obj *sc.ClusterServiceBroker) {
-	obj.Finalizers = []string{sc.FinalizerServiceCatalog}
+func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, sb *sc.ClusterServiceBroker) {
+	sb.Finalizers = []string{sc.FinalizerServiceCatalog}
 
-	obj.Spec.RelistBehavior = sc.ServiceBrokerRelistBehaviorDuration
+	if sb.Spec.RelistBehavior == "" {
+		sb.Spec.RelistBehavior = sc.ServiceBrokerRelistBehaviorDuration
+	}
 }
 
 func (h *CreateUpdateHandler) mutateOnUpdate(ctx context.Context, obj *sc.ClusterServiceBroker) {

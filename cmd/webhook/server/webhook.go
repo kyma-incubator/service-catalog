@@ -91,7 +91,7 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 	}
 
 	if err := mgr.Add(healthzSvr); err != nil {
-		return errors.Wrap(err, "while registering webhook server with manager")
+		return errors.Wrap(err, "while registering healthz server with manager")
 	}
 
 	// starts the server blocks until the Stop channel is closed
