@@ -86,6 +86,7 @@ func (c *controller) reconcileServiceClass(serviceClass *v1beta1.ServiceClass) e
 	if err != nil {
 		return err
 	}
+	klog.Info(pcb.Messagef("Found %d ServiceInstances", len(serviceInstances.Items)))
 
 	if len(serviceInstances.Items) != 0 {
 		return nil
@@ -96,17 +97,13 @@ func (c *controller) reconcileServiceClass(serviceClass *v1beta1.ServiceClass) e
 }
 
 func (c *controller) findServiceInstancesOnServiceClass(serviceClass *v1beta1.ServiceClass) (*v1beta1.ServiceInstanceList, error) {
-	//fieldSet := fields.Set{
-	//	"spec.serviceClassRef.name": serviceClass.Name,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		ServiceCatalogDomain+"/spec.serviceClassRef.name": serviceClass.Name,
+		v1beta1.GroupName+"/spec.serviceClassRef.name": serviceClass.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{
 		LabelSelector: labelSelector,
 	}
+	klog.Warning("ServiceClass - TLabelSelector")
 	return c.serviceCatalogClient.ServiceInstances(serviceClass.Namespace).List(listOpts)
 }

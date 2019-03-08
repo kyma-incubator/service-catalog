@@ -82,6 +82,8 @@ func (c *controller) reconcileClusterServicePlan(clusterServicePlan *v1beta1.Clu
 	if err != nil {
 		return err
 	}
+	klog.Infof("Found %d ServiceInstances", len(serviceInstances.Items))
+
 
 	if len(serviceInstances.Items) != 0 {
 		return nil
@@ -92,13 +94,8 @@ func (c *controller) reconcileClusterServicePlan(clusterServicePlan *v1beta1.Clu
 }
 
 func (c *controller) findServiceInstancesOnClusterServicePlan(clusterServicePlan *v1beta1.ClusterServicePlan) (*v1beta1.ServiceInstanceList, error) {
-	//fieldSet := fields.Set{
-	//	"spec.clusterServicePlanRef.name": clusterServicePlan.Name,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		ServiceCatalogDomain+"/spec.clusterServicePlanRef.name": clusterServicePlan.Name,
+		v1beta1.GroupName+"/spec.clusterServicePlanRef.name": clusterServicePlan.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{

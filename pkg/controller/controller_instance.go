@@ -1352,10 +1352,6 @@ func (c *controller) resolveClusterServiceClassRef(instance *v1beta1.ServiceInst
 		filterLabel := instance.Spec.GetClusterServiceClassFilterLabelName()
 		filterValue := instance.Spec.GetSpecifiedClusterServiceClass()
 		klog.V(4).Info(pcb.Messagef("looking up a ClusterServiceClass from %s: %q", filterLabel, filterValue))
-
-		//listOpts := metav1.ListOptions{
-		//	FieldSelector: fields.OneTermEqualSelector(filterField, filterValue).String(),
-		//}
 		labelSelector := labels.SelectorFromSet(labels.Set{
 			filterLabel: filterValue,
 		}).String()
@@ -1365,6 +1361,8 @@ func (c *controller) resolveClusterServiceClassRef(instance *v1beta1.ServiceInst
 		}
 
 		serviceClasses, err := c.serviceCatalogClient.ClusterServiceClasses().List(listOpts)
+		klog.Info(pcb.Messagef("Found %d ClusterServiceClasses", len(serviceClasses.Items)))
+
 		if err == nil && len(serviceClasses.Items) == 1 {
 			sc = &serviceClasses.Items[0]
 			instance.Spec.ClusterServiceClassRef = &v1beta1.ClusterObjectReference{
@@ -1423,14 +1421,10 @@ func (c *controller) resolveServiceClassRef(instance *v1beta1.ServiceInstance) (
 			)
 		}
 	} else {
-		// TODO(adamwalach) check labels
 		filterLabel := instance.Spec.GetServiceClassFilterLabelName()
 		filterValue := instance.Spec.GetSpecifiedServiceClass()
 
 		klog.V(4).Info(pcb.Messagef("looking up a ServiceClass from %s: %q", filterLabel, filterValue))
-		//listOpts := metav1.ListOptions{
-		//	FieldSelector: fields.OneTermEqualSelector(filterField, filterValue).String(),
-		//}
 
 		labelSelector := labels.SelectorFromSet(labels.Set{
 			filterLabel: filterValue,
@@ -1441,6 +1435,8 @@ func (c *controller) resolveServiceClassRef(instance *v1beta1.ServiceInstance) (
 		}
 
 		serviceClasses, err := c.serviceCatalogClient.ServiceClasses(instance.Namespace).List(listOpts)
+		klog.Info(pcb.Messagef("Found %d ServiceClasses", len(serviceClasses.Items)))
+
 		if err == nil && len(serviceClasses.Items) == 1 {
 			sc = &serviceClasses.Items[0]
 			instance.Spec.ServiceClassRef = &v1beta1.LocalObjectReference{
@@ -1490,24 +1486,18 @@ func (c *controller) resolveClusterServicePlanRef(instance *v1beta1.ServiceInsta
 			)
 		}
 	} else {
-		// TODO(adamwalach) check labels
-		//fieldSet := fields.Set{
-		//	instance.Spec.GetClusterServicePlanFilterFieldName(): instance.Spec.GetSpecifiedClusterServicePlan(),
-		//	"spec.clusterServiceClassRef.name":                   instance.Spec.ClusterServiceClassRef.Name,
-		//	"spec.clusterServiceBrokerName":                      brokerName,
-		//}
-		//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-		//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
 		labelSelector := labels.SelectorFromSet(labels.Set{
-			instance.Spec.GetClusterServicePlanFilterLabelName():     instance.Spec.GetSpecifiedClusterServicePlan(),
-			ServiceCatalogDomain+"/spec.clusterServiceClassRef.name": instance.Spec.ClusterServiceClassRef.Name,
-			ServiceCatalogDomain+"/spec.clusterServiceBrokerName":    brokerName,
+			instance.Spec.GetClusterServicePlanFilterLabelName():    instance.Spec.GetSpecifiedClusterServicePlan(),
+			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": instance.Spec.ClusterServiceClassRef.Name,
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    brokerName,
 		}).String()
 
 		listOpts := metav1.ListOptions{
 			LabelSelector: labelSelector,
 		}
 		servicePlans, err := c.serviceCatalogClient.ClusterServicePlans().List(listOpts)
+		klog.Info(pcb.Messagef("Found %d ClusterServicePlans", len(servicePlans.Items)))
+
 		if err == nil && len(servicePlans.Items) == 1 {
 			sp := &servicePlans.Items[0]
 			instance.Spec.ClusterServicePlanRef = &v1beta1.ClusterObjectReference{
@@ -1556,24 +1546,18 @@ func (c *controller) resolveServicePlanRef(instance *v1beta1.ServiceInstance, br
 			)
 		}
 	} else {
-		// TODO(adamwalach) check labels
-		//fieldSet := fields.Set{
-		//	instance.Spec.GetServicePlanFilterFieldName(): instance.Spec.GetSpecifiedServicePlan(),
-		//	"spec.serviceClassRef.name":                   instance.Spec.ServiceClassRef.Name,
-		//	"spec.serviceBrokerName":                      brokerName,
-		//}
-		//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-		//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
 		labelSelector := labels.SelectorFromSet(labels.Set{
-			instance.Spec.GetServicePlanFilterLabelName():     instance.Spec.GetSpecifiedServicePlan(),
-			ServiceCatalogDomain+"/spec.serviceClassRef.name": instance.Spec.ServiceClassRef.Name,
-			ServiceCatalogDomain+"/spec.serviceBrokerName":    brokerName,
+			instance.Spec.GetServicePlanFilterLabelName():    instance.Spec.GetSpecifiedServicePlan(),
+			v1beta1.GroupName + "/spec.serviceClassRef.name": instance.Spec.ServiceClassRef.Name,
+			v1beta1.GroupName + "/spec.serviceBrokerName":    brokerName,
 		}).String()
 
 		listOpts := metav1.ListOptions{
 			LabelSelector: labelSelector,
 		}
 		servicePlans, err := c.serviceCatalogClient.ServicePlans(instance.Namespace).List(listOpts)
+		klog.Info(pcb.Messagef("Found %d ServicePlans", len(servicePlans.Items)))
+
 		if err == nil && len(servicePlans.Items) == 1 {
 			sp := &servicePlans.Items[0]
 			instance.Spec.ServicePlanRef = &v1beta1.LocalObjectReference{

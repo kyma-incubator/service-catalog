@@ -722,9 +722,10 @@ func (c *controller) getCurrentServiceClassesAndPlansForBroker(broker *v1beta1.C
 	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
 	//_ = metav1.ListOptions{FieldSelector: fieldSelector}
 	//listOpts := metav1.ListOptions{}
+	pcb := pretty.NewClusterServiceBrokerContextBuilder(broker)
 
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		ServiceCatalogDomain+"/spec.clusterServiceBrokerName": broker.Name,
+		v1beta1.GroupName+"/spec.clusterServiceBrokerName": broker.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{
@@ -746,6 +747,7 @@ func (c *controller) getCurrentServiceClassesAndPlansForBroker(broker *v1beta1.C
 
 		return nil, nil, err
 	}
+	klog.Info(pcb.Messagef("Found %d ServiceClasses", len(existingServiceClasses.Items)))
 
 	existingServicePlans, err := c.serviceCatalogClient.ClusterServicePlans().List(listOpts)
 	if err != nil {
@@ -762,6 +764,7 @@ func (c *controller) getCurrentServiceClassesAndPlansForBroker(broker *v1beta1.C
 
 		return nil, nil, err
 	}
+	klog.Info(pcb.Messagef("Found %d ServicePlans", len(existingServicePlans.Items)))
 
 	return existingServiceClasses.Items, existingServicePlans.Items, nil
 }

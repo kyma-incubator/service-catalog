@@ -21,10 +21,6 @@ import (
 	"strings"
 )
 
-const (
-	ServiceCatalogDomain string = "servicecatalog.k8s.io"
-)
-
 // ClusterServiceClassSpecified checks that at least one clusterserviceclass
 // field is set.
 func (pr PlanReference) ClusterServiceClassSpecified() bool {
@@ -139,11 +135,11 @@ func (pr PlanReference) GetSpecifiedServicePlan() string {
 // a list of service catalog classes by the PlanReference.
 func (pr PlanReference) GetClusterServiceClassFilterLabelName() string {
 	if pr.ClusterServiceClassExternalName != "" {
-		return ServiceCatalogDomain+"/spec.externalName"
+		return GroupName+"/spec.externalName"
 	}
 
 	if pr.ClusterServiceClassExternalID != "" {
-		return ServiceCatalogDomain+"/spec.externalID"
+		return GroupName+"/spec.externalID"
 	}
 
 	return ""
@@ -153,11 +149,11 @@ func (pr PlanReference) GetClusterServiceClassFilterLabelName() string {
 // a list of service catalog plans by the PlanReference.
 func (pr PlanReference) GetClusterServicePlanFilterLabelName() string {
 	if pr.ClusterServicePlanExternalName != "" {
-		return ServiceCatalogDomain+"/spec.externalName"
+		return GroupName+"/spec.externalName"
 	}
 
 	if pr.ClusterServicePlanExternalID != "" {
-		return ServiceCatalogDomain+"/spec.externalID"
+		return GroupName+"/spec.externalID"
 	}
 
 	return ""
@@ -167,11 +163,11 @@ func (pr PlanReference) GetClusterServicePlanFilterLabelName() string {
 // a list of service catalog classes by the PlanReference.
 func (pr PlanReference) GetServiceClassFilterLabelName() string {
 	if pr.ServiceClassExternalName != "" {
-		return ServiceCatalogDomain+"/spec.externalName"
+		return GroupName+"/spec.externalName"
 	}
 
 	if pr.ServiceClassExternalID != "" {
-		return ServiceCatalogDomain+"/spec.externalID"
+		return GroupName+"/spec.externalID"
 	}
 
 	return ""
@@ -181,11 +177,11 @@ func (pr PlanReference) GetServiceClassFilterLabelName() string {
 // a list of service catalog plans by the PlanReference.
 func (pr PlanReference) GetServicePlanFilterLabelName() string {
 	if pr.ServicePlanExternalName != "" {
-		return ServiceCatalogDomain+"/spec.externalName"
+		return GroupName+"/spec.externalName"
 	}
 
 	if pr.ServicePlanExternalID != "" {
-		return ServiceCatalogDomain+"/spec.externalID"
+		return GroupName+"/spec.externalID"
 	}
 
 	return ""

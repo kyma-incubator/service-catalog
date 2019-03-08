@@ -88,6 +88,7 @@ func (c *controller) reconcileServicePlan(servicePlan *v1beta1.ServicePlan) erro
 	if err != nil {
 		return err
 	}
+	klog.Info(pcb.Messagef("Found %d ServiceInstances", len(serviceInstances.Items)))
 
 	if len(serviceInstances.Items) != 0 {
 		return nil
@@ -98,18 +99,14 @@ func (c *controller) reconcileServicePlan(servicePlan *v1beta1.ServicePlan) erro
 }
 
 func (c *controller) findServiceInstancesOnServicePlan(servicePlan *v1beta1.ServicePlan) (*v1beta1.ServiceInstanceList, error) {
-	//fieldSet := fields.Set{
-	//	"spec.servicePlanRef.name": servicePlan.Name,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		ServiceCatalogDomain+"/spec.servicePlanRef.name": servicePlan.Name,
+		v1beta1.GroupName+"/spec.servicePlanRef.name": servicePlan.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{
 		LabelSelector: labelSelector,
 	}
 
+	klog.Warning("ServicePlan - LabelSelector")
 	return c.serviceCatalogClient.ServiceInstances(metav1.NamespaceAll).List(listOpts)
 }

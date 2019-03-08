@@ -698,16 +698,9 @@ func (c *controller) updateServiceBrokerFinalizers(
 }
 
 func (c *controller) getCurrentServiceClassesAndPlansForNamespacedBroker(broker *v1beta1.ServiceBroker) ([]v1beta1.ServiceClass, []v1beta1.ServicePlan, error) {
-	//fieldSet := fields.Set{
-	//	v1beta1.FilterSpecServiceBrokerName: broker.Name,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//_ = metav1.ListOptions{FieldSelector: fieldSelector}
-	//listOpts := metav1.ListOptions{}
-	//
-
+	pcb := pretty.NewServiceBrokerContextBuilder(broker)
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		ServiceCatalogDomain+"/"+v1beta1.FilterSpecServiceBrokerName: broker.Name,
+		v1beta1.GroupName+"/"+v1beta1.FilterSpecServiceBrokerName: broker.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{
@@ -728,6 +721,7 @@ func (c *controller) getCurrentServiceClassesAndPlansForNamespacedBroker(broker 
 
 		return nil, nil, err
 	}
+	klog.Info(pcb.Messagef("Found %d ServiceClasses", len(existingServiceClasses.Items)))
 
 	existingServicePlans, err := c.serviceCatalogClient.ServicePlans(broker.Namespace).List(listOpts)
 	if err != nil {
@@ -744,6 +738,7 @@ func (c *controller) getCurrentServiceClassesAndPlansForNamespacedBroker(broker 
 
 		return nil, nil, err
 	}
+	klog.Info(pcb.Messagef("Found %d ServicePlans", len(existingServicePlans.Items)))
 
 	return existingServiceClasses.Items, existingServicePlans.Items, nil
 }

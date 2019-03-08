@@ -70,14 +70,6 @@ const (
 	DefaultClusterIDConfigMapName string = "cluster-info"
 	// DefaultClusterIDConfigMapNamespace is the k8s namespace that the clusterid configmap will be stored in.
 	DefaultClusterIDConfigMapNamespace string = "default"
-
-	ServiceCatalogDomain string = "servicecatalog.k8s.io"
-
-	// TODO(mszostok): WIP add indexes names
-	//clusterServiceClassFilterIndexName = "clusterServiceClassFilterIndex"
-	//clusterServicePlanFilterIndexName  = "clusterServicePlanFilterIndex"
-	//servicePlanFilterIndexName  = "servicePlanFilterIndex"
-	//serviceClassFilterIndexName = "serviceClassFilterIndex"
 )
 
 // NewController returns a new Open Service Broker catalog controller.
