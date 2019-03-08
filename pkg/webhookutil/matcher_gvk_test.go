@@ -1,4 +1,4 @@
-package util_test
+package webhookutil_test
 
 import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
