@@ -716,12 +716,6 @@ func (c *controller) updateClusterServiceBrokerFinalizers(
 }
 
 func (c *controller) getCurrentServiceClassesAndPlansForBroker(broker *v1beta1.ClusterServiceBroker) ([]v1beta1.ClusterServiceClass, []v1beta1.ClusterServicePlan, error) {
-	//fieldSet := fields.Set{
-	//	"spec.clusterServiceBrokerName": broker.Name,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//_ = metav1.ListOptions{FieldSelector: fieldSelector}
-	//listOpts := metav1.ListOptions{}
 	pcb := pretty.NewClusterServiceBrokerContextBuilder(broker)
 
 	labelSelector := labels.SelectorFromSet(labels.Set{

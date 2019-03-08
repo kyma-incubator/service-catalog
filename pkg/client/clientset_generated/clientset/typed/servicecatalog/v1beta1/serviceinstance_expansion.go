@@ -17,9 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
-	"encoding/json"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 // The ServiceInstanceExpansion interface allows setting the References
@@ -30,40 +28,13 @@ type ServiceInstanceExpansion interface {
 
 func (c *serviceInstances) UpdateReferences(serviceInstance *v1beta1.ServiceInstance) (result *v1beta1.ServiceInstance, err error) {
 	result = &v1beta1.ServiceInstance{}
-
-	// TODO(mszostok): replace the subresource "resource" with custom patch
-	type serviceInstanceSpecRefPatch struct {
-		ClusterServiceClassRef *v1beta1.ClusterObjectReference `json:"clusterServiceClassRef,omitempty"`
-		ClusterServicePlanRef  *v1beta1.ClusterObjectReference `json:"clusterServicePlanRef,omitempty"`
-		ServiceClassRef        *v1beta1.LocalObjectReference   `json:"serviceClassRef,omitempty"`
-		ServicePlanRef         *v1beta1.LocalObjectReference   `json:"servicePlanRef,omitempty"`
-	}
-	type serviceInstanceRefPatch struct {
-		Spec serviceInstanceSpecRefPatch `json:"spec"`
-	}
-
-	patchedSvc := serviceInstanceRefPatch{
-		Spec: serviceInstanceSpecRefPatch{
-
-			serviceInstance.Spec.ClusterServiceClassRef,
-			serviceInstance.Spec.ClusterServicePlanRef,
-			serviceInstance.Spec.ServiceClassRef,
-			serviceInstance.Spec.ServicePlanRef,
-		},
-	}
-
-	encoded, err := json.Marshal(patchedSvc)
-	if err != nil {
-		return result, err
-	}
-
-	err = c.client.Patch(types.MergePatchType).
+	err = c.client.Put().
 		Namespace(serviceInstance.Namespace).
 		Resource("serviceinstances").
 		Name(serviceInstance.Name).
-		Body(encoded).
+		SubResource("reference").
+		Body(serviceInstance).
 		Do().
 		Into(result)
-
 	return
 }

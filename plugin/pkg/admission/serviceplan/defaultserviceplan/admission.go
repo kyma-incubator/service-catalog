@@ -265,11 +265,6 @@ func (d *defaultServicePlan) getClusterServiceClassByField(a admission.Attribute
 	filterValue := ref.GetSpecifiedClusterServiceClass()
 
 	klog.V(4).Infof("Fetching ClusterServiceClass filtered by %q = %q", filterLabel, filterValue)
-	//fieldSet := fields.Set{
-	//	filterField: filterValue,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//listOpts := apimachineryv1.ListOptions{FieldSelector: fieldSelector}
 	labelSelector := labels.SelectorFromSet(labels.Set{
 		filterLabel: filterValue,
 	}).String()
@@ -296,11 +291,6 @@ func (d *defaultServicePlan) getServiceClassByField(a admission.Attributes, ref 
 	filterValue := ref.GetSpecifiedServiceClass()
 
 	klog.V(4).Infof("Fetching ServiceClass filtered by %q = %q", filterLabel, filterValue)
-	//fieldSet := fields.Set{
-	//	filterField: filterValue,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//listOpts := apimachineryv1.ListOptions{FieldSelector: fieldSelector}
 	labelSelector := labels.SelectorFromSet(labels.Set{
 		filterLabel: filterValue,
 	}).String()
@@ -326,11 +316,6 @@ func (d *defaultServicePlan) getServiceClassByField(a admission.Attributes, ref 
 // ServicePlans for the specified service class name
 func (d *defaultServicePlan) getClusterServicePlansByClusterServiceClassName(scName string) ([]servicecatalog.ClusterServicePlan, error) {
 	klog.V(4).Infof("Fetching ClusterServicePlans by class name %q", scName)
-	//fieldSet := fields.Set{
-	//	"spec.clusterServiceClassRef.name": scName,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//listOpts := apimachineryv1.ListOptions{FieldSelector: fieldSelector}
 	labelSelector := labels.SelectorFromSet(labels.Set{
 		"servicecatalog.k8s.io/spec.clusterServiceClassRef.name": scName,
 	}).String()
@@ -352,11 +337,6 @@ func (d *defaultServicePlan) getClusterServicePlansByClusterServiceClassName(scN
 // ServicePlans for the specified service class name
 func (d *defaultServicePlan) getServicePlansByServiceClassName(scName string) ([]servicecatalog.ServicePlan, error) {
 	klog.V(4).Infof("Fetching ServicePlans by class name %q", scName)
-	//fieldSet := fields.Set{
-	//	"spec.serviceClassRef.name": scName,
-	//}
-	//fieldSelector := fields.SelectorFromSet(fieldSet).String()
-	//listOpts := apimachineryv1.ListOptions{FieldSelector: fieldSelector}
 	labelSelector := labels.SelectorFromSet(labels.Set{
 		"servicecatalog.k8s.io/spec.serviceClassRef.name": scName,
 	}).String()

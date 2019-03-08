@@ -29,7 +29,7 @@ import (
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"k8s.io/klog"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	runtimeutil "k8s.io/apimachinery/pkg/util/runtime"
@@ -128,12 +128,14 @@ func NewController(
 		UpdateFunc: controller.clusterServiceClassUpdate,
 		DeleteFunc: controller.clusterServiceClassDelete,
 	})
+
 	controller.clusterServicePlanLister = clusterServicePlanInformer.Lister()
 	clusterServicePlanInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    controller.clusterServicePlanAdd,
 		UpdateFunc: controller.clusterServicePlanUpdate,
 		DeleteFunc: controller.clusterServicePlanDelete,
 	})
+
 	controller.instanceLister = instanceInformer.Lister()
 	instanceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    controller.instanceAdd,
@@ -189,9 +191,7 @@ type controller struct {
 	clusterServiceBrokerLister  listers.ClusterServiceBrokerLister
 	serviceBrokerLister         listers.ServiceBrokerLister
 	clusterServiceClassLister   listers.ClusterServiceClassLister
-	//clusterServiceClassIndexer  cache.Indexer
 	serviceClassLister          listers.ServiceClassLister
-	//clusterServicePlanIndexer   cache.Indexer
 	instanceLister              listers.ServiceInstanceLister
 	bindingLister               listers.ServiceBindingLister
 	clusterServicePlanLister    listers.ClusterServicePlanLister
@@ -327,7 +327,7 @@ func (c *controller) monitorConfigMap() {
 	// in a hardcoded place.
 	klog.V(9).Info("cluster ID monitor loop enter")
 	cm, err := c.kubeClient.CoreV1().ConfigMaps(c.clusterIDConfigMapNamespace).Get(c.clusterIDConfigMapName, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
+	if errors.IsNotFound(err) {
 		m := make(map[string]string)
 		m["id"] = c.getClusterID()
 		cm := &corev1.ConfigMap{

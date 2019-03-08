@@ -102,8 +102,7 @@ func Run(controllerManagerOptions *options.ControllerManagerServer) error {
 
 	var err error
 	var k8sKubeconfig *rest.Config
-	// TODO(mszostok): the K8sAPIServerURL should not be required when kubeconfig path is specified
-	if controllerManagerOptions.K8sKubeconfigPath == "" {
+	if controllerManagerOptions.K8sAPIServerURL == "" && controllerManagerOptions.K8sKubeconfigPath == "" {
 		k8sKubeconfig, err = rest.InClusterConfig()
 	} else {
 		k8sKubeconfig, err = clientcmd.BuildConfigFromFlags(
@@ -131,8 +130,7 @@ func Run(controllerManagerOptions *options.ControllerManagerServer) error {
 
 	var serviceCatalogKubeconfig *rest.Config
 	// Build the service-catalog kubeconfig / clientBuilder
-	// TODO(mszostok): the ServiceCatalogAPIServerURL should not be required when kubeconfig path is specified
-	if controllerManagerOptions.ServiceCatalogKubeconfigPath == "" {
+	if controllerManagerOptions.ServiceCatalogAPIServerURL == "" && controllerManagerOptions.ServiceCatalogKubeconfigPath == "" {
 		// explicitly fall back to InClusterConfig, assuming we're talking to an API server which does aggregation
 		// (BuildConfigFromFlags does this, but gives a more generic warning message than we do here)
 		klog.V(4).Infof("Using inClusterConfig to talk to service catalog API server -- make sure your API server is registered with the aggregator")

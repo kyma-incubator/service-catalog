@@ -1343,7 +1343,7 @@ func (c *controller) resolveClusterServiceClassRef(instance *v1beta1.ServiceInst
 			))
 		} else {
 			return nil, fmt.Errorf(
-				"UpdateReferencesReferences a non-existent ClusterServiceClass %c",
+				"References a non-existent ClusterServiceClass %c",
 				instance.Spec.PlanReference,
 			)
 		}
