@@ -74,7 +74,6 @@ webhooks:
     apiGroups: ["servicecatalog.k8s.io"]
     apiVersions: ["v1beta1"]
     resources: ["serviceplans"]
-
 - name: mutating.servicebindings.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}

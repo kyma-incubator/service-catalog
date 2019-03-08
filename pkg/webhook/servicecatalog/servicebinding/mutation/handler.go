@@ -23,11 +23,11 @@ import (
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scfeatures "github.com/kubernetes-incubator/service-catalog/pkg/features"
+	webhookutil "github.com/kubernetes-incubator/service-catalog/pkg/webhook/util"
 
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
-	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -40,8 +40,17 @@ var _ admission.Handler = &CreateUpdateHandler{}
 
 // Handle handles admission requests.
 func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
+	traced := webhookutil.NewTracedLogger(req.UID)
+	traced.Infof("Start handling operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
+
 	sb := &sc.ServiceBinding{}
+	if err := webhookutil.MatchKinds(sb, req.Kind); err != nil {
+		traced.Errorf("Error matching kinds: %v", err)
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+
 	if err := h.decoder.Decode(req, sb); err != nil {
+		traced.Errorf("Could not decode request object: %v", err)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
@@ -52,14 +61,17 @@ func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request)
 	case admissionTypes.Update:
 		h.mutateOnUpdate(ctx, mutated)
 	default:
-		klog.Warning("ServiceBinding mutation wehbook does not support action %q", req.Operation)
+		traced.Infof("ServiceBinding mutation wehbook does not support action %q", req.Operation)
+		return admission.Allowed("action not taken")
 	}
 
 	rawMutated, err := json.Marshal(mutated)
 	if err != nil {
+		traced.Errorf("Error marshaling mutated object: %v", err)
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
+	traced.Infof("Completed successfully operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
 	return admission.PatchResponseFromRaw(req.AdmissionRequest.Object.Raw, rawMutated)
 }
 

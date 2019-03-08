@@ -22,9 +22,9 @@ import (
 	"net/http"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	webhookutil "github.com/kubernetes-incubator/service-catalog/pkg/webhook/util"
 
 	admissionTypes "k8s.io/api/admission/v1beta1"
-	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -45,8 +45,17 @@ var _ admission.Handler = &CreateUpdateHandler{}
 
 // Handle handles admission requests.
 func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
+	traced := webhookutil.NewTracedLogger(req.UID)
+	traced.Infof("Start handling operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
+
 	cb := &sc.ClusterServiceBroker{}
+	if err := webhookutil.MatchKinds(cb, req.Kind); err != nil {
+		traced.Errorf("Error matching kinds: %v", err)
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+
 	if err := h.decoder.Decode(req, cb); err != nil {
+		traced.Errorf("Could not decode request object: %v", err)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
@@ -57,15 +66,18 @@ func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request)
 	case admissionTypes.Update:
 		h.mutateOnUpdate(ctx, mutated)
 	default:
-		klog.Warning("ClusterServiceBroker mutation wehbook does not support action %q", req.Operation)
+		traced.Infof("ClusterServiceBroker mutation wehbook does not support action %q", req.Operation)
+		return admission.Allowed("action not taken")
 	}
 
 	rawMutated, err := json.Marshal(mutated)
 	if err != nil {
+		traced.Errorf("Error marshaling mutated object: %v", err)
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
 
-	return admission.PatchResponseFromRaw(req.AdmissionRequest.Object.Raw, rawMutated)
+	traced.Infof("Completed successfully operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
+	return admission.PatchResponseFromRaw(req.Object.Raw, rawMutated)
 }
 
 //var _ inject.Client = &CreateUpdateHandler{}
@@ -84,19 +96,14 @@ func (h *CreateUpdateHandler) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, obj *sc.ClusterServiceBroker) {
-	// moved from github.com/kubernetes-incubator/service-catalog/pkg/registry/servicecatalog/clusterservicebroker/strategy.go
-	// TODO: status is a sub-resource so main api-server will take care of it
-	// Creating a brand new object, thus it must have no
-	// status. We can't fail here if they passed a status in, so
-	// we just wipe it clean.
-	//cbroker.Status = sc.ClusterServiceBrokerStatus{}
-	// TODO: this is done by main api-server
-	//cbroker.Generation = 1
-	obj.Finalizers = []string{sc.FinalizerServiceCatalog}
+func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, sb *sc.ClusterServiceBroker) {
+	// TODO(mszostok): logic with finalizers was moved from aggregated api-server
+	// question, should we reset whole finalizers entry or only append our own?
+	sb.Finalizers = []string{sc.FinalizerServiceCatalog}
 
-	// moved from github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1/defaults.go
-	obj.Spec.RelistBehavior = sc.ServiceBrokerRelistBehaviorDuration
+	if sb.Spec.RelistBehavior == "" {
+		sb.Spec.RelistBehavior = sc.ServiceBrokerRelistBehaviorDuration
+	}
 }
 
 func (h *CreateUpdateHandler) mutateOnUpdate(ctx context.Context, obj *sc.ClusterServiceBroker) {

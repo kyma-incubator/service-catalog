@@ -30,6 +30,8 @@ import (
 	simutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
 	spmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceplan/mutation"
 
+  scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/server/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -59,7 +61,9 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		return errors.Wrap(err, "while set up overall controller manager for webhook server")
 	}
 
-	// setup webhook server
+	scTypes.AddToScheme(mgr.GetScheme())
+
+  // setup webhook server
 	webhookSvr := &webhook.Server{
 		Port:    int32(opts.SecureServingOptions.BindPort),
 		CertDir: opts.SecureServingOptions.ServerCert.CertDirectory,
@@ -81,8 +85,8 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		webhookSvr.Register(path, &webhook.Admission{Handler: handler})
 	}
 
-	// setup healtz server
-	healtzSvr := manager.RunnableFunc(func(stopCh <-chan struct{}) error {
+	// setup healthz server
+	healthzSvr := manager.RunnableFunc(func(stopCh <-chan struct{}) error {
 		mux := http.NewServeMux()
 		// liveness registered at /healthz indicates if the container is responding
 		healthz.InstallHandler(mux, healthz.PingHealthz)
@@ -100,8 +104,8 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		return errors.Wrap(err, "while registering webhook server with manager")
 	}
 
-	if err := mgr.Add(healtzSvr); err != nil {
-		return errors.Wrap(err, "while registering webhook server with manager")
+	if err := mgr.Add(healthzSvr); err != nil {
+		return errors.Wrap(err, "while registering healthz server with manager")
 	}
 
 	// starts the server blocks until the Stop channel is closed
