@@ -24,6 +24,7 @@ import (
 	sbmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebinding/mutation"
 	brmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebroker/mutation"
 	simutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
+	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/server/healthz"
@@ -53,6 +54,8 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 	if err != nil {
 		return errors.Wrap(err, "while set up overall controller manager for webhook server")
 	}
+
+	scTypes.AddToScheme(mgr.GetScheme())
 
 	// setup webhook server
 	webhookSvr := &webhook.Server{
