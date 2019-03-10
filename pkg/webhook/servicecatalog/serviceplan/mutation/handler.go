@@ -22,9 +22,9 @@ import (
 	"net/http"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	webhookutil "github.com/kubernetes-incubator/service-catalog/pkg/webhook/util"
 
 	admissionTypes "k8s.io/api/admission/v1beta1"
-	"k8s.io/klog"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -38,28 +38,39 @@ var _ admission.Handler = &CreateUpdateHandler{}
 
 // Handle handles admission requests.
 func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
-	sb := &sc.ServicePlan{}
+	traced := webhookutil.NewTracedLogger(req.UID)
+	traced.Infof("Start handling operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
 
-	if err := h.decoder.Decode(req, sb); err != nil {
+	cb := &sc.ServicePlan{}
+	if err := webhookutil.MatchKinds(cb, req.Kind); err != nil {
+		traced.Errorf("Error matching kinds: %v", err)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	mutated := sb.DeepCopy()
+	if err := h.decoder.Decode(req, cb); err != nil {
+		traced.Errorf("Could not decode request object: %v", err)
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+
+	mutated := cb.DeepCopy()
 	switch req.Operation {
 	case admissionTypes.Create:
-		h.mutateOnCreate(ctx, req, mutated)
+		h.mutateOnCreate(ctx, mutated)
 	case admissionTypes.Update:
 		h.mutateOnUpdate(ctx, mutated)
 	default:
-		klog.Warning("ClusterServicePlan mutation wehbook does not support action %q", req.Operation)
+		traced.Infof("ServicePlan mutation wehbook does not support action %q", req.Operation)
+		return admission.Allowed("action not taken")
 	}
 	h.syncLabels(mutated)
-
 	rawMutated, err := json.Marshal(mutated)
 	if err != nil {
+		traced.Errorf("Error marshaling mutated object: %v", err)
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
-	return admission.PatchResponseFromRaw(req.AdmissionRequest.Object.Raw, rawMutated)
+
+	traced.Infof("Completed successfully operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
+	return admission.PatchResponseFromRaw(req.Object.Raw, rawMutated)
 }
 
 var _ admission.DecoderInjector = &CreateUpdateHandler{}
@@ -70,7 +81,7 @@ func (h *CreateUpdateHandler) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, req admission.Request, binding *sc.ServicePlan) {
+func (h *CreateUpdateHandler) mutateOnCreate(ctx context.Context, binding *sc.ServicePlan) {
 
 }
 

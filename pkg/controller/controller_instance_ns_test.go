@@ -822,14 +822,20 @@ func TestResolveNamespacedReferencesWorks(t *testing.T) {
 	assertNumberOfActions(t, actions, 3)
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.externalName", instance.Spec.ServiceClassExternalName),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.externalName": instance.Spec.ServiceClassExternalName,
+		}),
+		Fields: fields.Everything(),
 	}
 	assertList(t, actions[0], &v1beta1.ServiceClass{}, listRestrictions)
 
 	listRestrictions = clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.ParseSelectorOrDie("spec.externalName=test-serviceplan,spec.serviceBrokerName=test-servicebroker,spec.serviceClassRef.name=scguid"),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.externalName":"test-serviceplan",
+			v1beta1.GroupName+"/spec.serviceBrokerName":"test-servicebroker",
+			v1beta1.GroupName+"/spec.serviceClassRef.name":"scguid",
+		}),
+		Fields: fields.Everything(),
 	}
 	assertList(t, actions[1], &v1beta1.ServicePlan{}, listRestrictions)
 

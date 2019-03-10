@@ -554,7 +554,12 @@ func getTestBearerAuthSecret() *corev1.Secret {
 func getTestClusterServiceClass() *v1beta1.ClusterServiceClass {
 	broker := getTestClusterServiceBroker()
 	class := &v1beta1.ClusterServiceClass{
-		ObjectMeta: metav1.ObjectMeta{Name: testClusterServiceClassGUID},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testClusterServiceClassGUID,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.clusterServiceClassRef.name": testClusterServiceClassGUID,
+			},
+		},
 		Spec: v1beta1.ClusterServiceClassSpec{
 			ClusterServiceBrokerName: testClusterServiceBrokerName,
 			CommonServiceClassSpec: v1beta1.CommonServiceClassSpec{
@@ -648,7 +653,12 @@ func getTestBindingRetrievableServiceClass() *v1beta1.ServiceClass {
 func getTestClusterServicePlan() *v1beta1.ClusterServicePlan {
 	broker := getTestClusterServiceBroker()
 	plan := &v1beta1.ClusterServicePlan{
-		ObjectMeta: metav1.ObjectMeta{Name: testClusterServicePlanGUID},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testClusterServicePlanGUID,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.clusterServicePlanRef.name": testClusterServicePlanGUID,
+			},
+		},
 		Spec: v1beta1.ClusterServicePlanSpec{
 			ClusterServiceBrokerName: testClusterServiceBrokerName,
 			CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
@@ -714,7 +724,12 @@ func getTestRemovedClusterServicePlan() *v1beta1.ClusterServicePlan {
 func getTestClusterServicePlanNonbindable() *v1beta1.ClusterServicePlan {
 	broker := getTestClusterServiceBroker()
 	plan := &v1beta1.ClusterServicePlan{
-		ObjectMeta: metav1.ObjectMeta{Name: testNonbindableClusterServicePlanGUID},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testNonbindableClusterServicePlanGUID,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.clusterServicePlanRef.name": testNonbindableClusterServicePlanGUID,
+			},
+		},
 		Spec: v1beta1.ClusterServicePlanSpec{
 			CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
 				ExternalName: testNonbindableClusterServicePlanName,

@@ -106,6 +106,10 @@ func getTestServiceClass() *v1beta1.ServiceClass {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      testServiceClassGUID,
 			Namespace: testNamespace,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.serviceClassRef.name": testServiceClassGUID,
+				v1beta1.GroupName+"/spec.externalName": testServiceClassName,
+			},
 		},
 		Spec: v1beta1.ServiceClassSpec{
 			ServiceBrokerName:      testServiceBrokerName,
@@ -127,6 +131,12 @@ func getTestServicePlan() *v1beta1.ServicePlan {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      testServicePlanGUID,
 			Namespace: testNamespace,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.servicePlanRef.name": testServicePlanGUID,
+				v1beta1.GroupName+"/spec.externalName": testServicePlanName,
+				v1beta1.GroupName+"/spec.serviceBrokerName":testServiceBrokerName,
+				v1beta1.GroupName+"/spec.serviceClassRef.name":testServiceClassGUID,
+			},
 		},
 		Spec: v1beta1.ServicePlanSpec{
 			ServiceBrokerName:     testServiceBrokerName,
@@ -145,6 +155,10 @@ func getTestServiceInstanceWithNamespacedPlanReference() *v1beta1.ServiceInstanc
 			Name:       testServiceInstanceName,
 			Namespace:  testNamespace,
 			Generation: 1,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.serviceClassExternalName" :testServiceClassName,
+				v1beta1.GroupName+"/spec.servicePlanExternalName" : testServicePlanName,
+			},
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{

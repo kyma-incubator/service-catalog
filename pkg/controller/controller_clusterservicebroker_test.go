@@ -265,8 +265,10 @@ func TestReconcileClusterServiceBrokerExistingServiceClassAndServicePlan(t *test
 	assertGetCatalog(t, brokerActions[0])
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", "test-clusterservicebroker"),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 
 	actions := fakeCatalogClient.Actions()
@@ -314,8 +316,10 @@ func TestReconcileClusterServiceBrokerRemovedClusterServiceClass(t *testing.T) {
 	assertGetCatalog(t, brokerActions[0])
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", "test-clusterservicebroker"),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 
 	actions := fakeCatalogClient.Actions()
@@ -382,8 +386,10 @@ func TestReconcileClusterServiceBrokerRemovedAndRestoredClusterServiceClass(t *t
 	assertGetCatalog(t, brokerActions[0])
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", "test-clusterservicebroker"),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 
 	actions := fakeCatalogClient.Actions()
@@ -439,8 +445,10 @@ func TestReconcileClusterServiceBrokerRemovedClusterServicePlan(t *testing.T) {
 	assertGetCatalog(t, brokerActions[0])
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", "test-clusterservicebroker"),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 
 	actions := fakeCatalogClient.Actions()
@@ -483,8 +491,10 @@ func TestReconcileClusterServiceBrokerExistingClusterServiceClassDifferentBroker
 	assertNumberOfActions(t, actions, 3)
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", "test-clusterservicebroker"),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 	assertList(t, actions[0], &v1beta1.ClusterServiceClass{}, listRestrictions)
 	assertList(t, actions[1], &v1beta1.ClusterServicePlan{}, listRestrictions)
@@ -535,8 +545,10 @@ func TestReconcileClusterServiceBrokerExistingClusterServicePlanDifferentClass(t
 	assertNumberOfActions(t, actions, 4)
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", "test-clusterservicebroker"),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 	assertList(t, actions[0], &v1beta1.ClusterServiceClass{}, listRestrictions)
 	assertList(t, actions[1], &v1beta1.ClusterServicePlan{}, listRestrictions)
@@ -662,8 +674,10 @@ func TestReconcileClusterServiceBrokerDelete(t *testing.T) {
 			assertNumberOfActions(t, catalogActions, 7)
 
 			listRestrictions := clientgotesting.ListRestrictions{
-				Labels: labels.Everything(),
-				Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", broker.Name),
+				Labels: labels.SelectorFromSet(labels.Set{
+					v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+				}),
+				Fields: fields.Everything(),
 			}
 			assertList(t, catalogActions[0], &v1beta1.ClusterServiceClass{}, listRestrictions)
 			assertList(t, catalogActions[1], &v1beta1.ClusterServicePlan{}, listRestrictions)
@@ -774,8 +788,10 @@ func TestReconcileClusterServiceBrokerZeroServices(t *testing.T) {
 	assertNumberOfActions(t, actions, 3)
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", broker.Name),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 	assertList(t, actions[0], &v1beta1.ClusterServiceClass{}, listRestrictions)
 	assertList(t, actions[1], &v1beta1.ClusterServicePlan{}, listRestrictions)
@@ -946,8 +962,10 @@ func TestReconcileClusterServiceBrokerWithReconcileError(t *testing.T) {
 	assertNumberOfActions(t, actions, 4)
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", broker.Name),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 	assertList(t, actions[0], &v1beta1.ClusterServiceClass{}, listRestrictions)
 	assertList(t, actions[1], &v1beta1.ClusterServicePlan{}, listRestrictions)
@@ -1003,8 +1021,10 @@ func TestReconcileClusterServiceBrokerSuccessOnFinalRetry(t *testing.T) {
 	assertNumberOfActions(t, actions, 7)
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", broker.Name),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 
 	// first action should be an update action to clear OperationStartTime
@@ -1101,8 +1121,10 @@ func TestReconcileClusterServiceBrokerWithStatusUpdateError(t *testing.T) {
 	assertNumberOfActions(t, actions, 6)
 
 	listRestrictions := clientgotesting.ListRestrictions{
-		Labels: labels.Everything(),
-		Fields: fields.OneTermEqualSelector("spec.clusterServiceBrokerName", broker.Name),
+		Labels: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+		}),
+		Fields: fields.Everything(),
 	}
 
 	assertList(t, actions[0], &v1beta1.ClusterServiceClass{}, listRestrictions)
