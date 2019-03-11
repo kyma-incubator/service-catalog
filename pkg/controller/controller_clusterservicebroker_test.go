@@ -977,7 +977,7 @@ func TestReconcileClusterServiceBrokerWithReconcileError(t *testing.T) {
 	if !ok {
 		t.Fatalf("couldn't convert to a ClusterServiceClass: %+v", createSCAction.GetObject())
 	}
-	if e, a := getTestClusterServiceClass(), createdSC; !reflect.DeepEqual(e, a) {
+	if e, a := getTestClusterServiceClassWithoutLabels(), createdSC; !reflect.DeepEqual(e, a) {
 		t.Fatalf("unexpected diff for created ClusterServiceClass: %v,\n\nEXPECTED: %+v\n\nACTUAL:  %+v", diff.ObjectReflectDiff(e, a), e, a)
 	}
 	updatedClusterServiceBroker := assertUpdateStatus(t, actions[3], broker)

@@ -576,10 +576,38 @@ func getTestClusterServiceClass() *v1beta1.ClusterServiceClass {
 	return class
 }
 
+func getTestClusterServiceClassWithoutLabels() *v1beta1.ClusterServiceClass {
+	broker := getTestClusterServiceBroker()
+	class := &v1beta1.ClusterServiceClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testClusterServiceClassGUID,
+		},
+		Spec: v1beta1.ClusterServiceClassSpec{
+			ClusterServiceBrokerName: testClusterServiceBrokerName,
+			CommonServiceClassSpec: v1beta1.CommonServiceClassSpec{
+				Description:  "a test service",
+				ExternalName: testClusterServiceClassName,
+				ExternalID:   testClusterServiceClassGUID,
+				Bindable:     true,
+			},
+		},
+	}
+	markAsServiceCatalogManagedResource(class, broker)
+	return class
+}
+
+
 func getTestMarkedAsRemovedClusterServiceClass() *v1beta1.ClusterServiceClass {
 	broker := getTestClusterServiceBroker()
 	class := &v1beta1.ClusterServiceClass{
-		ObjectMeta: metav1.ObjectMeta{Name: testRemovedClusterServiceClassGUID},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testRemovedClusterServiceClassGUID,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.clusterServiceClassRef.name": testClusterServiceClassGUID,
+				v1beta1.GroupName+"/spec.externalName": testClusterServiceClassName,
+				v1beta1.GroupName+"/spec.clusterServiceBrokerName":testClusterServiceBrokerName,
+			},
+		},
 		Spec: v1beta1.ClusterServiceClassSpec{
 			ClusterServiceBrokerName: testClusterServiceBrokerName,
 			CommonServiceClassSpec: v1beta1.CommonServiceClassSpec{
@@ -665,7 +693,7 @@ func getTestClusterServicePlan() *v1beta1.ClusterServicePlan {
 			Labels: map[string]string{
 				v1beta1.GroupName+"/spec.clusterServicePlanRef.name": testClusterServicePlanGUID,
 				v1beta1.GroupName+"/spec.externalName": testClusterServicePlanName,
-				v1beta1.GroupName+"/spec.serviceBrokerName":testClusterServiceBrokerName,
+				v1beta1.GroupName+"/spec.clusterServiceBrokerName":testClusterServiceBrokerName,
 			},
 		},
 		Spec: v1beta1.ClusterServicePlanSpec{
@@ -713,7 +741,14 @@ func getTestMarkedAsRemovedClusterServicePlan() *v1beta1.ClusterServicePlan {
 func getTestRemovedClusterServicePlan() *v1beta1.ClusterServicePlan {
 	broker := getTestClusterServiceBroker()
 	plan := &v1beta1.ClusterServicePlan{
-		ObjectMeta: metav1.ObjectMeta{Name: testRemovedClusterServicePlanGUID},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: testRemovedClusterServicePlanGUID,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.externalName": testRemovedClusterServicePlanGUID,
+				v1beta1.GroupName+"/spec.clusterServiceClassRef.name": testClusterServiceClassGUID,
+				v1beta1.GroupName+"/spec.clusterServiceBrokerName":testClusterServiceBrokerName,
+			},
+		},
 		Spec: v1beta1.ClusterServicePlanSpec{
 			ClusterServiceBrokerName: testClusterServiceBrokerName,
 			CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
