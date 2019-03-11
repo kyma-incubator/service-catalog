@@ -686,6 +686,13 @@
   revision = "4d0e916071f68db74f8a73926335f809396d6b42"
 
 [[projects]]
+  digest = "1:08413c4235cad94a96c39e1e2f697789733c4a87d1fdf06b412d2cf2ba49826a"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "NUT"
+  revision = "d8ed2627bdf02c080bf22230dbb337003b7aba2d"
+
+[[projects]]
   branch = "master"
   digest = "1:0d9b5a68e4883862d39f9f21bec9a2d173a937f530acf854808efcf4176235c9"
   name = "github.com/pmorie/go-open-service-broker-client"
@@ -794,6 +801,16 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "7fb2782df3d83e0036cc89f461ed0422628776f4"
+
+[[projects]]
+  digest = "1:303db6177d2b5f81b7bbc4f283fe38c4efae53d3ebd1123d6324a93d8688ff3e"
+  name = "github.com/stretchr/testify"
+  packages = [
+    "assert",
+    "require",
+  ]
+  pruneopts = "NUT"
+  revision = "c679ae2cc0cb27ec3293fea7e254e47386f05d69"
 
 [[projects]]
   digest = "1:28aee88434fcefe93f513c55f793bc36362b88c0ae40e63033899fb78ddfd402"
@@ -1559,6 +1576,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/Azure/go-autorest/autorest",
+    "github.com/appscode/jsonpatch",
     "github.com/coreos/etcd/embed",
     "github.com/coreos/pkg/capnslog",
     "github.com/davecgh/go-spew/spew",
@@ -1584,8 +1602,12 @@
     "github.com/spf13/cobra",
     "github.com/spf13/pflag",
     "github.com/spf13/viper",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/require",
     "golang.org/x/lint/golint",
     "k8s.io/api/admission/v1beta1",
+    "k8s.io/api/apps/v1beta1",
+    "k8s.io/api/authentication/v1",
     "k8s.io/api/authorization/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/apitesting/fuzzer",
@@ -1650,6 +1672,7 @@
     "k8s.io/client-go/informers",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/pkg/version",
     "k8s.io/client-go/plugin/pkg/client/auth",
@@ -1676,6 +1699,7 @@
     "k8s.io/kube-openapi/cmd/openapi-gen",
     "k8s.io/kube-openapi/pkg/common",
     "k8s.io/kubectl/pkg/pluginutils",
+    "sigs.k8s.io/controller-runtime/pkg/client/apiutil",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
     "sigs.k8s.io/controller-runtime/pkg/manager",
     "sigs.k8s.io/controller-runtime/pkg/webhook",

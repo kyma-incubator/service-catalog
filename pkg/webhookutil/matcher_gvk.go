@@ -14,7 +14,7 @@ func equalGVK(a metav1.GroupVersionKind, b schema.GroupVersionKind) bool {
 	return a.Kind == b.Kind && a.Version == b.Version && a.Group == b.Group
 }
 
-func MatchKinds(obj runtime.Object, reqKind metav1.GroupVersionKind) (error) {
+func MatchKinds(obj runtime.Object, reqKind metav1.GroupVersionKind) error {
 	gvk, err := apiutil.GVKForObject(obj, scheme.Scheme)
 	if err != nil {
 		return err
