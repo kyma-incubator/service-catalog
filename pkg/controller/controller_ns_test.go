@@ -109,6 +109,7 @@ func getTestServiceClass() *v1beta1.ServiceClass {
 			Labels: map[string]string{
 				v1beta1.GroupName+"/spec.serviceClassRef.name": testServiceClassGUID,
 				v1beta1.GroupName+"/spec.externalName": testServiceClassName,
+				v1beta1.GroupName+"/spec.serviceBrokerName":testServiceBrokerName,
 			},
 		},
 		Spec: v1beta1.ServiceClassSpec{

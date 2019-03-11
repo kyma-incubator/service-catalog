@@ -104,6 +104,6 @@ func (c *controller) findServiceInstancesOnServiceClass(serviceClass *v1beta1.Se
 	listOpts := metav1.ListOptions{
 		LabelSelector: labelSelector,
 	}
-	klog.Warning("ServiceClass - TLabelSelector")
+
 	return c.serviceCatalogClient.ServiceInstances(serviceClass.Namespace).List(listOpts)
 }

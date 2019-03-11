@@ -558,6 +558,8 @@ func getTestClusterServiceClass() *v1beta1.ClusterServiceClass {
 			Name: testClusterServiceClassGUID,
 			Labels: map[string]string{
 				v1beta1.GroupName+"/spec.clusterServiceClassRef.name": testClusterServiceClassGUID,
+				v1beta1.GroupName+"/spec.externalName": testClusterServiceClassName,
+				v1beta1.GroupName+"/spec.clusterServiceBrokerName":testClusterServiceBrokerName,
 			},
 		},
 		Spec: v1beta1.ClusterServiceClassSpec{
@@ -657,6 +659,8 @@ func getTestClusterServicePlan() *v1beta1.ClusterServicePlan {
 			Name: testClusterServicePlanGUID,
 			Labels: map[string]string{
 				v1beta1.GroupName+"/spec.clusterServicePlanRef.name": testClusterServicePlanGUID,
+				v1beta1.GroupName+"/spec.externalName": testClusterServicePlanName,
+				v1beta1.GroupName+"/spec.serviceBrokerName":testClusterServiceBrokerName,
 			},
 		},
 		Spec: v1beta1.ClusterServicePlanSpec{
@@ -728,6 +732,8 @@ func getTestClusterServicePlanNonbindable() *v1beta1.ClusterServicePlan {
 			Name: testNonbindableClusterServicePlanGUID,
 			Labels: map[string]string{
 				v1beta1.GroupName+"/spec.clusterServicePlanRef.name": testNonbindableClusterServicePlanGUID,
+				v1beta1.GroupName+"/spec.externalName": testClusterServicePlanName,
+				v1beta1.GroupName+"/spec.serviceBrokerName":testClusterServiceBrokerName,
 			},
 		},
 		Spec: v1beta1.ClusterServicePlanSpec{
@@ -832,6 +838,12 @@ func getTestServiceInstance() *v1beta1.ServiceInstance {
 			Name:       testServiceInstanceName,
 			Namespace:  testNamespace,
 			Generation: 1,
+			Labels: map[string]string{
+				v1beta1.GroupName+"/spec.serviceClassRef.name": testServiceClassGUID,
+				v1beta1.GroupName+"/spec.servicePlanRef.name": testServicePlanGUID,
+				v1beta1.GroupName+"/spec.clusterServiceClassRef.name": testClusterServiceClassGUID,
+				v1beta1.GroupName+"/spec.clusterServicePlanRef.name": testClusterServicePlanGUID,
+			},
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{

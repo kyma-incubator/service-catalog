@@ -107,6 +107,5 @@ func (c *controller) findServiceInstancesOnServicePlan(servicePlan *v1beta1.Serv
 		LabelSelector: labelSelector,
 	}
 
-	klog.Warning("ServicePlan - LabelSelector")
 	return c.serviceCatalogClient.ServiceInstances(metav1.NamespaceAll).List(listOpts)
 }
