@@ -1348,7 +1348,6 @@ func (c *controller) resolveClusterServiceClassRef(instance *v1beta1.ServiceInst
 			)
 		}
 	} else {
-		// TODO(adamwalach) check labels
 		filterLabel := instance.Spec.GetClusterServiceClassFilterLabelName()
 		filterValue := instance.Spec.GetSpecifiedClusterServiceClass()
 		klog.V(4).Info(pcb.Messagef("looking up a ClusterServiceClass from %s: %q", filterLabel, filterValue))

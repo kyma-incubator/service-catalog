@@ -149,11 +149,11 @@ func (pr PlanReference) GetClusterServiceClassFilterLabelName() string {
 // a list of service catalog plans by the PlanReference.
 func (pr PlanReference) GetClusterServicePlanFilterLabelName() string {
 	if pr.ClusterServicePlanExternalName != "" {
-		return "spec.externalName"
+		return GroupName+"/spec.externalName"
 	}
 
 	if pr.ClusterServicePlanExternalID != "" {
-		return "spec.externalID"
+		return GroupName+"/spec.externalID"
 	}
 
 	return ""
