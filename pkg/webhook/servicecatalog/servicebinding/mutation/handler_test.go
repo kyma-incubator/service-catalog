@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/types"
 	"github.com/appscode/jsonpatch"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scfeatures "github.com/kubernetes-incubator/service-catalog/pkg/features"
@@ -18,6 +17,7 @@ import (
 	authenticationv1 "k8s.io/api/authentication/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -26,8 +26,8 @@ import (
 func TestCreateUpdateHandlerHandleSuccess(t *testing.T) {
 	const fixUUID = "mocked-uuid-123-abc"
 	tests := map[string]struct {
-		givenRawObj   []byte
-		expPatches    []jsonpatch.Operation
+		givenRawObj []byte
+		expPatches  []jsonpatch.Operation
 	}{
 		"Should set all default fields": {
 			givenRawObj: []byte(`{
@@ -100,6 +100,8 @@ func TestCreateUpdateHandlerHandleSuccess(t *testing.T) {
 
 			err = utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=false", scfeatures.OriginatingIdentity))
 			require.NoError(t, err, "cannot disable OriginatingIdentity feature")
+			// restore default state
+			defer utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=true", scfeatures.OriginatingIdentity))
 
 			fixReq := admission.Request{
 				AdmissionRequest: admissionv1beta1.AdmissionRequest{
@@ -145,8 +147,7 @@ func TestCreateUpdateHandlerHandleSetUserInfoIfOriginatingIdentityIsEnabled(t *t
 	decoder, err := admission.NewDecoder(scheme.Scheme)
 	require.NoError(t, err)
 
-	err = utilfeature.DefaultFeatureGate.Set(fmt.Sprintf("%v=true", scfeatures.OriginatingIdentity))
-	require.NoError(t, err, "cannot disable OriginatingIdentity feature")
+	// assumption that OriginatingIdentity is enabled by default
 
 	reqUserInfo := authenticationv1.UserInfo{
 		Username: "minikube",
@@ -191,9 +192,9 @@ func TestCreateUpdateHandlerHandleSetUserInfoIfOriginatingIdentityIsEnabled(t *t
 		{
 			Operation: "add",
 			Path:      "/spec/userInfo",
-			Value:     map[string]interface{}{
+			Value: map[string]interface{}{
 				"username": "minikube",
-				"uid": "123",
+				"uid":      "123",
 				"groups": []interface{}{
 					"unauthorized",
 				},

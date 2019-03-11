@@ -95,7 +95,7 @@ func TestCreateUpdateHandlerHandleSuccess(t *testing.T) {
 						Version: "v1beta1",
 						Group:   "servicecatalog.k8s.io",
 					},
-					Object:    runtime.RawExtension{Raw: tc.givenRawObj},
+					Object: runtime.RawExtension{Raw: tc.givenRawObj},
 				},
 			}
 
@@ -156,7 +156,6 @@ func TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch(t *testing.T) {
 	assert.Equal(t, expReqResult, resp.Result)
 }
 
-
 func TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed(t *testing.T) {
 	// given
 	sc.AddToScheme(scheme.Scheme)
@@ -173,7 +172,7 @@ func TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed(t *testing.T) {
 				Version: "v1beta1",
 				Group:   "servicecatalog.k8s.io",
 			},
-			Object:    runtime.RawExtension{Raw: []byte("{malformed: JSON,,")},
+			Object: runtime.RawExtension{Raw: []byte("{malformed: JSON,,")},
 		},
 	}
 
