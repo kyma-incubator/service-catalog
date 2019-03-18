@@ -131,7 +131,7 @@ func (pr PlanReference) GetSpecifiedServicePlan() string {
 	return ""
 }
 
-// GetClusterServiceClassFilterFieldName returns the appropriate label name for filtering
+// GetClusterServiceClassFilterLabelName returns the appropriate label name for filtering
 // a list of service catalog classes by the PlanReference.
 func (pr PlanReference) GetClusterServiceClassFilterLabelName() string {
 	if pr.ClusterServiceClassExternalName != "" {

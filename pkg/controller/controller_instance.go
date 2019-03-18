@@ -1368,7 +1368,7 @@ func (c *controller) resolveClusterServiceClassRef(instance *v1beta1.ServiceInst
 				Name: sc.Name,
 			}
 			klog.V(4).Info(pcb.Messagef(
-				"resolved %c to K8S ClusterServiceClass %q",
+				"resolved %c to ClusterServiceClass %q",
 				instance.Spec.PlanReference, sc.Name,
 			))
 		} else {
@@ -1379,7 +1379,7 @@ func (c *controller) resolveClusterServiceClassRef(instance *v1beta1.ServiceInst
 		}
 
 		klog.V(4).Info(pcb.Messagef(
-			"resolved %c to K8S ClusterServiceClass %q",
+			"resolved %c to ClusterServiceClass %q",
 			instance.Spec.PlanReference, sc.Name,
 		))
 	}

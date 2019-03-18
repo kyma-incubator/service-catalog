@@ -22,9 +22,10 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -138,7 +139,9 @@ func (sdk *SDK) RetrievePlanByName(name string, opts ScopeOptions) (Plan, error)
 	}
 
 	listOpts := metav1.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(FieldExternalPlanName, name).String(),
+		LabelSelector: labels.SelectorFromSet(labels.Set{
+			v1beta1.GroupName + "/" + FieldExternalPlanName: name,
+		}).String(),
 	}
 
 	return sdk.retrieveSinglePlanByListOptions(name, opts, listOpts)
@@ -155,18 +158,21 @@ func (sdk *SDK) RetrievePlanByClassAndName(className, planName string, opts Scop
 		return nil, err
 	}
 
-	var classRefSelector fields.Selector
+	var classRefSet labels.Set
 	if opts.Scope.Matches(ClusterScope) {
-		classRefSelector = fields.OneTermEqualSelector(FieldClusterServiceClassRef, class.GetName())
+		classRefSet =  labels.Set{
+			v1beta1.GroupName+"/"+FieldClusterServiceClassRef: class.GetName(),
+		}
 	} else {
-		classRefSelector = fields.OneTermEqualSelector(FieldServiceClassRef, class.GetName())
+		classRefSet =  labels.Set{
+			v1beta1.GroupName+"/"+FieldServiceClassRef: class.GetName(),
+		}
 	}
-
 	listOpts := metav1.ListOptions{
-		FieldSelector: fields.AndSelectors(
-			classRefSelector,
-			fields.OneTermEqualSelector(FieldExternalPlanName, planName),
-		).String(),
+		LabelSelector: labels. Merge(classRefSet,
+			labels.Set{
+				v1beta1.GroupName+"/"+FieldExternalPlanName: planName,
+			}).String(),
 	}
 
 	ss := []string{class.GetName(), planName}
@@ -175,7 +181,7 @@ func (sdk *SDK) RetrievePlanByClassAndName(className, planName string, opts Scop
 
 // RetrievePlanByClassIDAndName gets a plan by its external name and class kube name combination.
 func (sdk *SDK) RetrievePlanByClassIDAndName(classKubeName, planName string, scopeOpts ScopeOptions) (Plan, error) {
-	var classRefSelector fields.Selector
+	var classRefSet labels.Set
 	findError := &multierror.Error{
 		ErrorFormat: func(errors []error) string {
 			return joinErrors("error:", errors, "\n  ")
@@ -184,12 +190,14 @@ func (sdk *SDK) RetrievePlanByClassIDAndName(classKubeName, planName string, sco
 
 	//we run through both of these to support AllScope (i.e. we don't know if its a cluster or namespaced plan)
 	if scopeOpts.Scope.Matches(ClusterScope) {
-		classRefSelector = fields.OneTermEqualSelector(FieldClusterServiceClassRef, classKubeName)
+		classRefSet = labels.Set{
+			v1beta1.GroupName+"/"+FieldClusterServiceClassRef: classKubeName,
+		}
 		listOpts := metav1.ListOptions{
-			FieldSelector: fields.AndSelectors(
-				classRefSelector,
-				fields.OneTermEqualSelector(FieldExternalPlanName, planName),
-			).String(),
+			LabelSelector: labels. Merge(classRefSet,
+				labels.Set{
+					v1beta1.GroupName+"/"+FieldExternalPlanName: planName,
+				}).String(),
 		}
 
 		ss := []string{classKubeName, planName}
@@ -201,12 +209,14 @@ func (sdk *SDK) RetrievePlanByClassIDAndName(classKubeName, planName string, sco
 		}
 	}
 	if scopeOpts.Scope.Matches(NamespaceScope) {
-		classRefSelector = fields.OneTermEqualSelector(FieldServiceClassRef, classKubeName)
+		classRefSet = labels.Set{
+			v1beta1.GroupName+"/"+FieldServiceClassRef: classKubeName,
+		}
 		listOpts := metav1.ListOptions{
-			FieldSelector: fields.AndSelectors(
-				classRefSelector,
-				fields.OneTermEqualSelector(FieldExternalPlanName, planName),
-			).String(),
+			LabelSelector: labels. Merge(classRefSet,
+				labels.Set{
+					v1beta1.GroupName+"/"+FieldExternalPlanName: planName,
+				}).String(),
 		}
 
 		ss := []string{classKubeName, planName}

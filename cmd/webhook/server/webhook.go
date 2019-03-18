@@ -30,7 +30,7 @@ import (
 	simutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
 	spmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceplan/mutation"
 
-  scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/server/healthz"
@@ -63,7 +63,7 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 
 	scTypes.AddToScheme(mgr.GetScheme())
 
-  // setup webhook server
+	// setup webhook server
 	webhookSvr := &webhook.Server{
 		Port:    int32(opts.SecureServingOptions.BindPort),
 		CertDir: opts.SecureServingOptions.ServerCert.CertDirectory,

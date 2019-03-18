@@ -694,6 +694,7 @@ func getTestClusterServicePlan() *v1beta1.ClusterServicePlan {
 				v1beta1.GroupName+"/spec.clusterServicePlanRef.name": testClusterServicePlanGUID,
 				v1beta1.GroupName+"/spec.externalName": testClusterServicePlanName,
 				v1beta1.GroupName+"/spec.clusterServiceBrokerName":testClusterServiceBrokerName,
+				v1beta1.GroupName+"/spec.clusterServiceClassRef.name":testClusterServiceClassGUID,
 			},
 		},
 		Spec: v1beta1.ClusterServicePlanSpec{

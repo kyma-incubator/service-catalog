@@ -25,13 +25,13 @@ import (
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const (
 	// FieldServicePlanRef is the jsonpath to an instance's plan name (Kubernetes name).
-	FieldServicePlanRef = "spec.clusterServicePlanRef.name"
+	FieldServicePlanRef = v1beta1.GroupName + "/spec.clusterServicePlanRef.name"
 )
 
 // RetrieveInstances lists all instances in a namespace.
@@ -88,7 +88,9 @@ func (sdk *SDK) RetrieveInstanceByBinding(b *v1beta1.ServiceBinding,
 // RetrieveInstancesByPlan retrieves all instances of a plan.
 func (sdk *SDK) RetrieveInstancesByPlan(plan Plan) ([]v1beta1.ServiceInstance, error) {
 	planOpts := v1.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(FieldServicePlanRef, plan.GetName()).String(),
+		LabelSelector: labels.SelectorFromSet(labels.Set{
+			FieldServicePlanRef: plan.GetName(),
+		}).String(),
 	}
 	instances, err := sdk.ServiceCatalog().ServiceInstances("").List(planOpts)
 	if err != nil {

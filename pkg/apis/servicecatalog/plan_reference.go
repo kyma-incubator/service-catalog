@@ -131,7 +131,7 @@ func (pr PlanReference) GetSpecifiedServicePlan() string {
 	return ""
 }
 
-// GetClusterServiceClassFilterFieldName returns the appropriate field name for filtering
+// GetClusterServiceClassFilterLabelName returns the appropriate field name for filtering
 // a list of service catalog classes by the PlanReference.
 func (pr PlanReference) GetClusterServiceClassFilterLabelName() string {
 	if pr.ClusterServiceClassExternalName != "" {
@@ -145,7 +145,7 @@ func (pr PlanReference) GetClusterServiceClassFilterLabelName() string {
 	return ""
 }
 
-// GetClusterServicePlanFilterFieldName returns the appropriate field name for filtering
+// GetClusterServicePlanFilterLabelName returns the appropriate field name for filtering
 // a list of service catalog plans by the PlanReference.
 func (pr PlanReference) GetClusterServicePlanFilterLabelName() string {
 	if pr.ClusterServicePlanExternalName != "" {
@@ -159,7 +159,7 @@ func (pr PlanReference) GetClusterServicePlanFilterLabelName() string {
 	return ""
 }
 
-// GetServiceClassFilterFieldName returns the appropriate field name for filtering
+// GetServiceClassFilterLabelName returns the appropriate field name for filtering
 // a list of service catalog classes by the PlanReference.
 func (pr PlanReference) GetServiceClassFilterLabelName() string {
 	if pr.ServiceClassExternalName != "" {
@@ -173,7 +173,7 @@ func (pr PlanReference) GetServiceClassFilterLabelName() string {
 	return ""
 }
 
-// GetServicePlanFilterFieldName returns the appropriate field name for filtering
+// GetServicePlanFilterLabelName returns the appropriate field name for filtering
 // a list of service catalog plans by the PlanReference.
 func (pr PlanReference) GetServicePlanFilterLabelName() string {
 	if pr.ServicePlanExternalName != "" {
