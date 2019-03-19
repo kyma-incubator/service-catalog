@@ -160,18 +160,18 @@ func (sdk *SDK) RetrievePlanByClassAndName(className, planName string, opts Scop
 
 	var classRefSet labels.Set
 	if opts.Scope.Matches(ClusterScope) {
-		classRefSet =  labels.Set{
-			v1beta1.GroupName+"/"+FieldClusterServiceClassRef: class.GetName(),
+		classRefSet = labels.Set{
+			v1beta1.GroupName + "/" + FieldClusterServiceClassRef: class.GetName(),
 		}
 	} else {
-		classRefSet =  labels.Set{
-			v1beta1.GroupName+"/"+FieldServiceClassRef: class.GetName(),
+		classRefSet = labels.Set{
+			v1beta1.GroupName + "/" + FieldServiceClassRef: class.GetName(),
 		}
 	}
 	listOpts := metav1.ListOptions{
-		LabelSelector: labels. Merge(classRefSet,
+		LabelSelector: labels.Merge(classRefSet,
 			labels.Set{
-				v1beta1.GroupName+"/"+FieldExternalPlanName: planName,
+				v1beta1.GroupName + "/" + FieldExternalPlanName: planName,
 			}).String(),
 	}
 
@@ -191,12 +191,12 @@ func (sdk *SDK) RetrievePlanByClassIDAndName(classKubeName, planName string, sco
 	//we run through both of these to support AllScope (i.e. we don't know if its a cluster or namespaced plan)
 	if scopeOpts.Scope.Matches(ClusterScope) {
 		classRefSet = labels.Set{
-			v1beta1.GroupName+"/"+FieldClusterServiceClassRef: classKubeName,
+			v1beta1.GroupName + "/" + FieldClusterServiceClassRef: classKubeName,
 		}
 		listOpts := metav1.ListOptions{
-			LabelSelector: labels. Merge(classRefSet,
+			LabelSelector: labels.Merge(classRefSet,
 				labels.Set{
-					v1beta1.GroupName+"/"+FieldExternalPlanName: planName,
+					v1beta1.GroupName + "/" + FieldExternalPlanName: planName,
 				}).String(),
 		}
 
@@ -210,12 +210,12 @@ func (sdk *SDK) RetrievePlanByClassIDAndName(classKubeName, planName string, sco
 	}
 	if scopeOpts.Scope.Matches(NamespaceScope) {
 		classRefSet = labels.Set{
-			v1beta1.GroupName+"/"+FieldServiceClassRef: classKubeName,
+			v1beta1.GroupName + "/" + FieldServiceClassRef: classKubeName,
 		}
 		listOpts := metav1.ListOptions{
-			LabelSelector: labels. Merge(classRefSet,
+			LabelSelector: labels.Merge(classRefSet,
 				labels.Set{
-					v1beta1.GroupName+"/"+FieldExternalPlanName: planName,
+					v1beta1.GroupName + "/" + FieldExternalPlanName: planName,
 				}).String(),
 		}
 
