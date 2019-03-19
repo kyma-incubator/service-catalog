@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 
+	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	csbmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/clusterservicebroker/mutation"
 	cscmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/clusterserviceclass/mutation"
 	cspmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/clusterserviceplan/mutation"
@@ -29,8 +30,6 @@ import (
 	scmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceclass/mutation"
 	simutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
 	spmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceplan/mutation"
-
-	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/server/healthz"
