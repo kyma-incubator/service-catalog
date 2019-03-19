@@ -18,7 +18,6 @@ package controller
 
 import (
 	"fmt"
-	"k8s.io/apimachinery/pkg/labels"
 	"strings"
 	"time"
 
@@ -27,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/tools/cache"
 
@@ -213,10 +213,12 @@ func (c *controller) reconcileClusterServiceBroker(broker *v1beta1.ClusterServic
 		if broker.Status.OperationStartTime != nil {
 			toUpdate := broker.DeepCopy()
 			toUpdate.Status.OperationStartTime = nil
-			if _, err := c.serviceCatalogClient.ClusterServiceBrokers().UpdateStatus(toUpdate); err != nil {
+			updated, err := c.serviceCatalogClient.ClusterServiceBrokers().UpdateStatus(toUpdate)
+			if err != nil {
 				klog.Error(pcb.Messagef("Error updating operation start time: %v", err))
 				return err
 			}
+			broker = updated
 		}
 
 		// get the existing services and plans for this broker so that we can
@@ -719,7 +721,7 @@ func (c *controller) getCurrentServiceClassesAndPlansForBroker(broker *v1beta1.C
 	pcb := pretty.NewClusterServiceBrokerContextBuilder(broker)
 
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName+"/spec.clusterServiceBrokerName": broker.Name,
+		v1beta1.GroupName + "/spec.clusterServiceBrokerName": broker.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{

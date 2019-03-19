@@ -179,10 +179,12 @@ func (c *controller) reconcileServiceBroker(broker *v1beta1.ServiceBroker) error
 			if broker.Status.OperationStartTime == nil {
 				toUpdate := broker.DeepCopy()
 				toUpdate.Status.OperationStartTime = &now
-				if _, err := c.serviceCatalogClient.ServiceBrokers(broker.Namespace).UpdateStatus(toUpdate); err != nil {
+				updated, err := c.serviceCatalogClient.ServiceBrokers(broker.Namespace).UpdateStatus(toUpdate);
+				if err != nil {
 					klog.Error(pcb.Messagef("Error updating operation start time: %v", err))
 					return err
 				}
+				broker = updated
 			} else if !time.Now().Before(broker.Status.OperationStartTime.Time.Add(c.reconciliationRetryDuration)) {
 				s := "Stopping reconciliation retries because too much time has elapsed"
 				klog.Info(pcb.Message(s))
