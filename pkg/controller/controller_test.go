@@ -943,7 +943,7 @@ func getTestServiceInstanceK8SNames() *v1beta1.ServiceInstance {
 			ExternalID: testServiceInstanceGUID,
 		},
 		Status: v1beta1.ServiceInstanceStatus{
-			Conditions: []v1beta1.ServiceInstanceCondition{},
+			Conditions:        []v1beta1.ServiceInstanceCondition{},
 			DeprovisionStatus: v1beta1.ServiceInstanceDeprovisionStatusNotRequired,
 		},
 	}
