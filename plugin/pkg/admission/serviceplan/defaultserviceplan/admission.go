@@ -32,9 +32,8 @@ import (
 	servicecataloginternalversion "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/internalclientset/typed/servicecatalog/internalversion"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog"
-	scadmission "github.com/kubernetes-incubator/service-catalog/pkg/apiserver/admission"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-
+	scadmission "github.com/kubernetes-incubator/service-catalog/pkg/apiserver/admission"
 )
 
 const (
@@ -318,7 +317,7 @@ func (d *defaultServicePlan) getServiceClassByField(a admission.Attributes, ref 
 func (d *defaultServicePlan) getClusterServicePlansByClusterServiceClassName(scName string) ([]servicecatalog.ClusterServicePlan, error) {
 	klog.V(4).Infof("Fetching ClusterServicePlans by class name %q", scName)
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName+"/spec.clusterServiceClassRef.name": scName,
+		v1beta1.GroupName + "/spec.clusterServiceClassRef.name": scName,
 	}).String()
 
 	listOpts := apimachineryv1.ListOptions{
@@ -339,7 +338,7 @@ func (d *defaultServicePlan) getClusterServicePlansByClusterServiceClassName(scN
 func (d *defaultServicePlan) getServicePlansByServiceClassName(scName string) ([]servicecatalog.ServicePlan, error) {
 	klog.V(4).Infof("Fetching ServicePlans by class name %q", scName)
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName+"/spec.serviceClassRef.name": scName,
+		v1beta1.GroupName + "/spec.serviceClassRef.name": scName,
 	}).String()
 
 	listOpts := apimachineryv1.ListOptions{

@@ -15,8 +15,8 @@ func TestMatchKinds(t *testing.T) {
 	t.Run("Should return no error for same GVK", func(t *testing.T) {
 		// given
 		reqGVK := metav1.GroupVersionKind{
-			Kind: "Deployment",
-			Group: "apps",
+			Kind:    "Deployment",
+			Group:   "apps",
 			Version: "v1beta1",
 		}
 
@@ -32,8 +32,8 @@ func TestMatchKinds(t *testing.T) {
 	t.Run("Should return error for different GVK", func(t *testing.T) {
 		// given
 		reqGVK := metav1.GroupVersionKind{
-			Kind: "Pod",
-			Group: "apps",
+			Kind:    "Pod",
+			Group:   "apps",
 			Version: "v1beta1",
 		}
 

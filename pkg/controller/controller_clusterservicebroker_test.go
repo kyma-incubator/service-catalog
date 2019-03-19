@@ -266,7 +266,7 @@ func TestReconcileClusterServiceBrokerExistingServiceClassAndServicePlan(t *test
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -317,7 +317,7 @@ func TestReconcileClusterServiceBrokerRemovedClusterServiceClass(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -387,7 +387,7 @@ func TestReconcileClusterServiceBrokerRemovedAndRestoredClusterServiceClass(t *t
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -446,7 +446,7 @@ func TestReconcileClusterServiceBrokerRemovedClusterServicePlan(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -492,7 +492,7 @@ func TestReconcileClusterServiceBrokerExistingClusterServiceClassDifferentBroker
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -546,7 +546,7 @@ func TestReconcileClusterServiceBrokerExistingClusterServicePlanDifferentClass(t
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -675,7 +675,7 @@ func TestReconcileClusterServiceBrokerDelete(t *testing.T) {
 
 			listRestrictions := clientgotesting.ListRestrictions{
 				Labels: labels.SelectorFromSet(labels.Set{
-					v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+					v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 				}),
 				Fields: fields.Everything(),
 			}
@@ -789,7 +789,7 @@ func TestReconcileClusterServiceBrokerZeroServices(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -963,7 +963,7 @@ func TestReconcileClusterServiceBrokerWithReconcileError(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -1022,7 +1022,7 @@ func TestReconcileClusterServiceBrokerSuccessOnFinalRetry(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -1122,7 +1122,7 @@ func TestReconcileClusterServiceBrokerWithStatusUpdateError(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.clusterServiceBrokerName": "test-clusterservicebroker",
+			v1beta1.GroupName + "/spec.clusterServiceBrokerName": "test-clusterservicebroker",
 		}),
 		Fields: fields.Everything(),
 	}

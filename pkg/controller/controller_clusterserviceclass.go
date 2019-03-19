@@ -83,7 +83,6 @@ func (c *controller) reconcileClusterServiceClass(serviceClass *v1beta1.ClusterS
 	}
 	klog.Infof("Found %d ServiceInstances", len(serviceInstances.Items))
 
-
 	if len(serviceInstances.Items) != 0 {
 		return nil
 	}
@@ -94,7 +93,7 @@ func (c *controller) reconcileClusterServiceClass(serviceClass *v1beta1.ClusterS
 
 func (c *controller) findServiceInstancesOnClusterServiceClass(serviceClass *v1beta1.ClusterServiceClass) (*v1beta1.ServiceInstanceList, error) {
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName+"/spec.clusterServiceClassRef.name": serviceClass.Name,
+		v1beta1.GroupName + "/spec.clusterServiceClassRef.name": serviceClass.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{

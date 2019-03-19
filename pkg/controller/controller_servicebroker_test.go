@@ -169,7 +169,7 @@ func TestReconcileServiceBrokerDelete(t *testing.T) {
 
 			listRestrictions := clientgotesting.ListRestrictions{
 				Labels: labels.SelectorFromSet(labels.Set{
-					v1beta1.GroupName+"/spec.serviceBrokerName": broker.Name,
+					v1beta1.GroupName + "/spec.serviceBrokerName": broker.Name,
 				}),
 				Fields: fields.Everything(),
 			}

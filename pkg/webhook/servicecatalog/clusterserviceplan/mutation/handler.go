@@ -35,7 +35,6 @@ type CreateUpdateHandler struct {
 
 var _ admission.Handler = &CreateUpdateHandler{}
 
-
 // Handle handles admission requests.
 func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
 	traced := webhookutil.NewTracedLogger(req.UID)

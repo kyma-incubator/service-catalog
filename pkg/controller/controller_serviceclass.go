@@ -98,7 +98,7 @@ func (c *controller) reconcileServiceClass(serviceClass *v1beta1.ServiceClass) e
 
 func (c *controller) findServiceInstancesOnServiceClass(serviceClass *v1beta1.ServiceClass) (*v1beta1.ServiceInstanceList, error) {
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName+"/spec.serviceClassRef.name": serviceClass.Name,
+		v1beta1.GroupName + "/spec.serviceClassRef.name": serviceClass.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{

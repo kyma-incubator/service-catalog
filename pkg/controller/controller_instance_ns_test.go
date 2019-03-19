@@ -823,7 +823,7 @@ func TestResolveNamespacedReferencesWorks(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.externalName": instance.Spec.ServiceClassExternalName,
+			v1beta1.GroupName + "/spec.externalName": instance.Spec.ServiceClassExternalName,
 		}),
 		Fields: fields.Everything(),
 	}
@@ -831,9 +831,9 @@ func TestResolveNamespacedReferencesWorks(t *testing.T) {
 
 	listRestrictions = clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName+"/spec.externalName":"test-serviceplan",
-			v1beta1.GroupName+"/spec.serviceBrokerName":"test-servicebroker",
-			v1beta1.GroupName+"/spec.serviceClassRef.name":"scguid",
+			v1beta1.GroupName + "/spec.externalName":         "test-serviceplan",
+			v1beta1.GroupName + "/spec.serviceBrokerName":    "test-servicebroker",
+			v1beta1.GroupName + "/spec.serviceClassRef.name": "scguid",
 		}),
 		Fields: fields.Everything(),
 	}

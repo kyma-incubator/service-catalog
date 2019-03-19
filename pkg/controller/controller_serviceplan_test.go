@@ -60,7 +60,7 @@ func TestReconcileServicePlanRemovedFromCatalog(t *testing.T) {
 			catalogActionsCheckFunc: func(t *testing.T, actions []clientgotesting.Action) {
 				listRestrictions := clientgotesting.ListRestrictions{
 					Labels: labels.SelectorFromSet(labels.Set{
-						v1beta1.GroupName+"/spec.servicePlanRef.name": "spguid",
+						v1beta1.GroupName + "/spec.servicePlanRef.name": "spguid",
 					}),
 					Fields: fields.Everything(),
 				}
@@ -77,7 +77,7 @@ func TestReconcileServicePlanRemovedFromCatalog(t *testing.T) {
 			catalogActionsCheckFunc: func(t *testing.T, actions []clientgotesting.Action) {
 				listRestrictions := clientgotesting.ListRestrictions{
 					Labels: labels.SelectorFromSet(labels.Set{
-						v1beta1.GroupName+"/spec.servicePlanRef.name": "spguid",
+						v1beta1.GroupName + "/spec.servicePlanRef.name": "spguid",
 					}),
 					Fields: fields.Everything(),
 				}
@@ -101,7 +101,7 @@ func TestReconcileServicePlanRemovedFromCatalog(t *testing.T) {
 			catalogActionsCheckFunc: func(t *testing.T, actions []clientgotesting.Action) {
 				listRestrictions := clientgotesting.ListRestrictions{
 					Labels: labels.SelectorFromSet(labels.Set{
-						v1beta1.GroupName+"/spec.servicePlanRef.name": "spguid",
+						v1beta1.GroupName + "/spec.servicePlanRef.name": "spguid",
 					}),
 					Fields: fields.Everything(),
 				}

@@ -6,12 +6,12 @@ import (
 	"k8s.io/klog"
 )
 
-
 func NewTracedLogger(uid types.UID) *TracedLogger {
 	return &TracedLogger{
-		header : fmt.Sprintf("[ReqUID: %s ]", uid),
+		header: fmt.Sprintf("[ReqUID: %s ]", uid),
 	}
 }
+
 type TracedLogger struct {
 	header string
 }
@@ -41,4 +41,3 @@ func (l *TracedLogger) Info(args ...interface{}) {
 func (l *TracedLogger) Error(args ...interface{}) {
 	klog.Errorf(l.tracedMsg(args...))
 }
-
