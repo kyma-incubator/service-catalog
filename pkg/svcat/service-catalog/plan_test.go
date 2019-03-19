@@ -49,7 +49,7 @@ var _ = Describe("Plan", func() {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "someclass",
 				Labels: map[string]string{
-					v1beta1.GroupName+"/spec.externalName": "foobar",
+					v1beta1.GroupName + "/spec.externalName": "foobar",
 				},
 			},
 		}
@@ -57,7 +57,7 @@ var _ = Describe("Plan", func() {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "foobar",
 				Labels: map[string]string{
-					v1beta1.GroupName+"/spec.externalName": "foobar",
+					v1beta1.GroupName + "/spec.externalName": "foobar",
 				},
 			},
 		}
@@ -65,8 +65,8 @@ var _ = Describe("Plan", func() {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "clusterscopedplan",
 				Labels: map[string]string{
-					v1beta1.GroupName+"/spec.externalName": "clusterscopedplan",
-					v1beta1.GroupName+"/spec.clusterServiceClassRef.name": csc.Name,
+					v1beta1.GroupName + "/spec.externalName":                "clusterscopedplan",
+					v1beta1.GroupName + "/spec.clusterServiceClassRef.name": csc.Name,
 				},
 			},
 			Spec: v1beta1.ClusterServicePlanSpec{
@@ -75,20 +75,20 @@ var _ = Describe("Plan", func() {
 		}
 		sc = &v1beta1.ServiceClass{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "somenamespacedclass",
+				Name:      "somenamespacedclass",
 				Namespace: "default",
 				Labels: map[string]string{
-					v1beta1.GroupName+"/spec.externalName": "somenamespacedclass",
+					v1beta1.GroupName + "/spec.externalName": "somenamespacedclass",
 				},
 			},
 		}
 		sp = &v1beta1.ServicePlan{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "foobar",
+				Name:      "foobar",
 				Namespace: sc.Namespace,
 				Labels: map[string]string{
-					v1beta1.GroupName+"/spec.externalName": "foobar",
-					v1beta1.GroupName+"/spec.serviceClassRef.name": sc.Name,
+					v1beta1.GroupName + "/spec.externalName":         "foobar",
+					v1beta1.GroupName + "/spec.serviceClassRef.name": sc.Name,
 				},
 			},
 			Spec: v1beta1.ServicePlanSpec{
@@ -275,7 +275,7 @@ var _ = Describe("Plan", func() {
 			Expect(plan.GetNamespace()).To(Equal(""))
 			actions := singleClient.Actions()
 			Expect(len(actions)).To(Equal(2))
-			labelRequirement, err :=  labels.NewRequirement(v1beta1.GroupName+"/"+FieldClusterServiceClassRef,"=",[]string{classKubeName})
+			labelRequirement, err := labels.NewRequirement(v1beta1.GroupName+"/"+FieldClusterServiceClassRef, "=", []string{classKubeName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(actions[0].Matches("list", "clusterserviceplans")).To(BeTrue())
 			Expect(actions[0].(testing.ListAction).GetListRestrictions().Labels).To(ContainElement(*labelRequirement))
@@ -307,13 +307,13 @@ var _ = Describe("Plan", func() {
 			Expect(plan.GetNamespace()).To(Equal(sp.Namespace))
 			actions := singleClient.Actions()
 			Expect(len(actions)).To(Equal(4))
-			labelRequirement, err :=  labels.NewRequirement(v1beta1.GroupName+"/"+FieldClusterServiceClassRef,"=",[]string{classKubeName})
+			labelRequirement, err := labels.NewRequirement(v1beta1.GroupName+"/"+FieldClusterServiceClassRef, "=", []string{classKubeName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(actions[0].Matches("list", "clusterserviceplans")).To(BeTrue())
 			Expect(actions[0].(testing.ListAction).GetListRestrictions().Labels).To(ContainElement(*labelRequirement))
 			Expect(actions[1].Matches("list", "serviceplans")).To(BeTrue())
 			Expect(actions[1].(testing.ListAction).GetListRestrictions().Labels).To(ContainElement(*labelRequirement))
-			namespacedLabelRequirement, err :=  labels.NewRequirement(v1beta1.GroupName+"/"+FieldServiceClassRef,"=",[]string{classKubeName})
+			namespacedLabelRequirement, err := labels.NewRequirement(v1beta1.GroupName+"/"+FieldServiceClassRef, "=", []string{classKubeName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(actions[2].Matches("list", "clusterserviceplans")).To(BeTrue())
 			Expect(actions[2].(testing.ListAction).GetListRestrictions().Labels).To(ContainElement(*namespacedLabelRequirement))
@@ -352,11 +352,11 @@ var _ = Describe("Plan", func() {
 			Expect(err.Error()).Should(ContainSubstring(namespacedErrorMessage))
 			actions := badClient.Actions()
 			Expect(len(actions)).To(Equal(3))
-			labelRequirement, err :=  labels.NewRequirement(v1beta1.GroupName+"/"+FieldClusterServiceClassRef,"=",[]string{classKubeName})
+			labelRequirement, err := labels.NewRequirement(v1beta1.GroupName+"/"+FieldClusterServiceClassRef, "=", []string{classKubeName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(actions[0].Matches("list", "clusterserviceplans")).To(BeTrue())
 			Expect(actions[0].(testing.ListAction).GetListRestrictions().Labels).To(ContainElement(*labelRequirement))
-			labelNamespacedRequirement, err :=  labels.NewRequirement(v1beta1.GroupName+"/"+FieldServiceClassRef,"=",[]string{classKubeName})
+			labelNamespacedRequirement, err := labels.NewRequirement(v1beta1.GroupName+"/"+FieldServiceClassRef, "=", []string{classKubeName})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(actions[1].Matches("list", "clusterserviceplans")).To(BeTrue())
 			Expect(actions[1].(testing.ListAction).GetListRestrictions().Labels).To(ContainElement(*labelNamespacedRequirement))
