@@ -26,9 +26,9 @@ helm install ${CURRENT_DIR}/../assets/buc-chart.tgz  --name buc --namespace kyma
 echo "- Register Helm Broker in Service Catalog"
 kubectl apply -f  ${CURRENT_DIR}/../assets/helm-broker.yaml
 
+echo "- Scale down controller manager"
+kubectl -n kyma-system scale deploy --replicas=0 catalog-catalog-controller-manager
+
 echo "- Expose Helm Broker to localhost on port 8081"
 export HB_POD_NAME=$(kubectl get po -l app=helm-broker -n kyma-system -o jsonpath='{ .items[*].metadata.name }')
 kubectl port-forward -n kyma-system pod/${HB_POD_NAME} 8081:8080
-
-echo "- Scale down controller manager"
-kubectl -n kyma-system scale deploy --replicas=0 catalog-catalog-controller-manager
