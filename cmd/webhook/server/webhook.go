@@ -64,7 +64,7 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 
 	// setup webhook server
 	webhookSvr := &webhook.Server{
-		Port:    int32(opts.SecureServingOptions.BindPort),
+		Port:    opts.SecureServingOptions.BindPort,
 		CertDir: opts.SecureServingOptions.ServerCert.CertDirectory,
 	}
 

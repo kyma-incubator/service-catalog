@@ -29,17 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-const (
-	// FieldExternalPlanName is the jsonpath to a plan's external name.
-	FieldExternalPlanName = "spec.externalName"
-
-	// FieldClusterServiceClassRef is the jsonpath to a plan's associated class name.
-	FieldClusterServiceClassRef = "spec.clusterServiceClassRef.name"
-
-	// FieldServiceClassRef is the jsonpath to a plan's associated class name.
-	FieldServiceClassRef = "spec.serviceClassRef.name"
-)
-
 // Plan provides a unifying layer of cluster and namespace scoped plan resources.
 type Plan interface {
 
@@ -140,7 +129,7 @@ func (sdk *SDK) RetrievePlanByName(name string, opts ScopeOptions) (Plan, error)
 
 	listOpts := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/" + FieldExternalPlanName: name,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: name,
 		}).String(),
 	}
 
@@ -161,17 +150,17 @@ func (sdk *SDK) RetrievePlanByClassAndName(className, planName string, opts Scop
 	var classRefSet labels.Set
 	if opts.Scope.Matches(ClusterScope) {
 		classRefSet = labels.Set{
-			v1beta1.GroupName + "/" + FieldClusterServiceClassRef: class.GetName(),
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: class.GetName(),
 		}
 	} else {
 		classRefSet = labels.Set{
-			v1beta1.GroupName + "/" + FieldServiceClassRef: class.GetName(),
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: class.GetName(),
 		}
 	}
 	listOpts := metav1.ListOptions{
 		LabelSelector: labels.Merge(classRefSet,
 			labels.Set{
-				v1beta1.GroupName + "/" + FieldExternalPlanName: planName,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: planName,
 			}).String(),
 	}
 
@@ -191,12 +180,12 @@ func (sdk *SDK) RetrievePlanByClassIDAndName(classKubeName, planName string, sco
 	//we run through both of these to support AllScope (i.e. we don't know if its a cluster or namespaced plan)
 	if scopeOpts.Scope.Matches(ClusterScope) {
 		classRefSet = labels.Set{
-			v1beta1.GroupName + "/" + FieldClusterServiceClassRef: classKubeName,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: classKubeName,
 		}
 		listOpts := metav1.ListOptions{
 			LabelSelector: labels.Merge(classRefSet,
 				labels.Set{
-					v1beta1.GroupName + "/" + FieldExternalPlanName: planName,
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: planName,
 				}).String(),
 		}
 
@@ -210,12 +199,12 @@ func (sdk *SDK) RetrievePlanByClassIDAndName(classKubeName, planName string, sco
 	}
 	if scopeOpts.Scope.Matches(NamespaceScope) {
 		classRefSet = labels.Set{
-			v1beta1.GroupName + "/" + FieldServiceClassRef: classKubeName,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: classKubeName,
 		}
 		listOpts := metav1.ListOptions{
 			LabelSelector: labels.Merge(classRefSet,
 				labels.Set{
-					v1beta1.GroupName + "/" + FieldExternalPlanName: planName,
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: planName,
 				}).String(),
 		}
 

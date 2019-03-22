@@ -29,11 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-const (
-	// FieldServicePlanRef is the jsonpath to an instance's plan name (Kubernetes name).
-	LabelServicePlanRef = v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServicePlanRefName
-)
-
 // RetrieveInstances lists all instances in a namespace.
 func (sdk *SDK) RetrieveInstances(ns, classFilter, planFilter string) (*v1beta1.ServiceInstanceList, error) {
 	instances, err := sdk.ServiceCatalog().ServiceInstances(ns).List(v1.ListOptions{})
@@ -89,7 +84,7 @@ func (sdk *SDK) RetrieveInstanceByBinding(b *v1beta1.ServiceBinding,
 func (sdk *SDK) RetrieveInstancesByPlan(plan Plan) ([]v1beta1.ServiceInstance, error) {
 	planOpts := v1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labels.Set{
-			LabelServicePlanRef: plan.GetName(),
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServicePlanRefName: plan.GetName(),
 		}).String(),
 	}
 	instances, err := sdk.ServiceCatalog().ServiceInstances("").List(planOpts)
