@@ -12,7 +12,7 @@ Execute all commands from the cookbook in the `hack` directory.
 Under the hood this script is:
 - creating minikube
 - installing tiller
-- installing Service Catalog [CRDs](./assets/svc-crds.yaml)
+- installing Service Catalog
 - installing Helm Broker
 - installing Binding Usage Controller
 - registering Helm Broker in Service Catalog with http://localhost:8081
@@ -95,9 +95,9 @@ Kyma installed on your cluster but without the ServiceCatalog.
 
 #### Steps
 
-1. Register the Service Catalog CRDs
+1. Install ServiceCatalog chart
 ```bash
-kubectl apply -f ./assets/svc-crds.yaml
+helm install --name catalog --namespace kyma-system  charts/catalog/ --wait
 ```
 
 2. Register Helm Broker
@@ -115,7 +115,13 @@ export HB_POD_NAME=$(kubectl get po -l app=helm-broker -n kyma-system -o jsonpat
 kubectl port-forward -n kyma-system pod/${HB_POD_NAME} 8081:8080
 ```
 
-5. Run the Service Catalog controller-manager
+5. Scale down controller manager 
+
+```bash
+kubectl -n kyma-system scale deploy --replicas=0 catalog-catalog-controller-manager
+```
+
+6. Run the Service Catalog controller-manager
 ```bash
 ./bin/run-controller.sh
 ```
