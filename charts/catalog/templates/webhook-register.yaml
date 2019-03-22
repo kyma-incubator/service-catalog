@@ -114,7 +114,6 @@ webhooks:
     apiVersions: ["v1beta1"]
     resources: ["serviceinstances"]
 ---
-
 apiVersion: v1
 kind: Secret
 metadata:
