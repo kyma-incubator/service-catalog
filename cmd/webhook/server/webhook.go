@@ -75,7 +75,7 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 
 		"/mutating-servicebindings":  &sbmutation.CreateUpdateHandler{},
 		"/mutating-servicebrokers":   &brmutation.CreateUpdateHandler{},
-		"/mutating-serviceclasses":     &scmutation.CreateUpdateHandler{},
+		"/mutating-serviceclasses":   &scmutation.CreateUpdateHandler{},
 		"/mutating-serviceinstances": &simutation.CreateUpdateHandler{},
 		"/mutating-serviceplans":     &spmutation.CreateUpdateHandler{},
 	}
