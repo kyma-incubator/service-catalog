@@ -94,7 +94,7 @@ func (c *controller) reconcileClusterServicePlan(clusterServicePlan *v1beta1.Clu
 
 func (c *controller) findServiceInstancesOnClusterServicePlan(clusterServicePlan *v1beta1.ClusterServicePlan) (*v1beta1.ServiceInstanceList, error) {
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName + "/spec.clusterServicePlanRef.name": clusterServicePlan.Name,
+		v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServicePlanRefName: clusterServicePlan.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{

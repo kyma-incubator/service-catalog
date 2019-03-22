@@ -149,8 +149,8 @@ func newClusterServiceClass(id string, name string) *servicecatalog.ClusterServi
 		ObjectMeta: metav1.ObjectMeta{
 			Name: id,
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.externalID":   id,
-				v1beta1.GroupName + "/spec.externalName": name,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalID:   id,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: name,
 			},
 		},
 		Spec: servicecatalog.ClusterServiceClassSpec{
@@ -169,8 +169,8 @@ func newServiceClass(id string, name string) *servicecatalog.ServiceClass {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: id,
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.externalID":   id,
-				v1beta1.GroupName + "/spec.externalName": name,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalID:   id,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: name,
 			},
 		},
 		Spec: servicecatalog.ServiceClassSpec{
@@ -189,9 +189,9 @@ func newClusterServicePlans(classname string, count uint, useDifferentClasses bo
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "bar-id",
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.externalID":                  "12345",
-				v1beta1.GroupName + "/spec.externalName":                "bar",
-				v1beta1.GroupName + "/spec.clusterServiceClassRef.name": classname,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalID:                 "12345",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "bar",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: classname,
 			},
 		},
 		Spec: servicecatalog.ClusterServicePlanSpec{
@@ -211,9 +211,9 @@ func newClusterServicePlans(classname string, count uint, useDifferentClasses bo
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "baz-id",
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.externalID":                  "23456",
-				v1beta1.GroupName + "/spec.externalName":                "baz",
-				v1beta1.GroupName + "/spec.clusterServiceClassRef.name": classname,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalID:                 "23456",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "baz",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: classname,
 			},
 		},
 		Spec: servicecatalog.ClusterServicePlanSpec{
@@ -245,9 +245,9 @@ func newServicePlans(classname string, count uint, useDifferentClasses bool) []*
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "bar-id",
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.externalID":           "12345",
-				v1beta1.GroupName + "/spec.externalName":         "bar",
-				v1beta1.GroupName + "/spec.serviceClassRef.name": classname,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalID:          "12345",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:        "bar",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: classname,
 			},
 		},
 		Spec: servicecatalog.ServicePlanSpec{
@@ -267,9 +267,9 @@ func newServicePlans(classname string, count uint, useDifferentClasses bool) []*
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "baz-id",
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.externalID":           "23456",
-				v1beta1.GroupName + "/spec.externalName":         "bar",
-				v1beta1.GroupName + "/spec.serviceClassRef.name": classname,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalID:          "23456",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:        "bar",
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: classname,
 			},
 		},
 		Spec: servicecatalog.ServicePlanSpec{

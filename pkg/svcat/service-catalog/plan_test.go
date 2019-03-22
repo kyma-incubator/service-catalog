@@ -49,7 +49,7 @@ var _ = Describe("Plan", func() {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "someclass",
 				Labels: map[string]string{
-					v1beta1.GroupName + "/spec.externalName": "foobar",
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: "foobar",
 				},
 			},
 		}
@@ -57,7 +57,7 @@ var _ = Describe("Plan", func() {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "foobar",
 				Labels: map[string]string{
-					v1beta1.GroupName + "/spec.externalName": "foobar",
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: "foobar",
 				},
 			},
 		}
@@ -65,8 +65,8 @@ var _ = Describe("Plan", func() {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "clusterscopedplan",
 				Labels: map[string]string{
-					v1beta1.GroupName + "/spec.externalName":                "clusterscopedplan",
-					v1beta1.GroupName + "/spec.clusterServiceClassRef.name": csc.Name,
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "clusterscopedplan",
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: csc.Name,
 				},
 			},
 			Spec: v1beta1.ClusterServicePlanSpec{
@@ -78,7 +78,7 @@ var _ = Describe("Plan", func() {
 				Name:      "somenamespacedclass",
 				Namespace: "default",
 				Labels: map[string]string{
-					v1beta1.GroupName + "/spec.externalName": "somenamespacedclass",
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: "somenamespacedclass",
 				},
 			},
 		}
@@ -87,8 +87,8 @@ var _ = Describe("Plan", func() {
 				Name:      "foobar",
 				Namespace: sc.Namespace,
 				Labels: map[string]string{
-					v1beta1.GroupName + "/spec.externalName":         "foobar",
-					v1beta1.GroupName + "/spec.serviceClassRef.name": sc.Name,
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:        "foobar",
+					v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: sc.Name,
 				},
 			},
 			Spec: v1beta1.ServicePlanSpec{

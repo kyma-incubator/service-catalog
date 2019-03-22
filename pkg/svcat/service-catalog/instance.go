@@ -31,7 +31,7 @@ import (
 
 const (
 	// FieldServicePlanRef is the jsonpath to an instance's plan name (Kubernetes name).
-	FieldServicePlanRef = v1beta1.GroupName + "/spec.clusterServicePlanRef.name"
+	LabelServicePlanRef = v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServicePlanRefName
 )
 
 // RetrieveInstances lists all instances in a namespace.
@@ -89,7 +89,7 @@ func (sdk *SDK) RetrieveInstanceByBinding(b *v1beta1.ServiceBinding,
 func (sdk *SDK) RetrieveInstancesByPlan(plan Plan) ([]v1beta1.ServiceInstance, error) {
 	planOpts := v1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labels.Set{
-			FieldServicePlanRef: plan.GetName(),
+			LabelServicePlanRef: plan.GetName(),
 		}).String(),
 	}
 	instances, err := sdk.ServiceCatalog().ServiceInstances("").List(planOpts)

@@ -93,8 +93,8 @@ func (h *CreateUpdateHandler) syncLabels(obj *sc.ClusterServicePlan) {
 		obj.Labels = make(map[string]string)
 	}
 
-	obj.Labels[sc.GroupName+"/spec.externalID"] = obj.Spec.ExternalID
-	obj.Labels[sc.GroupName+"/spec.externalName"] = obj.Spec.ExternalName
-	obj.Labels[sc.GroupName+"/spec.clusterServiceClassRef.name"] = obj.Spec.ClusterServiceClassRef.Name
-	obj.Labels[sc.GroupName+"/spec.clusterServiceBrokerName"] = obj.Spec.ClusterServiceBrokerName
+	obj.Labels[sc.GroupName+"/"+sc.FilterSpecExternalID] = obj.Spec.ExternalID
+	obj.Labels[sc.GroupName+"/"+sc.FilterSpecExternalName] = obj.Spec.ExternalName
+	obj.Labels[sc.GroupName+"/"+sc.FilterSpecClusterServiceClassRefName] = obj.Spec.ClusterServiceClassRef.Name
+	obj.Labels[sc.GroupName+"/"+sc.FilterSpecClusterServiceBrokerName] = obj.Spec.ClusterServiceBrokerName
 }

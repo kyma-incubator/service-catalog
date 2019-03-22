@@ -107,9 +107,9 @@ func getTestServiceClass() *v1beta1.ServiceClass {
 			Name:      testServiceClassGUID,
 			Namespace: testNamespace,
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.serviceClassRef.name": testServiceClassGUID,
-				v1beta1.GroupName + "/spec.externalName":         testServiceClassName,
-				v1beta1.GroupName + "/spec.serviceBrokerName":    testServiceBrokerName,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: testServiceClassGUID,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:        testServiceClassName,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceBrokerName:   testServiceBrokerName,
 			},
 		},
 		Spec: v1beta1.ServiceClassSpec{
@@ -133,10 +133,10 @@ func getTestServicePlan() *v1beta1.ServicePlan {
 			Name:      testServicePlanGUID,
 			Namespace: testNamespace,
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.servicePlanRef.name":  testServicePlanGUID,
-				v1beta1.GroupName + "/spec.externalName":         testServicePlanName,
-				v1beta1.GroupName + "/spec.serviceBrokerName":    testServiceBrokerName,
-				v1beta1.GroupName + "/spec.serviceClassRef.name": testServiceClassGUID,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecServicePlanRefName:  testServicePlanGUID,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:        testServicePlanName,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceBrokerName:   testServiceBrokerName,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: testServiceClassGUID,
 			},
 		},
 		Spec: v1beta1.ServicePlanSpec{
@@ -156,10 +156,6 @@ func getTestServiceInstanceWithNamespacedPlanReference() *v1beta1.ServiceInstanc
 			Name:       testServiceInstanceName,
 			Namespace:  testNamespace,
 			Generation: 1,
-			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.serviceClassExternalName": testServiceClassName,
-				v1beta1.GroupName + "/spec.servicePlanExternalName":  testServicePlanName,
-			},
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{

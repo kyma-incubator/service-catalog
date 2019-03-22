@@ -1495,9 +1495,9 @@ func (c *controller) resolveClusterServicePlanRef(instance *v1beta1.ServiceInsta
 		}
 	} else {
 		labelSelector := labels.SelectorFromSet(labels.Set{
-			instance.Spec.GetClusterServicePlanFilterLabelName():    instance.Spec.GetSpecifiedClusterServicePlan(),
-			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": instance.Spec.ClusterServiceClassRef.Name,
-			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    brokerName,
+			instance.Spec.GetClusterServicePlanFilterLabelName():                   instance.Spec.GetSpecifiedClusterServicePlan(),
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: instance.Spec.ClusterServiceClassRef.Name,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   brokerName,
 		}).String()
 
 		listOpts := metav1.ListOptions{
@@ -1555,9 +1555,9 @@ func (c *controller) resolveServicePlanRef(instance *v1beta1.ServiceInstance, br
 		}
 	} else {
 		labelSelector := labels.SelectorFromSet(labels.Set{
-			instance.Spec.GetServicePlanFilterLabelName():    instance.Spec.GetSpecifiedServicePlan(),
-			v1beta1.GroupName + "/spec.serviceClassRef.name": instance.Spec.ServiceClassRef.Name,
-			v1beta1.GroupName + "/spec.serviceBrokerName":    brokerName,
+			instance.Spec.GetServicePlanFilterLabelName():                   instance.Spec.GetSpecifiedServicePlan(),
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: instance.Spec.ServiceClassRef.Name,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceBrokerName:   brokerName,
 		}).String()
 
 		listOpts := metav1.ListOptions{

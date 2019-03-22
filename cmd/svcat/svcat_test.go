@@ -91,7 +91,7 @@ func TestGetSvcatWithNamespacedBrokerFeatureDisabled(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "my-cluster-class",
 						Labels: map[string]string{
-							v1beta1.GroupName + "/spec.externalName": "my-cluster-class",
+							v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: "my-cluster-class",
 						},
 					},
 					Spec: v1beta1.ClusterServiceClassSpec{
@@ -104,7 +104,7 @@ func TestGetSvcatWithNamespacedBrokerFeatureDisabled(t *testing.T) {
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "my-cluster-plan",
 						Labels: map[string]string{
-							v1beta1.GroupName + "/spec.externalName": "my-cluster-plan",
+							v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: "my-cluster-plan",
 						},
 					},
 					Spec: v1beta1.ClusterServicePlanSpec{

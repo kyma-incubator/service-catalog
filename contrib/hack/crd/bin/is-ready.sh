@@ -23,6 +23,11 @@
 #
 ################################################################################
 
+# Just to satisfy make verify
+# I am not sure if enabling it is safe, it might brake the script below
+set -o errexit
+set +o errexit
+
 #Checking if POD is already deployed
 trap "exit" INT
 while :

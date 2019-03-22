@@ -317,7 +317,7 @@ func (d *defaultServicePlan) getServiceClassByField(a admission.Attributes, ref 
 func (d *defaultServicePlan) getClusterServicePlansByClusterServiceClassName(scName string) ([]servicecatalog.ClusterServicePlan, error) {
 	klog.V(4).Infof("Fetching ClusterServicePlans by class name %q", scName)
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName + "/spec.clusterServiceClassRef.name": scName,
+		v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: scName,
 	}).String()
 
 	listOpts := apimachineryv1.ListOptions{
@@ -338,7 +338,7 @@ func (d *defaultServicePlan) getClusterServicePlansByClusterServiceClassName(scN
 func (d *defaultServicePlan) getServicePlansByServiceClassName(scName string) ([]servicecatalog.ServicePlan, error) {
 	klog.V(4).Infof("Fetching ServicePlans by class name %q", scName)
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName + "/spec.serviceClassRef.name": scName,
+		v1beta1.GroupName + "/" + v1beta1.FilterSpecServiceClassRefName: scName,
 	}).String()
 
 	listOpts := apimachineryv1.ListOptions{

@@ -60,7 +60,7 @@ func TestReconcileClusterServicePlanRemovedFromCatalog(t *testing.T) {
 			catalogActionsCheckFunc: func(t *testing.T, actions []clientgotesting.Action) {
 				listRestrictions := clientgotesting.ListRestrictions{
 					Labels: labels.SelectorFromSet(labels.Set{
-						v1beta1.GroupName + "/spec.clusterServicePlanRef.name": "cspguid",
+						v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServicePlanRefName: "cspguid",
 					}),
 					Fields: fields.Everything(),
 				}
@@ -77,7 +77,7 @@ func TestReconcileClusterServicePlanRemovedFromCatalog(t *testing.T) {
 			catalogActionsCheckFunc: func(t *testing.T, actions []clientgotesting.Action) {
 				listRestrictions := clientgotesting.ListRestrictions{
 					Labels: labels.SelectorFromSet(labels.Set{
-						v1beta1.GroupName + "/spec.clusterServicePlanRef.name": "cspguid",
+						v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServicePlanRefName: "cspguid",
 					}),
 					Fields: fields.Everything(),
 				}
@@ -101,7 +101,7 @@ func TestReconcileClusterServicePlanRemovedFromCatalog(t *testing.T) {
 			catalogActionsCheckFunc: func(t *testing.T, actions []clientgotesting.Action) {
 				listRestrictions := clientgotesting.ListRestrictions{
 					Labels: labels.SelectorFromSet(labels.Set{
-						v1beta1.GroupName + "/spec.clusterServicePlanRef.name": "cspguid",
+						v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServicePlanRefName: "cspguid",
 					}),
 					Fields: fields.Everything(),
 				}

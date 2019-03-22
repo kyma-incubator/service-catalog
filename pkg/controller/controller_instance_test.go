@@ -132,7 +132,7 @@ func TestReconcileServiceInstanceNonExistentClusterServiceClass(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName": instance.Spec.ClusterServiceClassExternalName,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: instance.Spec.ClusterServiceClassExternalName,
 		}),
 		Fields: fields.Everything(),
 	}
@@ -324,9 +324,9 @@ func TestReconcileServiceInstanceNonExistentClusterServicePlan(t *testing.T) {
 	assertNumberOfActions(t, actions, 2)
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName":                "nothere",
-			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    "test-clusterservicebroker",
-			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": "cscguid",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "nothere",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   "test-clusterservicebroker",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: "cscguid",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -807,7 +807,7 @@ func TestReconcileServiceInstanceResolvesReferences(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName": instance.Spec.ClusterServiceClassExternalName,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: instance.Spec.ClusterServiceClassExternalName,
 		}),
 		Fields: fields.Everything(),
 	}
@@ -815,9 +815,9 @@ func TestReconcileServiceInstanceResolvesReferences(t *testing.T) {
 
 	listRestrictions = clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName":                "test-clusterserviceplan",
-			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    "test-clusterservicebroker",
-			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": "cscguid",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "test-clusterserviceplan",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   "test-clusterservicebroker",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: "cscguid",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -1017,9 +1017,9 @@ func TestReconcileServiceInstanceResolvesReferencesClusterServiceClassRefAlready
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName":                "test-clusterserviceplan",
-			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    "test-clusterservicebroker",
-			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": "cscguid",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "test-clusterserviceplan",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   "test-clusterservicebroker",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: "cscguid",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -4633,7 +4633,7 @@ func TestResolveReferencesNoClusterServiceClass(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName": instance.Spec.ClusterServiceClassExternalName,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: instance.Spec.ClusterServiceClassExternalName,
 		}),
 		Fields: fields.Everything(),
 	}
@@ -4922,7 +4922,7 @@ func TestResolveReferencesNoClusterServicePlan(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName": instance.Spec.ClusterServiceClassExternalName,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: instance.Spec.ClusterServiceClassExternalName,
 		}),
 		Fields: fields.Everything(),
 	}
@@ -4930,9 +4930,9 @@ func TestResolveReferencesNoClusterServicePlan(t *testing.T) {
 
 	listRestrictions = clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName":                "test-clusterserviceplan",
-			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    "test-clusterservicebroker",
-			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": "cscguid",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "test-clusterserviceplan",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   "test-clusterservicebroker",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: "cscguid",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -5425,7 +5425,7 @@ func TestResolveReferencesWorks(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName": instance.Spec.ClusterServiceClassExternalName,
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName: instance.Spec.ClusterServiceClassExternalName,
 		}),
 		Fields: fields.Everything(),
 	}
@@ -5433,9 +5433,9 @@ func TestResolveReferencesWorks(t *testing.T) {
 
 	listRestrictions = clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName":                "test-clusterserviceplan",
-			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    "test-clusterservicebroker",
-			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": "cscguid",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "test-clusterserviceplan",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   "test-clusterservicebroker",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: "cscguid",
 		}),
 		Fields: fields.Everything(),
 	}
@@ -5478,9 +5478,9 @@ func TestResolveReferencesForPlanChange(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: newPlanID,
 			Labels: map[string]string{
-				v1beta1.GroupName + "/spec.externalName":                newPlanName,
-				v1beta1.GroupName + "/spec.clusterServiceBrokerName":    testClusterServiceBrokerName,
-				v1beta1.GroupName + "/spec.clusterServiceClassRef.name": testClusterServiceClassGUID,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               newPlanName,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   testClusterServiceBrokerName,
+				v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: testClusterServiceClassGUID,
 			},
 		},
 		Spec: v1beta1.ClusterServicePlanSpec{
@@ -5517,9 +5517,9 @@ func TestResolveReferencesForPlanChange(t *testing.T) {
 
 	listRestrictions := clientgotesting.ListRestrictions{
 		Labels: labels.SelectorFromSet(labels.Set{
-			v1beta1.GroupName + "/spec.externalName":                "new-plan-name",
-			v1beta1.GroupName + "/spec.clusterServiceBrokerName":    "test-clusterservicebroker",
-			v1beta1.GroupName + "/spec.clusterServiceClassRef.name": "cscguid",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecExternalName:               "new-plan-name",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName:   "test-clusterservicebroker",
+			v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceClassRefName: "cscguid",
 		}),
 		Fields: fields.Everything(),
 	}

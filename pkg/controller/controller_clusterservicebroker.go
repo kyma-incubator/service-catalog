@@ -721,7 +721,7 @@ func (c *controller) getCurrentServiceClassesAndPlansForBroker(broker *v1beta1.C
 	pcb := pretty.NewClusterServiceBrokerContextBuilder(broker)
 
 	labelSelector := labels.SelectorFromSet(labels.Set{
-		v1beta1.GroupName + "/spec.clusterServiceBrokerName": broker.Name,
+		v1beta1.GroupName + "/" + v1beta1.FilterSpecClusterServiceBrokerName: broker.Name,
 	}).String()
 
 	listOpts := metav1.ListOptions{
