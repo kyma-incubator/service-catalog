@@ -96,5 +96,5 @@ func (h *CreateUpdateHandler) syncLabels(obj *sc.ServicePlan) {
 	obj.Labels[sc.GroupName+"/"+sc.FilterSpecExternalID] = obj.Spec.ExternalID
 	obj.Labels[sc.GroupName+"/"+sc.FilterSpecExternalName] = obj.Spec.ExternalName
 	obj.Labels[sc.GroupName+"/"+sc.FilterSpecServiceClassRefName] = obj.Spec.ServiceClassRef.Name
-	obj.Labels[sc.GroupName+"/"+sc.FilterSpecClusterServiceBrokerName] = obj.Spec.ServiceBrokerName
+	obj.Labels[sc.GroupName+"/"+sc.FilterSpecServiceBrokerName] = obj.Spec.ServiceBrokerName
 }
