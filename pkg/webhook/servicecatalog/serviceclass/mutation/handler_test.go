@@ -22,7 +22,7 @@ import (
 
 	"github.com/appscode/jsonpatch"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebroker/mutation"
+	"github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceclass/mutation"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil/tester"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,55 +39,28 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 
 		expPatches []jsonpatch.Operation
 	}{
-		"Should set all default fields": {
+		"Should copy spec fields to labels": {
 			givenRawObj: []byte(`{
   				"apiVersion": "servicecatalog.k8s.io/v1beta1",
-  				"kind": "ServiceBroker",
+  				"kind": "ServiceClass",
   				"metadata": {
   				  "creationTimestamp": null,
-  				  "name": "test-broker"
+  				  "name": "test-service-class"
   				},
   				"spec": {
-				  "relistRequests": 1,
-  				  "url": "http://localhost:8081/"
+                  "externalID": "id",
+                  "externalName": "name",
+                  "serviceBrokerName": "broker"
   				}
 			}`),
 			expPatches: []jsonpatch.Operation{
 				{
 					Operation: "add",
-					Path:      "/metadata/finalizers",
-					Value: []interface{}{
-						"kubernetes-incubator/service-catalog",
-					},
-				},
-				{
-					Operation: "add",
-					Path:      "/spec/relistBehavior",
-					Value:     "Duration",
-				},
-			},
-		},
-		"Should omit relistBehavior if it's already set": {
-			givenRawObj: []byte(`{
-  				"apiVersion": "servicecatalog.k8s.io/v1beta1",
-  				"kind": "ServiceBroker",
-  				"metadata": {
-  				  "creationTimestamp": null,
-  				  "name": "test-broker"
-  				},
-  				"spec": {
-				  "relistRequests": 1,
-				  "relistBehavior": "Manual",
-  				  "url": "http://localhost:8081/"
-  				}
-			}`),
-			expPatches: []jsonpatch.Operation{
-				{
-					Operation: "add",
-					Path:      "/metadata/finalizers",
-					Value: []interface{}{
-						"kubernetes-incubator/service-catalog",
-					},
+					Path:      "/metadata/labels",
+					Value: map[string]interface{}{
+						sc.GroupName+"/"+sc.FilterSpecExternalID : "id",
+						sc.GroupName+"/"+sc.FilterSpecExternalName : "name",
+						sc.GroupName+"/"+sc.FilterSpecServiceBrokerName : "broker"					},
 				},
 			},
 		},
@@ -103,10 +76,10 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 			fixReq := admission.Request{
 				AdmissionRequest: admissionv1beta1.AdmissionRequest{
 					Operation: admissionv1beta1.Create,
-					Name:      "test-broker",
+					Name:      "test-service-class",
 					Namespace: "system",
 					Kind: metav1.GroupVersionKind{
-						Kind:    "ServiceBroker",
+						Kind:    "ServiceClass",
 						Version: "v1beta1",
 						Group:   "servicecatalog.k8s.io",
 					},
@@ -116,7 +89,6 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 
 			handler := mutation.CreateUpdateHandler{}
 			handler.InjectDecoder(decoder)
-
 			// when
 			resp := handler.Handle(context.Background(), fixReq)
 
@@ -128,7 +100,6 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 			// filtering out status cause k8s api-server will discard this too
 			patches := tester.FilterOutStatusPatch(resp.Patches)
 
-			require.Len(t, patches, len(tc.expPatches))
 			for _, expPatch := range tc.expPatches {
 				assert.Contains(t, patches, expPatch)
 			}
@@ -142,6 +113,6 @@ func TestCreateUpdateHandlerHandleDecoderErrors(t *testing.T) {
 		tester.TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch,
 	} {
 		handler := mutation.CreateUpdateHandler{}
-		fn(t, &handler, "ServiceBroker")
+		fn(t, &handler, "ServiceClass")
 	}
 }
