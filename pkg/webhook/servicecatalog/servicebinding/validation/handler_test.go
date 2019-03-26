@@ -2,7 +2,6 @@ package validation_test
 
 import (
 	"context"
-	SchemeBuilder "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebinding/validation"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +21,7 @@ const (
 	OUT_OF_DATE_INSTANCE = "out-of-date-instance"
 )
 
-func TestValidationHandler_HandleAllowed(t *testing.T) {
+func TestAdmissionHandler_HandleAllowed(t *testing.T) {
 	//Given
 	namespace := "test-handler"
 	err := sc.AddToScheme(scheme.Scheme)
@@ -57,7 +56,7 @@ func TestValidationHandler_HandleAllowed(t *testing.T) {
 		},
 	}
 
-	sch, err := SchemeBuilder.SchemeBuilderRuntime.Build()
+	sch, err := sc.SchemeBuilderRuntime.Build()
 	require.NoError(t, err)
 
 	decoder, err := admission.NewDecoder(sch)
@@ -66,24 +65,21 @@ func TestValidationHandler_HandleAllowed(t *testing.T) {
 	tests := map[string]struct {
 		operation       admissionv1beta1.Operation
 		instanceRefName string
-		responseAllowed bool
 	}{
-		"Request for Create should be allowed": {
+		"Request for Create ServiceBinding should be allowed": {
 			admissionv1beta1.Create,
 			UP_TO_DATE_INSTANCE,
-			true,
 		},
-		"Request for Update should be allowed": {
+		"Request for Update ServiceBinding should be allowed": {
 			admissionv1beta1.Update,
 			UP_TO_DATE_INSTANCE,
-			true,
 		},
 	}
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
 			// Given
-			handler := &validation.ValidationHandler{}
+			handler := &validation.AdmissionHandler{}
 
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ServiceInstance{
 				ObjectMeta: metav1.ObjectMeta{
@@ -103,12 +99,12 @@ func TestValidationHandler_HandleAllowed(t *testing.T) {
 			response := handler.Handle(context.TODO(), request)
 
 			// Then
-			assert.Equal(t, response.AdmissionResponse.Allowed, test.responseAllowed)
+			assert.True(t, response.AdmissionResponse.Allowed)
 		})
 	}
 }
 
-func TestValidationHandler_HandleDenied(t *testing.T) {
+func TestAdmissionHandler_HandleDenied(t *testing.T) {
 	//Given
 	namespace := "test-handler"
 	err := sc.AddToScheme(scheme.Scheme)
@@ -143,7 +139,7 @@ func TestValidationHandler_HandleDenied(t *testing.T) {
 		},
 	}
 
-	sch, err := SchemeBuilder.SchemeBuilderRuntime.Build()
+	sch, err := sc.SchemeBuilderRuntime.Build()
 	require.NoError(t, err)
 
 	decoder, err := admission.NewDecoder(sch)
@@ -152,24 +148,21 @@ func TestValidationHandler_HandleDenied(t *testing.T) {
 	tests := map[string]struct {
 		operation       admissionv1beta1.Operation
 		instanceRefName string
-		responseAllowed bool
 	}{
-		"Request for Create should be denied": {
+		"Request for Create ServiceBinding should be denied": {
 			admissionv1beta1.Create,
 			OUT_OF_DATE_INSTANCE,
-			false,
 		},
-		"Request for Update should be denied": {
+		"Request for Update ServiceBinding should be denied": {
 			admissionv1beta1.Update,
 			OUT_OF_DATE_INSTANCE,
-			false,
 		},
 	}
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
 			// Given
-			handler := &validation.ValidationHandler{}
+			handler := &validation.AdmissionHandler{}
 
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ServiceInstance{
 				ObjectMeta: metav1.ObjectMeta{
@@ -190,7 +183,7 @@ func TestValidationHandler_HandleDenied(t *testing.T) {
 			response := handler.Handle(context.TODO(), request)
 
 			// Then
-			assert.Equal(t, response.AdmissionResponse.Allowed, test.responseAllowed)
+			assert.False(t, response.AdmissionResponse.Allowed)
 		})
 	}
 }

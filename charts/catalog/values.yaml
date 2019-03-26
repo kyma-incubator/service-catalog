@@ -3,7 +3,7 @@
 image: eu.gcr.io/kyma-project/develop/service-catalog/service-catalog-amd64:crd-0.0.3
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
-imagePullPolicy: IfNotPresent
+imagePullPolicy: Always
 ## If true, create & use RBAC resources
 ##
 rbacEnable: true
