@@ -33,6 +33,8 @@ import (
 
 	sivalidation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/validation"
 
+	sbvalidation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebinding/validation"
+
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/server/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -82,6 +84,8 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		"/mutating-serviceinstances": simutation.New(),
 
 		"/validating-serviceinstances": sivalidation.NewAdmissionHandler(),
+
+		"/validating-servicebindings": &sbvalidation.ValidationHandler{},
 	}
 
 	for path, handler := range webhooks {
