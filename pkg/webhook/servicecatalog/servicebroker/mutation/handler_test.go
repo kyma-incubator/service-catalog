@@ -137,7 +137,7 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 }
 
 func TestCreateUpdateHandlerHandleDecoderErrors(t *testing.T) {
-	for _, fn := range []func(t *testing.T, handler tester.TestDecoderHandler, kind string) {
+	for _, fn := range []func(t *testing.T, handler tester.TestDecoderHandler, kind string){
 		tester.TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed,
 		tester.TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch,
 	} {

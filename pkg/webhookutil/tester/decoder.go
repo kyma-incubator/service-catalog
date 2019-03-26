@@ -32,11 +32,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-type  TestDecoderHandler interface {
+type TestDecoderHandler interface {
 	InjectDecoder(d *admission.Decoder) error
 	Handle(ctx context.Context, req admission.Request) admission.Response
 }
-
 
 func TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed(t *testing.T, handler TestDecoderHandler, kind string) {
 	// given
@@ -73,7 +72,6 @@ func TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed(t *testing.T, h
 	assert.Equal(t, expReqResult, resp.Result)
 }
 
-
 func TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch(t *testing.T, handler TestDecoderHandler, kind string) {
 	// given
 	sc.AddToScheme(scheme.Scheme)
@@ -86,7 +84,7 @@ func TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch(t *testing.T, handler
 			Name:      "test-name",
 			Namespace: "system",
 			Kind: metav1.GroupVersionKind{
-				Kind:    "Incorrect"+kind,
+				Kind:    "Incorrect" + kind,
 				Version: "v1beta1",
 				Group:   "servicecatalog.k8s.io",
 			},

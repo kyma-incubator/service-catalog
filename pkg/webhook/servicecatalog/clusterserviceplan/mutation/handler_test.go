@@ -59,10 +59,10 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 					Operation: "add",
 					Path:      "/metadata/labels",
 					Value: map[string]interface{}{
-						sc.GroupName + "/" + sc.FilterSpecExternalID:        "id",
-						sc.GroupName + "/" + sc.FilterSpecExternalName:      "name",
-						sc.GroupName + "/" + sc.FilterSpecClusterServiceBrokerName: "broker",
-						sc.GroupName + "/" + sc.FilterSpecClusterServiceClassRefName:  "refbroker",
+						sc.GroupName + "/" + sc.FilterSpecExternalID:                 "id",
+						sc.GroupName + "/" + sc.FilterSpecExternalName:               "name",
+						sc.GroupName + "/" + sc.FilterSpecClusterServiceBrokerName:   "broker",
+						sc.GroupName + "/" + sc.FilterSpecClusterServiceClassRefName: "refbroker",
 					},
 				},
 			},
@@ -111,7 +111,7 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 }
 
 func TestCreateUpdateHandlerHandleDecoderErrors(t *testing.T) {
-	for _, fn := range []func(t *testing.T, handler tester.TestDecoderHandler, kind string) {
+	for _, fn := range []func(t *testing.T, handler tester.TestDecoderHandler, kind string){
 		tester.TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed,
 		tester.TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch,
 	} {
