@@ -44,7 +44,6 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
   				"apiVersion": "servicecatalog.k8s.io/v1beta1",
   				"kind": "ServicePlan",
   				"metadata": {
-  				  "creationTimestamp": null,
   				  "name": "test-service-plan"
   				},
   				"spec": {
@@ -102,20 +101,19 @@ func TestCreateUpdateHandlerHandleCreateSuccess(t *testing.T) {
 			require.NotNil(t, resp.PatchType)
 			assert.Equal(t, admissionv1beta1.PatchTypeJSONPatch, *resp.PatchType)
 
-			// filtering out status cause k8s api-server will discard this too
-			patches := tester.FilterOutStatusPatch(resp.Patches)
-
 			for _, expPatch := range tc.expPatches {
-				assert.Contains(t, patches, expPatch)
+				assert.Contains(t, resp.Patches, expPatch)
 			}
 		})
 	}
 }
 
 func TestCreateUpdateHandlerHandleDecoderErrors(t *testing.T) {
+	tester.DiscardLoggedMsg()
+
 	for _, fn := range []func(t *testing.T, handler tester.TestDecoderHandler, kind string){
-		tester.TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed,
-		tester.TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch,
+		tester.AssertHandlerReturnErrorIfReqObjIsMalformed,
+		tester.AssertHandlerReturnErrorIfGVKMismatch,
 	} {
 		handler := mutation.CreateUpdateHandler{}
 		fn(t, &handler, "ServicePlan")
