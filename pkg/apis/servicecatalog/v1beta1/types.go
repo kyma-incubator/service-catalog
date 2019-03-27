@@ -1492,3 +1492,7 @@ type RemoveKeyTransform struct {
 	// The key to remove from the Secret
 	Key string `json:"key"`
 }
+
+func init() {
+	SchemeBuilderRuntime.Register(&ServiceBinding{}, &ServiceInstance{})
+}
