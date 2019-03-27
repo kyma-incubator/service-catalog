@@ -243,9 +243,11 @@ func TestCreateUpdateHandlerHandleSetUserInfoIfOriginatingIdentityIsEnabled(t *t
 }
 
 func TestCreateUpdateHandlerHandleDecoderErrors(t *testing.T) {
+	tester.DiscardLoggedMsg()
+
 	for _, fn := range []func(t *testing.T, handler tester.TestDecoderHandler, kind string){
-		tester.TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed,
-		tester.TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch,
+		tester.AssertHandlerReturnErrorIfReqObjIsMalformed,
+		tester.AssertHandlerReturnErrorIfGVKMismatch,
 	} {
 		handler := mutation.CreateUpdateHandler{}
 		fn(t, &handler, "ServiceBinding")

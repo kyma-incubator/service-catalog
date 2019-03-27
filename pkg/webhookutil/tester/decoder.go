@@ -18,7 +18,10 @@ package tester
 
 import (
 	"context"
+	"flag"
 	"fmt"
+	"io/ioutil"
+	"k8s.io/klog"
 	"net/http"
 	"testing"
 
@@ -32,12 +35,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+//TestDecoderHandler represents a handler with a decoder
 type TestDecoderHandler interface {
 	InjectDecoder(d *admission.Decoder) error
 	Handle(ctx context.Context, req admission.Request) admission.Response
 }
 
-func TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed(t *testing.T, handler TestDecoderHandler, kind string) {
+// AssertHandlerReturnErrorIfReqObjIsMalformed checks error handling of malformed requests
+func AssertHandlerReturnErrorIfReqObjIsMalformed(t *testing.T, handler TestDecoderHandler, kind string) {
 	// given
 	sc.AddToScheme(scheme.Scheme)
 	decoder, err := admission.NewDecoder(scheme.Scheme)
@@ -72,7 +77,8 @@ func TestCreateUpdateHandlerHandleReturnErrorIfReqObjIsMalformed(t *testing.T, h
 	assert.Equal(t, expReqResult, resp.Result)
 }
 
-func TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch(t *testing.T, handler TestDecoderHandler, kind string) {
+// AssertHandlerReturnErrorIfGVKMismatch checks error handling when wrong type of object is passed
+func AssertHandlerReturnErrorIfGVKMismatch(t *testing.T, handler TestDecoderHandler, kind string) {
 	// given
 	sc.AddToScheme(scheme.Scheme)
 	decoder, err := admission.NewDecoder(scheme.Scheme)
@@ -104,4 +110,14 @@ func TestCreateUpdateHandlerHandleReturnErrorIfGVKMismatch(t *testing.T, handler
 	// then
 	assert.False(t, resp.Allowed)
 	assert.Equal(t, expReqResult, resp.Result)
+}
+
+// DiscardLoggedMsg turns off log messages
+func DiscardLoggedMsg() {
+	klog.InitFlags(nil)
+	flag.Set("logtostderr", "false")
+	flag.Set("alsologtostderr", "false")
+	flag.Set("stderrthreshold", "999")
+	flag.Parse()
+	klog.SetOutput(ioutil.Discard)
 }
