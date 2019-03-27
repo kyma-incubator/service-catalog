@@ -22,6 +22,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
 // GroupName is the group name use in this package
@@ -45,6 +47,9 @@ var (
 	// the code-generation can find it.
 	SchemeBuilder      = runtime.NewSchemeBuilder(addKnownTypes, addDefaultingFuncs)
 	localSchemeBuilder = &SchemeBuilder
+
+	SchemeBuilderRuntime = &scheme.Builder{GroupVersion: SchemeGroupVersion, SchemeBuilder: SchemeBuilder}
+
 	// AddToScheme is exposed for API installation
 	AddToScheme = SchemeBuilder.AddToScheme
 

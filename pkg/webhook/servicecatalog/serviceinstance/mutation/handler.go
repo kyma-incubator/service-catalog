@@ -24,16 +24,20 @@ import (
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scfeatures "github.com/kubernetes-incubator/service-catalog/pkg/features"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
+	"github.com/pkg/errors"
 
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // CreateUpdateHandler handles ServiceInstance
 type CreateUpdateHandler struct {
 	decoder *admission.Decoder
 	UUID    webhookutil.UUIDGenerator
+	client  client.Client
 }
 
 var _ admission.Handler = &CreateUpdateHandler{}
@@ -63,6 +67,19 @@ func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request)
 	default:
 		traced.Infof("ServiceInstance mutation wehbook does not support action %q", req.Operation)
 		return admission.Allowed("action not taken")
+	}
+
+	// If the plan is specified, let it through and have the controller
+	// deal with finding the right plan, etc.
+	defaultPlanHandler := DefaultServicePlan{
+		Ctx:      ctx,
+		Instance: mutated,
+		Client:   h.client,
+	}
+
+	dspErr := defaultPlanHandler.HandleDefaultPlan()
+	if dspErr != nil {
+		return admission.Errored(dspErr.Code(), errors.New(dspErr.Error()))
 	}
 
 	rawMutated, err := json.Marshal(mutated)
@@ -114,4 +131,9 @@ func setServiceInstanceUserInfo(req admission.Request, instance *sc.ServiceInsta
 			instance.Spec.UserInfo.Extra[k] = sc.ExtraValue(v)
 		}
 	}
+}
+
+func (h *CreateUpdateHandler) InjectClient(c client.Client) error {
+	h.client = c
+	return nil
 }
