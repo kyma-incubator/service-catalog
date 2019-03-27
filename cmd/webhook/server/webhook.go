@@ -81,7 +81,7 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		"/mutating-serviceinstances": &simutation.CreateUpdateHandler{},
 		"/mutating-serviceplans":     &spmutation.CreateUpdateHandler{},
 
-		"/validating-serviceinstances": &sivalidation.ValidationHandler{},
+		"/validating-serviceinstances": &sivalidation.AdmissionHandler{},
 	}
 
 	for path, handler := range webhooks {

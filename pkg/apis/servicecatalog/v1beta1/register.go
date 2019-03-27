@@ -48,6 +48,7 @@ var (
 	// AddToScheme is exposed for API installation
 	AddToScheme = SchemeBuilder.AddToScheme
 
+	//SchemeBuilderRuntime maps go types to Kubernetes GroupVersionKinds.
 	SchemeBuilderRuntime = &scheme.Builder{GroupVersion: SchemeGroupVersion}
 )
 

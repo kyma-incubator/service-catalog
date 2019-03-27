@@ -1494,5 +1494,5 @@ type RemoveKeyTransform struct {
 }
 
 func init() {
-	SchemeBuilderRuntime.Register(&ServiceBinding{}, &ServiceInstance{})
+	SchemeBuilderRuntime.Register(&ServiceBinding{}, &ServiceInstance{}, &ClusterServiceClass{})
 }
