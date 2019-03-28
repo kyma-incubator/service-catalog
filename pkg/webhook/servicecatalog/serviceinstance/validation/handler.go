@@ -73,13 +73,13 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 				errs = append(errs, err)
 			}
 		}
-	}else if req.Operation == admissionTypes.Update && h.UpdateValidators != nil {
+	} else if req.Operation == admissionTypes.Update && h.UpdateValidators != nil {
 		for _, fn := range h.UpdateValidators {
 			if err := fn(ctx, req, si, traced); err != nil {
 				errs = append(errs, err)
 			}
 		}
-	}else{
+	} else {
 		traced.Infof("ServiceInstance AdmissionHandler wehbook does not support action %q", req.Operation)
 		return admission.Allowed("action not taken")
 	}

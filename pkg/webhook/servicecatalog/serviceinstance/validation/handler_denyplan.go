@@ -27,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-
 // DenyPlanChangeIfNotUpdatable checks if Plan can be changed
 func (h *AdmissionHandler) DenyPlanChangeIfNotUpdatable(ctx context.Context, req admission.Request, si *sc.ServiceInstance, traced *webhookutil.TracedLogger) error {
 
