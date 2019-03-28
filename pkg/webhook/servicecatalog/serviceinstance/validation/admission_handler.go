@@ -18,9 +18,6 @@ package validation
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -33,26 +30,25 @@ import (
 	strings "strings"
 )
 
-type CreateValidator interface {
-	Validate(ctx context.Context, cli client.Client, si *sc.ServiceInstance) error
-}
-
-type UpdateValidator interface {
-	Validate(ctx context.Context, cli client.Client, old, new *sc.ServiceInstance) error
-}
+type Validator func(ctx context.Context, req admission.Request, si *sc.ServiceInstance, l *webhookutil.TracedLogger) error
 
 // AdmissionHandler handles ServiceInstance
 type AdmissionHandler struct {
 	decoder *admission.Decoder
 	client  client.Client
 
-	CreateValidators []CreateValidator
-	UpdateValidators []UpdateValidator
+	CreateValidators []Validator
+	UpdateValidators []Validator
 }
 
 var _ admission.Handler = &AdmissionHandler{}
 var _ admission.DecoderInjector = &AdmissionHandler{}
 var _ inject.Client = &AdmissionHandler{}
+
+func NewAdmissionHandler() {
+	h := &AdmissionHandler{}
+	h.UpdateValidators = []Validator{h.ValidatePlanUpdate}
+}
 
 // Handle handles admission requests.
 func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
@@ -73,17 +69,12 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 	var errs multiError
 	switch req.Operation {
 	case admissionTypes.Create:
-		for _, v := range h.CreateValidators {
-			errs = append(errs, v.Validate(ctx,h.client, si))
+		for _, fn := range h.CreateValidators {
+			errs = append(errs, fn(ctx,req, si, traced))
 		}
 	case admissionTypes.Update:
-		old := &sc.ServiceInstance{}
-		if err := h.decoder.DecodeRaw(req.OldObject, si); err != nil {
-			traced.Errorf("Could not decode request object: %v", err)
-			return admission.Errored(http.StatusBadRequest, err)
-		}
 		for _, v := range h.UpdateValidators {
-			errs = append(errs, v.Validate(ctx,h.client, old, si))
+			errs = append(errs, v(ctx,req, si, traced))
 		}
 	default:
 		traced.Infof("ServiceInstance AdmissionHandler wehbook does not support action %q", req.Operation)
@@ -116,5 +107,5 @@ func (m multiError) Error() string {
 	for _, e := range m {
 		msgs = append(msgs, e.Error())
 	}
-	return strings.join(msgs, "; ")
+	return strings.Join(msgs, "; ")
 }
