@@ -120,19 +120,6 @@ metadata:
   name: {{ template "fullname" . }}-validating-webhook
   namespace: "{{ .Release.Namespace }}"
 webhooks:
-- name: validating.servicebindings.servicecatalog.k8s.io
-  clientConfig:
-    caBundle: {{ b64enc $ca.Cert }}
-    service:
-      name: {{ template "fullname" . }}-webhook
-      namespace: "{{ .Release.Namespace }}"
-      path: "/validating-servicebindings"
-  failurePolicy: Fail
-  rules:
-  - operations: [ "CREATE", "UPDATE" ]
-    apiGroups: ["servicecatalog.k8s.io"]
-    apiVersions: ["v1beta1"]
-    resources: ["servicebindings"]
 - name: validating.serviceinstances.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}

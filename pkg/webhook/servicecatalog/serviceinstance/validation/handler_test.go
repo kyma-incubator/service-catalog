@@ -218,7 +218,7 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.
 	}
 }
 
-func TestCreateUpdateHandlerHandleDecoderErrors(t *testing.T) {
+func TestAdmissionHandlerHandleDecoderErrors(t *testing.T) {
 	tester.DiscardLoggedMsg()
 
 	for _, fn := range []func(t *testing.T, handler tester.TestDecoderHandler, kind string){
