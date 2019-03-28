@@ -18,9 +18,6 @@ package validation
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -32,15 +29,25 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+type Validator func(ctx context.Context, req admission.Request, si *sc.ServiceInstance, l *webhookutil.TracedLogger) error
+
 // AdmissionHandler handles ServiceInstance
 type AdmissionHandler struct {
 	decoder *admission.Decoder
 	client  client.Client
+
+	CreateValidators []Validator
+	UpdateValidators []Validator
 }
 
 var _ admission.Handler = &AdmissionHandler{}
 var _ admission.DecoderInjector = &AdmissionHandler{}
 var _ inject.Client = &AdmissionHandler{}
+
+func NewAdmissionHandler() {
+	h := &AdmissionHandler{}
+	h.UpdateValidators = []Validator{h.DenyPlanChangeIfNotUpdatable}
+}
 
 // Handle handles admission requests.
 func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
@@ -58,16 +65,26 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	var err error
-	switch req.Operation {
-	case admissionTypes.Update:
-		err = h.denyPlanChangeIfNotUpdatable(ctx, req, si)
-	default:
+	var errs webhookutil.MultiError
+
+	if req.Operation == admissionTypes.Create && h.CreateValidators != nil {
+		for _, fn := range h.CreateValidators {
+			if err := fn(ctx, req, si, traced); err != nil {
+				errs = append(errs, err)
+			}
+		}
+	}else if req.Operation == admissionTypes.Update && h.UpdateValidators != nil {
+		for _, fn := range h.UpdateValidators {
+			if err := fn(ctx, req, si, traced); err != nil {
+				errs = append(errs, err)
+			}
+		}
+	}else{
 		traced.Infof("ServiceInstance AdmissionHandler wehbook does not support action %q", req.Operation)
 		return admission.Allowed("action not taken")
 	}
-	if err != nil {
-		return admission.Denied(err.Error())
+	if errs != nil {
+		return admission.Denied(errs.Error())
 	}
 
 	traced.Infof("Completed successfully AdmissionHandler operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
@@ -83,59 +100,5 @@ func (h *AdmissionHandler) InjectDecoder(d *admission.Decoder) error {
 // InjectClient injects the client into the CreateUpdateHandler
 func (h *AdmissionHandler) InjectClient(c client.Client) error {
 	h.client = c
-	return nil
-}
-
-func (h *AdmissionHandler) denyPlanChangeIfNotUpdatable(ctx context.Context, req admission.Request, si *sc.ServiceInstance) error {
-	traced := webhookutil.NewTracedLogger(req.UID)
-
-	if si.Spec.ClusterServiceClassRef == nil {
-		traced.Infof("Service class does not exist")
-		return nil // user chose a service class that doesn't exist
-	}
-
-	csc := &sc.ClusterServiceClass{}
-	if err := h.client.Get(ctx, types.NamespacedName{
-		Namespace: "",
-		Name:      si.Spec.ClusterServiceClassRef.Name,
-	}, csc); err != nil {
-		traced.Infof("Could not locate service class '%v', can not determine if UpdateablePlan.", si.Spec.ClusterServiceClassRef.Name)
-		return err
-	}
-
-	if csc.Spec.PlanUpdatable {
-		traced.Info("AdmissionHandler passed - UpdateablePlan is set to true.")
-		return nil
-	}
-
-	if si.Spec.GetSpecifiedClusterServicePlan() != "" {
-		origInstance := &sc.ServiceInstance{}
-		if err := h.decoder.DecodeRaw(req.OldObject, origInstance); err != nil {
-			traced.Errorf("Could not decode oldObject: %v", err)
-			return err
-		}
-
-		externalPlanNameUpdated := si.Spec.ClusterServicePlanExternalName != origInstance.Spec.ClusterServicePlanExternalName
-		externalPlanIDUpdated := si.Spec.ClusterServicePlanExternalID != origInstance.Spec.ClusterServicePlanExternalID
-		k8sPlanUpdated := si.Spec.ClusterServicePlanName != origInstance.Spec.ClusterServicePlanName
-		if externalPlanNameUpdated || externalPlanIDUpdated || k8sPlanUpdated {
-			var oldPlan, newPlan string
-			if externalPlanNameUpdated {
-				oldPlan = origInstance.Spec.ClusterServicePlanExternalName
-				newPlan = si.Spec.ClusterServicePlanExternalName
-			} else if externalPlanIDUpdated {
-				oldPlan = origInstance.Spec.ClusterServicePlanExternalID
-				newPlan = si.Spec.ClusterServicePlanExternalID
-			} else {
-				oldPlan = origInstance.Spec.ClusterServicePlanName
-				newPlan = si.Spec.ClusterServicePlanName
-			}
-			traced.Infof("update Service Instance %v/%v request specified Plan %v while original instance had %v", si.Namespace, si.Name, newPlan, oldPlan)
-			msg := fmt.Sprintf("The Service Class %v does not allow plan changes.", csc.Name)
-			traced.Error(msg)
-			return errors.New(msg)
-		}
-	}
-
 	return nil
 }
