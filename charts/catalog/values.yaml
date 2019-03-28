@@ -3,7 +3,7 @@
 image: eu.gcr.io/kyma-project/develop/service-catalog/service-catalog-amd64:crd-0.0.1
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
-imagePullPolicy: IfNotPresent
+imagePullPolicy: Always
 ## If true, create & use RBAC resources
 ##
 rbacEnable: true
@@ -31,7 +31,6 @@ webhook:
       securePort: 30443
   # Log level; valid values are in the range 0 - 10
   verbosity: 10
-  serviceAccount: service-catalog-webhook
   # Webhook resource requests and limits
   # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
