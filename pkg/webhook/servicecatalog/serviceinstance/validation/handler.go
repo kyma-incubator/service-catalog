@@ -108,9 +108,7 @@ func (h *AdmissionHandler) denyPlanChangeIfNotUpdatable(ctx context.Context, req
 		return nil
 	}
 
-	fmt.Println("DUPA0")
 	if si.Spec.GetSpecifiedClusterServicePlan() != "" {
-		fmt.Println("DUPA1")
 		origInstance := &sc.ServiceInstance{}
 		h.decoder.DecodeRaw(req.OldObject, origInstance)
 		if err := h.decoder.Decode(req, si); err != nil {
