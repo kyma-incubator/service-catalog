@@ -110,9 +110,8 @@ func (h *AdmissionHandler) denyPlanChangeIfNotUpdatable(ctx context.Context, req
 
 	if si.Spec.GetSpecifiedClusterServicePlan() != "" {
 		origInstance := &sc.ServiceInstance{}
-		h.decoder.DecodeRaw(req.OldObject, origInstance)
-		if err := h.decoder.Decode(req, si); err != nil {
-			traced.Errorf("Could not decode request oldObject: %v", err)
+		if err := h.decoder.DecodeRaw(req.OldObject, origInstance); err != nil {
+			traced.Errorf("Could not decode oldObject: %v", err)
 			return err
 		}
 
