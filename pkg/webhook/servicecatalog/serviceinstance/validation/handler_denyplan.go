@@ -29,6 +29,7 @@ import (
 
 // DenyPlanChangeIfNotUpdatable checks if Plan can be changed
 func (h *AdmissionHandler) DenyPlanChangeIfNotUpdatable(ctx context.Context, req admission.Request, si *sc.ServiceInstance, traced *webhookutil.TracedLogger) error {
+	traced.Info("Starting validation - DenyPlanChangeIfNotUpdatable")
 
 	if si.Spec.ClusterServiceClassRef == nil {
 		traced.Infof("Service class does not exist")
@@ -45,7 +46,7 @@ func (h *AdmissionHandler) DenyPlanChangeIfNotUpdatable(ctx context.Context, req
 	}
 
 	if csc.Spec.PlanUpdatable {
-		traced.Info("AdmissionHandler passed - UpdateablePlan is set to true.")
+		traced.Info("DenyPlanChangeIfNotUpdatable passed - UpdateablePlan is set to true.")
 		return nil
 	}
 
