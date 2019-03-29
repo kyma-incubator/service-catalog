@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+//Validator is used to implement new validation logic
 type Validator func(ctx context.Context, req admission.Request, si *sc.ServiceInstance, l *webhookutil.TracedLogger) error
 
 // AdmissionHandler handles ServiceInstance
@@ -44,6 +45,7 @@ var _ admission.Handler = &AdmissionHandler{}
 var _ admission.DecoderInjector = &AdmissionHandler{}
 var _ inject.Client = &AdmissionHandler{}
 
+// NewAdmissionHandler creates new AdmissionHandler and initializes validators list
 func NewAdmissionHandler() {
 	h := &AdmissionHandler{}
 	h.UpdateValidators = []Validator{h.DenyPlanChangeIfNotUpdatable}

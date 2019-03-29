@@ -18,6 +18,7 @@ package webhookutil
 
 import "strings"
 
+// MultiError represents a list of error values
 type MultiError []error
 
 func (m MultiError) Error() string {
