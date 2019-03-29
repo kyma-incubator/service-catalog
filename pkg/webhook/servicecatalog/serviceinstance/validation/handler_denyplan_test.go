@@ -114,6 +114,11 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.
 					Name:      test.serviceClassName,
 					Namespace: "",
 				},
+				Spec: sc.ClusterServiceClassSpec{
+					CommonServiceClassSpec: sc.CommonServiceClassSpec{
+						PlanUpdatable: test.serviceClassIsUpdatable,
+					},
+				},
 			})
 			err := handler.InjectDecoder(decoder)
 			require.NoError(t, err)
@@ -201,6 +206,11 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      test.serviceClassName,
 					Namespace: "",
+				},
+				Spec: sc.ClusterServiceClassSpec{
+					CommonServiceClassSpec: sc.CommonServiceClassSpec{
+						PlanUpdatable: test.serviceClassIsUpdatable,
+					},
 				},
 			})
 			err := handler.InjectDecoder(decoder)
