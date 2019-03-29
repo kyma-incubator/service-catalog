@@ -69,22 +69,24 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 
 	var errs webhookutil.MultiError
 
-	if req.Operation == admissionTypes.Create && h.CreateValidators != nil {
+	switch req.Operation {
+		case admissionTypes.Create:
 		for _, fn := range h.CreateValidators {
 			if err := fn(ctx, req, si, traced); err != nil {
 				errs = append(errs, err)
 			}
 		}
-	} else if req.Operation == admissionTypes.Update && h.UpdateValidators != nil {
+	 	case admissionTypes.Update:
 		for _, fn := range h.UpdateValidators {
 			if err := fn(ctx, req, si, traced); err != nil {
 				errs = append(errs, err)
 			}
 		}
-	} else {
+	default:
 		traced.Infof("ServiceInstance AdmissionHandler wehbook does not support action %q", req.Operation)
 		return admission.Allowed("action not taken")
 	}
+
 	if errs != nil {
 		return admission.Denied(errs.Error())
 	}
