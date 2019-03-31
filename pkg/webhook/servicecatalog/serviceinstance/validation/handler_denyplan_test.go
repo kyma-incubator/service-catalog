@@ -18,9 +18,10 @@ package validation_test
 
 import (
 	"context"
-	SchemeBuilder "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"fmt"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/validation"
+	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil/tester"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
@@ -33,7 +34,7 @@ import (
 )
 
 func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.T) {
-	//Given
+	// given
 	clusterServiceClassName := "csc-test"
 
 	err := sc.AddToScheme(scheme.Scheme)
@@ -61,7 +62,7 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.
 			}`)},
 		},
 	}
-	sch, err := SchemeBuilder.SchemeBuilderRuntime.Build()
+	sch, err := sc.SchemeBuilderRuntime.Build()
 	require.NoError(t, err)
 
 	decoder, err := admission.NewDecoder(sch)
@@ -106,9 +107,9 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
-			// Given
+			// given
 			handler := validation.AdmissionHandler{}
-			handler.UpdateValidators = []validation.Validator{handler.DenyPlanChangeIfNotUpdatable}
+			handler.UpdateValidators = []validation.GenericValidator{&validation.DenyPlanChangeIfNotUpdatable{}}
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ClusterServiceClass{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      test.serviceClassName,
@@ -126,10 +127,10 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.
 			require.NoError(t, err)
 			request.AdmissionRequest.Operation = test.operation
 
-			// When
+			// when
 			response := handler.Handle(context.TODO(), request)
 
-			// Then
+			// then
 			assert.Equal(t, response.AdmissionResponse.Allowed, test.responseAllowed)
 			assert.Contains(t, response.AdmissionResponse.Result.Reason, test.responseReason)
 		})
@@ -137,7 +138,9 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.
 }
 
 func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.T) {
-	//Given
+	tester.DiscardLoggedMsg()
+
+	// given
 	clusterServiceClassName := "csc-test"
 
 	err := sc.AddToScheme(scheme.Scheme)
@@ -177,7 +180,7 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.
 			}`)},
 		},
 	}
-	sch, err := SchemeBuilder.SchemeBuilderRuntime.Build()
+	sch, err := sc.SchemeBuilderRuntime.Build()
 	require.NoError(t, err)
 
 	decoder, err := admission.NewDecoder(sch)
@@ -199,9 +202,9 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
-			// Given
+			// given
 			handler := validation.AdmissionHandler{}
-			handler.UpdateValidators = []validation.Validator{handler.DenyPlanChangeIfNotUpdatable}
+			handler.UpdateValidators = []validation.GenericValidator{&validation.DenyPlanChangeIfNotUpdatable{}}
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ClusterServiceClass{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      test.serviceClassName,
@@ -219,11 +222,12 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.
 			require.NoError(t, err)
 			request.AdmissionRequest.Operation = admissionv1beta1.Update
 
-			// When
+			// when
 			response := handler.Handle(context.TODO(), request)
 
-			// Then
+			// then
 			assert.Equal(t, response.AdmissionResponse.Allowed, test.responseAllowed)
+			fmt.Println(response.AdmissionResponse.Result.Reason)
 			assert.Contains(t, response.AdmissionResponse.Result.Reason, test.responseReason)
 		})
 	}

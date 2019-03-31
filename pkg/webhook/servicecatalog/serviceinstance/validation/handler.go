@@ -23,22 +23,25 @@ import (
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
 
+	"github.com/hashicorp/go-multierror"
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-//Validator is used to implement new validation logic
-type Validator func(ctx context.Context, req admission.Request, si *sc.ServiceInstance, l *webhookutil.TracedLogger) error
+//GenericValidator is used to implement new validation logic
+type GenericValidator interface {
+	Validate(context.Context, admission.Request, *sc.ServiceInstance, *webhookutil.TracedLogger) error
+}
 
-// AdmissionHandler handles ServiceInstance
+// AdmissionHandler handles ServiceInstance validation
 type AdmissionHandler struct {
 	decoder *admission.Decoder
 	client  client.Client
 
-	CreateValidators []Validator
-	UpdateValidators []Validator
+	CreateValidators []GenericValidator
+	UpdateValidators []GenericValidator
 }
 
 var _ admission.Handler = &AdmissionHandler{}
@@ -46,9 +49,10 @@ var _ admission.DecoderInjector = &AdmissionHandler{}
 var _ inject.Client = &AdmissionHandler{}
 
 // NewAdmissionHandler creates new AdmissionHandler and initializes validators list
-func NewAdmissionHandler() {
+func NewAdmissionHandler() *AdmissionHandler {
 	h := &AdmissionHandler{}
-	h.UpdateValidators = []Validator{h.DenyPlanChangeIfNotUpdatable}
+	h.UpdateValidators = []GenericValidator{&DenyPlanChangeIfNotUpdatable{}}
+	return h
 }
 
 // Handle handles admission requests.
@@ -67,19 +71,13 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	var errs webhookutil.MultiError
+	var errs error
 
 	switch req.Operation {
-		case admissionTypes.Create:
-		for _, fn := range h.CreateValidators {
-			if err := fn(ctx, req, si, traced); err != nil {
-				errs = append(errs, err)
-			}
-		}
-	 	case admissionTypes.Update:
-		for _, fn := range h.UpdateValidators {
-			if err := fn(ctx, req, si, traced); err != nil {
-				errs = append(errs, err)
+	case admissionTypes.Update:
+		for _, v := range h.UpdateValidators {
+			if err := v.Validate(ctx, req, si, traced); err != nil {
+				errs = multierror.Append(errs, err)
 			}
 		}
 	default:
@@ -95,14 +93,30 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 	return admission.Allowed("ServiceInstance AdmissionHandler successful")
 }
 
-// InjectDecoder injects the decoder
+// InjectDecoder injects the decoder into the handlers
 func (h *AdmissionHandler) InjectDecoder(d *admission.Decoder) error {
 	h.decoder = d
+
+	for _, v := range h.CreateValidators {
+		admission.InjectDecoderInto(d, v)
+	}
+	for _, v := range h.UpdateValidators {
+		admission.InjectDecoderInto(d, v)
+	}
+
 	return nil
 }
 
-// InjectClient injects the client into the CreateUpdateHandler
+// InjectClient injects the client into the handlers
 func (h *AdmissionHandler) InjectClient(c client.Client) error {
 	h.client = c
+
+	for _, v := range h.CreateValidators {
+		inject.ClientInto(c, v)
+	}
+	for _, v := range h.UpdateValidators {
+		inject.ClientInto(c, v)
+	}
+
 	return nil
 }

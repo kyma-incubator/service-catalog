@@ -20,15 +20,34 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"k8s.io/apimachinery/pkg/types"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// DenyPlanChangeIfNotUpdatable checks if Plan can be changed
-func (h *AdmissionHandler) DenyPlanChangeIfNotUpdatable(ctx context.Context, req admission.Request, si *sc.ServiceInstance, traced *webhookutil.TracedLogger) error {
+// DenyPlanChangeIfNotUpdatable handles ServiceInstance validation
+type DenyPlanChangeIfNotUpdatable struct {
+	decoder *admission.Decoder
+	client  client.Client
+}
+
+// InjectDecoder injects the decoder
+func (h *DenyPlanChangeIfNotUpdatable) InjectDecoder(d *admission.Decoder) error {
+	h.decoder = d
+	return nil
+}
+
+// InjectClient injects the client
+func (h *DenyPlanChangeIfNotUpdatable) InjectClient(c client.Client) error {
+	h.client = c
+	return nil
+}
+
+// Validate checks if Plan can be changed
+func (h *DenyPlanChangeIfNotUpdatable) Validate(ctx context.Context, req admission.Request, si *sc.ServiceInstance, traced *webhookutil.TracedLogger) error {
 	traced.Info("Starting validation - DenyPlanChangeIfNotUpdatable")
 
 	if si.Spec.ClusterServiceClassRef == nil {
@@ -37,10 +56,12 @@ func (h *AdmissionHandler) DenyPlanChangeIfNotUpdatable(ctx context.Context, req
 	}
 
 	csc := &sc.ClusterServiceClass{}
-	if err := h.client.Get(ctx, types.NamespacedName{
+	key := types.NamespacedName{
 		Namespace: "",
 		Name:      si.Spec.ClusterServiceClassRef.Name,
-	}, csc); err != nil {
+	}
+
+	if err := h.client.Get(ctx, key, csc); err != nil {
 		traced.Infof("Could not locate service class '%v', can not determine if UpdateablePlan.", si.Spec.ClusterServiceClassRef.Name)
 		return err
 	}
