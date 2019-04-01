@@ -18,7 +18,6 @@ package validation_test
 
 import (
 	"context"
-	"fmt"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/validation"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil/tester"
@@ -34,6 +33,8 @@ import (
 )
 
 func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.T) {
+	tester.DiscardLoggedMsg()
+
 	// given
 	clusterServiceClassName := "csc-test"
 
@@ -75,13 +76,6 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.
 		responseAllowed         bool
 		responseReason          string
 	}{
-		"Create operation": {
-			admissionv1beta1.Create,
-			clusterServiceClassName,
-			false,
-			true,
-			"action not taken",
-		},
 		"UpdateablePlan set to false, no changes": {
 			admissionv1beta1.Update,
 			clusterServiceClassName,
@@ -109,7 +103,7 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatableSimpleScenarios(t *testing.
 		t.Run(desc, func(t *testing.T) {
 			// given
 			handler := validation.AdmissionHandler{}
-			handler.UpdateValidators = []validation.GenericValidator{&validation.DenyPlanChangeIfNotUpdatable{}}
+			handler.UpdateValidators = []validation.Validator{&validation.DenyPlanChangeIfNotUpdatable{}}
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ClusterServiceClass{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      test.serviceClassName,
@@ -204,7 +198,7 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.
 		t.Run(desc, func(t *testing.T) {
 			// given
 			handler := validation.AdmissionHandler{}
-			handler.UpdateValidators = []validation.GenericValidator{&validation.DenyPlanChangeIfNotUpdatable{}}
+			handler.UpdateValidators = []validation.Validator{&validation.DenyPlanChangeIfNotUpdatable{}}
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ClusterServiceClass{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      test.serviceClassName,
@@ -227,7 +221,6 @@ func TestAdmissionHandlerDenyPlanChangeIfNotUpdatablePlanNameChanged(t *testing.
 
 			// then
 			assert.Equal(t, response.AdmissionResponse.Allowed, test.responseAllowed)
-			fmt.Println(response.AdmissionResponse.Result.Reason)
 			assert.Contains(t, response.AdmissionResponse.Result.Reason, test.responseReason)
 		})
 	}

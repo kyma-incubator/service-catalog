@@ -30,8 +30,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-//GenericValidator is used to implement new validation logic
-type GenericValidator interface {
+// Validator is used to implement new validation logic
+type Validator interface {
 	Validate(context.Context, admission.Request, *sc.ServiceInstance, *webhookutil.TracedLogger) error
 }
 
@@ -40,8 +40,8 @@ type AdmissionHandler struct {
 	decoder *admission.Decoder
 	client  client.Client
 
-	CreateValidators []GenericValidator
-	UpdateValidators []GenericValidator
+	CreateValidators []Validator
+	UpdateValidators []Validator
 }
 
 var _ admission.Handler = &AdmissionHandler{}
@@ -50,9 +50,9 @@ var _ inject.Client = &AdmissionHandler{}
 
 // NewAdmissionHandler creates new AdmissionHandler and initializes validators list
 func NewAdmissionHandler() *AdmissionHandler {
-	h := &AdmissionHandler{}
-	h.UpdateValidators = []GenericValidator{&DenyPlanChangeIfNotUpdatable{}}
-	return h
+	return &AdmissionHandler{
+		UpdateValidators: []Validator{&DenyPlanChangeIfNotUpdatable{}},
+	}
 }
 
 // Handle handles admission requests.
@@ -74,6 +74,12 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 	var errs error
 
 	switch req.Operation {
+	case admissionTypes.Create:
+		for _, v := range h.CreateValidators {
+			if err := v.Validate(ctx, req, si, traced); err != nil {
+				errs = multierror.Append(errs, err)
+			}
+		}
 	case admissionTypes.Update:
 		for _, v := range h.UpdateValidators {
 			if err := v.Validate(ctx, req, si, traced); err != nil {
