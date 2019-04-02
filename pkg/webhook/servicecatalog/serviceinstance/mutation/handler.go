@@ -24,20 +24,27 @@ import (
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scfeatures "github.com/kubernetes-incubator/service-catalog/pkg/features"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
-	"github.com/pkg/errors"
-
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
 
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // CreateUpdateHandler handles ServiceInstance
 type CreateUpdateHandler struct {
-	decoder *admission.Decoder
-	UUID    webhookutil.UUIDGenerator
-	client  client.Client
+	decoder            *admission.Decoder
+	UUID               webhookutil.UUIDGenerator
+	defaultServicePlan *DefaultServicePlan
+}
+
+// New return new CreateUpdateHandler
+func New() *CreateUpdateHandler {
+	return &CreateUpdateHandler{
+		defaultServicePlan: &DefaultServicePlan{},
+	}
 }
 
 var _ admission.Handler = &CreateUpdateHandler{}
@@ -69,17 +76,14 @@ func (h *CreateUpdateHandler) Handle(ctx context.Context, req admission.Request)
 		return admission.Allowed("action not taken")
 	}
 
-	// If the plan is specified, let it through and have the controller
-	// deal with finding the right plan, etc.
-	defaultPlanHandler := DefaultServicePlan{
-		Ctx:      ctx,
-		Instance: mutated,
-		Client:   h.client,
-	}
-
-	dspErr := defaultPlanHandler.HandleDefaultPlan()
-	if dspErr != nil {
-		return admission.Errored(dspErr.Code(), errors.New(dspErr.Error()))
+	// Sets default plan for instance if it's not specified and only one plan exists
+	if err := h.defaultServicePlan.SetDefaultPlan(ctx, mutated, traced); err != nil {
+		switch err.Code() {
+		case http.StatusForbidden:
+			return admission.Denied(err.Error())
+		default:
+			return admission.Errored(err.Code(), errors.New(err.Error()))
+		}
 	}
 
 	rawMutated, err := json.Marshal(mutated)
@@ -133,7 +137,11 @@ func setServiceInstanceUserInfo(req admission.Request, instance *sc.ServiceInsta
 	}
 }
 
+// InjectClient injects the client
 func (h *CreateUpdateHandler) InjectClient(c client.Client) error {
-	h.client = c
+	_, err := inject.ClientInto(c, h.defaultServicePlan)
+	if err != nil {
+		return err
+	}
 	return nil
 }

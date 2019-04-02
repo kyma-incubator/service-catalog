@@ -1,5 +1,3 @@
-package mutation_test
-
 /*
 Copyright 2017 The Kubernetes Authors.
 
@@ -16,42 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import (
-	"testing"
-	"net/http"
-	"fmt"
-	"context"
+package mutation_test
 
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"testing"
+
+	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
-	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
+	"k8s.io/apimachinery/pkg/util/uuid"
+	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 func TestErrorWhenNoClassesSpecified(t *testing.T) {
-	dsp := mutation.DefaultServicePlan{
-		Instance: newServiceInstance("dummy"),
-	}
+	dsp := mutation.DefaultServicePlan{}
 
-	mutateErr := dsp.HandleDefaultPlan()
+	mutateErr := dsp.SetDefaultPlan(context.Background(), newServiceInstance("dummy"), webhookutil.NewTracedLogger(uuid.NewUUID()))
 	assertMutateError(t, mutateErr, "class not specified on ServiceInstance, cannot choose default plan", http.StatusInternalServerError)
 }
 
 func TestClusterServiceClassSpecified(t *testing.T) {
-	sch, err := sc.SchemeBuilderRuntime.Build()
-	require.NoError(t, err)
-
 	const className = "csc"
 
 	for tn, tc := range map[string]struct {
 		instance *sc.ServiceInstance
 		objects  []runtime.Object
-		err      *mutation.MutateError
+		err      *webhookutil.WebhookError
 	}{
 		"SuccessWithClusterServiceClassName": {
 			instance: &sc.ServiceInstance{
@@ -108,7 +106,7 @@ func TestClusterServiceClassSpecified(t *testing.T) {
 			objects: []runtime.Object{
 				newClusterServiceClass(className, className),
 			},
-			err: mutation.NewMutateError(fmt.Sprintf("no ClusterServicePlans found at all for ClusterServiceClass %q", className), http.StatusForbidden),
+			err: webhookutil.NewWebhookError(fmt.Sprintf("no ClusterServicePlans found at all for ClusterServiceClass %q", className), http.StatusForbidden),
 		},
 		"ErrorWhenMoreThenOnePlanSpecified": {
 			instance: &sc.ServiceInstance{
@@ -124,40 +122,35 @@ func TestClusterServiceClassSpecified(t *testing.T) {
 				newClusterServicePlans(className, 2, false)[0],
 				newClusterServicePlans(className, 2, false)[1],
 			},
-			err: mutation.NewMutateError(fmt.Sprintf("ClusterServiceClass (K8S: %v ExternalName: %v) has more than one plan, PlanName must be specified", className, className), http.StatusForbidden),
+			err: webhookutil.NewWebhookError(fmt.Sprintf("ClusterServiceClass (K8S: %v ExternalName: %v) has more than one plan, PlanName must be specified", className, className), http.StatusForbidden),
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
-			fakeClient := fake.NewFakeClientWithScheme(sch, tc.objects...)
+			fakeClient := fake.NewFakeClientWithScheme(newTestScheme(t), tc.objects...)
+			traced := webhookutil.NewTracedLogger(uuid.NewUUID())
 
-			dsp := mutation.DefaultServicePlan{
-				Ctx:      context.Background(),
-				Instance: tc.instance,
-				Client:   fakeClient,
-			}
+			dsp := mutation.DefaultServicePlan{}
+			dsp.InjectClient(fakeClient)
 
-			mutateErr := dsp.HandleDefaultPlan()
+			mutateErr := dsp.SetDefaultPlan(context.Background(), tc.instance, traced)
 
 			if tc.err != nil {
 				assertMutateError(t, mutateErr, tc.err.Error(), tc.err.Code())
 			} else {
-				assert.Empty(t, mutateErr.Error())
+				assert.Nil(t, mutateErr)
 			}
 		})
 	}
 }
 
 func TestServiceClassSpecified(t *testing.T) {
-	sch, err := sc.SchemeBuilderRuntime.Build()
-	require.NoError(t, err)
-
 	const className = "sc"
 	const namespace = "dummy"
 
 	for tn, tc := range map[string]struct {
 		instance *sc.ServiceInstance
 		objects  []runtime.Object
-		err      *mutation.MutateError
+		err      *webhookutil.WebhookError
 	}{
 		"SuccessWithServiceClassName": {
 			instance: &sc.ServiceInstance{
@@ -214,7 +207,7 @@ func TestServiceClassSpecified(t *testing.T) {
 			objects: []runtime.Object{
 				newServiceClass(className, className, namespace),
 			},
-			err: mutation.NewMutateError(fmt.Sprintf("no ServicePlans found at all for ServiceClass %q", className), http.StatusForbidden),
+			err: webhookutil.NewWebhookError(fmt.Sprintf("no ServicePlans found at all for ServiceClass %q", className), http.StatusForbidden),
 		},
 		"ErrorWhenMoreThenOnePlanSpecified": {
 			instance: &sc.ServiceInstance{
@@ -230,27 +223,33 @@ func TestServiceClassSpecified(t *testing.T) {
 				newServicePlans(className, namespace, 2, false)[0],
 				newServicePlans(className, namespace, 2, false)[1],
 			},
-			err: mutation.NewMutateError(fmt.Sprintf("ServiceClass (K8S: %v ExternalName: %v) has more than one plan, PlanName must be specified", className, className), http.StatusForbidden),
+			err: webhookutil.NewWebhookError(fmt.Sprintf("ServiceClass (K8S: %v ExternalName: %v) has more than one plan, PlanName must be specified", className, className), http.StatusForbidden),
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
-			fakeClient := fake.NewFakeClientWithScheme(sch, tc.objects...)
+			fakeClient := fake.NewFakeClientWithScheme(newTestScheme(t), tc.objects...)
+			traced := webhookutil.NewTracedLogger(uuid.NewUUID())
 
-			dsp := mutation.DefaultServicePlan{
-				Ctx:      context.Background(),
-				Instance: tc.instance,
-				Client:   fakeClient,
-			}
+			dsp := mutation.DefaultServicePlan{}
+			dsp.InjectClient(fakeClient)
 
-			mutateErr := dsp.HandleDefaultPlan()
+			mutateErr := dsp.SetDefaultPlan(context.Background(), tc.instance, traced)
 
 			if tc.err != nil {
 				assertMutateError(t, mutateErr, tc.err.Error(), tc.err.Code())
 			} else {
-				assert.Empty(t, mutateErr.Error())
+				assert.Nil(t, mutateErr)
 			}
 		})
 	}
+}
+
+func newTestScheme(t *testing.T) *runtime.Scheme {
+	sch, err := sc.SchemeBuilderRuntime.Build()
+	require.NoError(t, err)
+	sc.AddToScheme(scheme.Scheme)
+
+	return sch
 }
 
 // newServiceInstance returns a new instance for the specified namespace.
@@ -415,7 +414,7 @@ func newServicePlans(classname string, namespace string, count uint, useDifferen
 	return []*sc.ServicePlan{}
 }
 
-func assertMutateError(t *testing.T, actualErr *mutation.MutateError, expMsg string, expCode int32) {
+func assertMutateError(t *testing.T, actualErr *webhookutil.WebhookError, expMsg string, expCode int32) {
 	assert.Equal(t, expMsg, actualErr.Error())
 	assert.Equal(t, expCode, actualErr.Code())
 }
