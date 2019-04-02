@@ -1,30 +1,63 @@
+/*
+Copyright 2019 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package validation
 
 import (
 	"context"
-	"fmt"
-
+	"github.com/hashicorp/go-multierror"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
-	authenticationapi "k8s.io/api/authentication/v1"
-	authorizationapi "k8s.io/api/authorization/v1"
-	corev1 "k8s.io/api/core/v1"
+	admissionTypes "k8s.io/api/admission/v1beta1"
 	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+// Validator is used to implement new validation logic
+type Validator interface {
+	Validate(context.Context, admission.Request, *sc.ClusterServiceBroker, *webhookutil.TracedLogger) error
+}
+
+// AdmissionHandler handles ClusterServiceBroker validation
 type AdmissionHandler struct {
 	decoder *admission.Decoder
 	client  client.Client
+
+	CreateValidators []Validator
+	UpdateValidators []Validator
 }
 
 var _ admission.Handler = &AdmissionHandler{}
+var _ admission.DecoderInjector = &AdmissionHandler{}
+var _ inject.Client = &AdmissionHandler{}
 
+// NewAdmissionHandler creates new AdmissionHandler and initializes validators list
+func NewAdmissionHandler() *AdmissionHandler {
+	return &AdmissionHandler{
+		CreateValidators: []Validator{&AccessToBroker{}},
+		UpdateValidators: []Validator{&AccessToBroker{}},
+	}
+}
+
+// Handle handles admission requests.
 func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
 	traced := webhookutil.NewTracedLogger(req.UID)
-	traced.Infof("Start validation handling operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
+	traced.Infof("Start handling AdmissionHandler operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
 
 	csb := &sc.ClusterServiceBroker{}
 	if err := webhookutil.MatchKinds(csb, req.Kind); err != nil {
@@ -37,86 +70,58 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	if csb.Spec.AuthInfo == nil {
-		traced.Infof("%s %q has no AuthInfo. Operation completed", csb.Kind, csb.Name)
-		return admission.Allowed("Validation successful")
+	var errs error
+
+	switch req.Operation {
+	case admissionTypes.Create:
+		for _, v := range h.CreateValidators {
+			if err := v.Validate(ctx, req, csb, traced); err != nil {
+				errs = multierror.Append(errs, err)
+			}
+		}
+	case admissionTypes.Update:
+		for _, v := range h.UpdateValidators {
+			if err := v.Validate(ctx, req, csb, traced); err != nil {
+				errs = multierror.Append(errs, err)
+			}
+		}
+	default:
+		traced.Infof("ClusterServiceBroker AdmissionHandler wehbook does not support action %q", req.Operation)
+		return admission.Allowed("action not taken")
 	}
 
-	var secretRef *sc.ObjectReference
-	if csb.Spec.AuthInfo.Basic != nil {
-		secretRef = csb.Spec.AuthInfo.Basic.SecretRef
-	} else if csb.Spec.AuthInfo.Bearer != nil {
-		secretRef = csb.Spec.AuthInfo.Bearer.SecretRef
+	if errs != nil {
+		return admission.Denied(errs.Error())
 	}
 
-	if secretRef == nil {
-		traced.Infof("%s %q has no SecretRef neither in Basic nor Bearer auth. Operation completed", csb.Kind, csb.Name)
-		return admission.Allowed("Validation successful")
-	}
-
-	user := req.UserInfo
-	sar := &authorizationapi.SubjectAccessReview{
-		Spec: authorizationapi.SubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationapi.ResourceAttributes{
-				Namespace: secretRef.Namespace,
-				Verb:      "get",
-				Group:     corev1.SchemeGroupVersion.Group,
-				Version:   corev1.SchemeGroupVersion.Version,
-				Resource:  corev1.ResourceSecrets.String(),
-				Name:      secretRef.Name,
-			},
-			User:   user.Username,
-			Groups: user.Groups,
-			Extra:  convertToSARExtra(user.Extra),
-			UID:    user.UID,
-		},
-	}
-
-	err := h.client.Create(ctx, sar)
-	if err != nil {
-		traced.Errorf("Could not create SubjectAccessReview for %s %q: %v", csb.Kind, csb.Name, err)
-		return admission.Errored(http.StatusBadRequest, err)
-	}
-
-	if !sar.Status.Allowed {
-		traced.Infof(
-			"Could not handle %s operation for %s %q because SubjectAccessReview has allowed status set to false",
-			req.Operation,
-			csb.Kind,
-			csb.Name,
-		)
-		return admission.Denied(fmt.Sprintf("Could not %s %s %q", req.Operation, csb.Kind, csb.Name))
-	}
-
-	traced.Infof("Completed successfully validation operation: %s for %s: %q", req.Operation, csb.Kind, csb.Name)
-	return admission.Allowed("Validation successful")
+	traced.Infof("Completed successfully AdmissionHandler operation: %s for %s: %q", req.Operation, req.Kind.Kind, req.Name)
+	return admission.Allowed("ClusterServiceBroker AdmissionHandler successful")
 }
 
-func convertToSARExtra(extra map[string]authenticationapi.ExtraValue) map[string]authorizationapi.ExtraValue {
-	if extra == nil {
-		return nil
+// InjectDecoder injects the decoder into the handlers
+func (h *AdmissionHandler) InjectDecoder(d *admission.Decoder) error {
+	h.decoder = d
+
+	for _, v := range h.CreateValidators {
+		admission.InjectDecoderInto(d, v)
+	}
+	for _, v := range h.UpdateValidators {
+		admission.InjectDecoderInto(d, v)
 	}
 
-	ret := map[string]authorizationapi.ExtraValue{}
-	for k, v := range extra {
-		ret[k] = authorizationapi.ExtraValue(v)
-	}
-
-	return ret
-}
-
-var _ inject.Client = &AdmissionHandler{}
-
-// InjectClient injects the client into the AdmissionHandler
-func (h *AdmissionHandler) InjectClient(c client.Client) error {
-	h.client = c
 	return nil
 }
 
-var _ admission.DecoderInjector = &AdmissionHandler{}
+// InjectClient injects the client into the handlers
+func (h *AdmissionHandler) InjectClient(c client.Client) error {
+	h.client = c
 
-// InjectDecoder injects the decoder into the AdmissionHandler
-func (h *AdmissionHandler) InjectDecoder(d *admission.Decoder) error {
-	h.decoder = d
+	for _, v := range h.CreateValidators {
+		inject.ClientInto(c, v)
+	}
+	for _, v := range h.UpdateValidators {
+		inject.ClientInto(c, v)
+	}
+
 	return nil
 }

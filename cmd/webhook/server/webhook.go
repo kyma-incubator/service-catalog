@@ -31,11 +31,10 @@ import (
 	simutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/mutation"
 	spmutation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceplan/mutation"
 
-	sivalidation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/validation"
-
 	csbrvalidation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/clusterservicebroker/validation"
 	sbvalidation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebinding/validation"
 	sbrvalidation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/servicebroker/validation"
+	sivalidation "github.com/kubernetes-incubator/service-catalog/pkg/webhook/servicecatalog/serviceinstance/validation"
 
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/server/healthz"
@@ -85,12 +84,10 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 		"/mutating-serviceplans":     &spmutation.CreateUpdateHandler{},
 		"/mutating-serviceinstances": simutation.New(),
 
-		"/validating-clusterservicebrokers": &csbrvalidation.ValidationHandler{},
-		"/validating-servicebindings":       &sbvalidation.ValidationHandler{},
-		"/validating-servicebrokers":        &sbrvalidation.ValidationHandler{},
-		"/validating-serviceinstances": sivalidation.NewAdmissionHandler(),
-
-		"/validating-servicebindings": &sbvalidation.ValidationHandler{},
+		"/validating-clusterservicebrokers": csbrvalidation.NewAdmissionHandler(),
+		"/validating-servicebindings":       sbvalidation.NewAdmissionHandler(),
+		"/validating-servicebrokers":        sbrvalidation.NewAdmissionHandler(),
+		"/validating-serviceinstances":      sivalidation.NewAdmissionHandler(),
 	}
 
 	for path, handler := range webhooks {

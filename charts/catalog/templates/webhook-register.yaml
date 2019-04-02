@@ -133,13 +133,6 @@ webhooks:
     apiGroups: ["servicecatalog.k8s.io"]
     apiVersions: ["v1beta1"]
     resources: ["serviceinstances"]
----
-apiVersion: admissionregistration.k8s.io/v1beta1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: {{ template "fullname" . }}-validating-webhook
-  namespace: "{{ .Release.Namespace }}"
-webhooks:
 - name: validating.clusterservicebrokers.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
