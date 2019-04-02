@@ -46,6 +46,8 @@ func (h *ReferenceDeletion) InjectClient(c client.Client) error {
 
 // Validate checks if instance reference for ServiceBinding is not marked for deletion
 // fail ServiceBinding operation if the ServiceInstance is marked for deletion
+// This feature was copied from Service Catalog admission plugin https://github.com/kubernetes-incubator/service-catalog/blob/v0.1.41/plugin/pkg/admission/servicebindings/lifecycle/admission.go
+// If you want to track previous changes please check there.
 func (h *ReferenceDeletion) Validate(ctx context.Context, req admission.Request, sb *sc.ServiceBinding, traced *webhookutil.TracedLogger) error {
 	instanceRef := sb.Spec.InstanceRef
 	instance := &sc.ServiceInstance{}
