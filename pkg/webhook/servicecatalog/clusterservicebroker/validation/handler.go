@@ -111,10 +111,16 @@ func (h *AdmissionHandler) InjectDecoder(d *admission.Decoder) error {
 	h.decoder = d
 
 	for _, v := range h.CreateValidators {
-		admission.InjectDecoderInto(d, v)
+		_, err := admission.InjectDecoderInto(d, v)
+		if err != nil {
+			return err
+		}
 	}
 	for _, v := range h.UpdateValidators {
-		admission.InjectDecoderInto(d, v)
+		_, err := admission.InjectDecoderInto(d, v)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -123,10 +129,16 @@ func (h *AdmissionHandler) InjectDecoder(d *admission.Decoder) error {
 // InjectClient injects the client into the handlers
 func (h *AdmissionHandler) InjectClient(c client.Client) error {
 	for _, v := range h.CreateValidators {
-		inject.ClientInto(c, v)
+		_, err := inject.ClientInto(c, v)
+		if err != nil {
+			return err
+		}
 	}
 	for _, v := range h.UpdateValidators {
-		inject.ClientInto(c, v)
+		_, err := inject.ClientInto(c, v)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
