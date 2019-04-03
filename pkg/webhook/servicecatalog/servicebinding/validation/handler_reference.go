@@ -22,7 +22,9 @@ import (
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
 	"k8s.io/apimachinery/pkg/types"
+	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -31,6 +33,9 @@ type ReferenceDeletion struct {
 	decoder *admission.Decoder
 	client  client.Client
 }
+
+var _ admission.DecoderInjector = &ReferenceDeletion{}
+var _ inject.Client = &ReferenceDeletion{}
 
 // InjectDecoder injects the decoder
 func (h *ReferenceDeletion) InjectDecoder(d *admission.Decoder) error {
@@ -48,23 +53,25 @@ func (h *ReferenceDeletion) InjectClient(c client.Client) error {
 // fail ServiceBinding operation if the ServiceInstance is marked for deletion
 // This feature was copied from Service Catalog admission plugin https://github.com/kubernetes-incubator/service-catalog/blob/v0.1.41/plugin/pkg/admission/servicebindings/lifecycle/admission.go
 // If you want to track previous changes please check there.
-func (h *ReferenceDeletion) Validate(ctx context.Context, req admission.Request, sb *sc.ServiceBinding, traced *webhookutil.TracedLogger) error {
+func (h *ReferenceDeletion) Validate(ctx context.Context, req admission.Request, sb *sc.ServiceBinding, traced *webhookutil.TracedLogger) *webhookutil.WebhookError {
 	instanceRef := sb.Spec.InstanceRef
 	instance := &sc.ServiceInstance{}
 
 	err := h.client.Get(ctx, types.NamespacedName{Namespace: sb.Namespace, Name: instanceRef.Name}, instance)
 	if err != nil {
-		traced.Errorf("Could not get ServiceInstance by name %q: %v", instanceRef.Name, err)
-		return err
+		traced.Infof("Could not get ServiceInstance by name %q: %v", instanceRef.Name, err)
+		return nil
 	}
 
 	if instance.DeletionTimestamp != nil {
-		traced.Infof(
-			"Could not handle %s operation for %s because ServiceInstance %s is marked for deletion",
-			req.Operation,
-			req.Kind.Kind,
+		warning := fmt.Sprintf(
+			"ServiceBinding %s/%s references a ServiceInstance that is being deleted: %s/%s",
+			sb.Namespace,
+			sb.Name,
+			sb.Namespace,
 			instanceRef.Name)
-		return fmt.Errorf("could not %s %s %q", req.Operation, sb.Kind, sb.Name)
+		traced.Info(warning)
+		return webhookutil.NewWebhookError(warning, http.StatusForbidden)
 	}
 
 	return nil

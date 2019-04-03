@@ -24,7 +24,9 @@ import (
 	authenticationapi "k8s.io/api/authentication/v1"
 	authorizationapi "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
+	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -33,6 +35,9 @@ type AccessToBroker struct {
 	decoder *admission.Decoder
 	client  client.Client
 }
+
+var _ admission.DecoderInjector = &AccessToBroker{}
+var _ inject.Client = &AccessToBroker{}
 
 // InjectDecoder injects the decoder
 func (h *AccessToBroker) InjectDecoder(d *admission.Decoder) error {
@@ -49,7 +54,7 @@ func (h *AccessToBroker) InjectClient(c client.Client) error {
 // Validate checks if client has access to cluster service broker if broker requires authentication
 // This feature was copied from Service Catalog admission plugin https://github.com/kubernetes-incubator/service-catalog/blob/v0.1.41/plugin/pkg/admission/broker/authsarcheck/admission.go
 // If you want to track previous changes please check there.
-func (h *AccessToBroker) Validate(ctx context.Context, req admission.Request, csb *sc.ClusterServiceBroker, traced *webhookutil.TracedLogger) error {
+func (h *AccessToBroker) Validate(ctx context.Context, req admission.Request, csb *sc.ClusterServiceBroker, traced *webhookutil.TracedLogger) *webhookutil.WebhookError {
 	if csb.Spec.AuthInfo == nil {
 		traced.Infof("%s %q has no AuthInfo. Operation completed", csb.Kind, csb.Name)
 		return nil
@@ -88,17 +93,17 @@ func (h *AccessToBroker) Validate(ctx context.Context, req admission.Request, cs
 	err := h.client.Create(ctx, sar)
 	if err != nil {
 		traced.Errorf("Could not create SubjectAccessReview for %s %q: %v", csb.Kind, csb.Name, err)
-		return nil
+		return webhookutil.NewWebhookError(err.Error(), http.StatusForbidden)
 	}
 
 	if !sar.Status.Allowed {
-		traced.Infof(
-			"Could not handle %s operation for %s %q because SubjectAccessReview has allowed status set to false",
-			req.Operation,
-			csb.Kind,
-			csb.Name,
-		)
-		return fmt.Errorf("could not %s %s %q", req.Operation, csb.Kind, csb.Name)
+		msg := fmt.Sprintf(
+			"broker forbidden access to auth secret (%s): Reason: %s, EvaluationError: %s",
+			secretRef.Name,
+			sar.Status.Reason,
+			sar.Status.EvaluationError)
+		traced.Info(msg)
+		return webhookutil.NewWebhookError(msg, http.StatusForbidden)
 	}
 
 	return nil

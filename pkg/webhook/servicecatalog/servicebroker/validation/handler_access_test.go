@@ -60,7 +60,7 @@ func (m *fakedClient) Create(ctx context.Context, obj runtime.Object, opts ...cl
 }
 
 func TestAdmissionHandlerAccessToBrokerAllowed(t *testing.T) {
-	//Given
+	// given
 	err := sc.AddToScheme(scheme.Scheme)
 	require.NoError(t, err)
 
@@ -85,7 +85,7 @@ func TestAdmissionHandlerAccessToBrokerAllowed(t *testing.T) {
 		operation admissionv1beta1.Operation
 		object    []byte
 	}{
-		"Request for Create ServiceBroker should be allowed": {
+		"Request for Create ServiceBroker without AuthInfo should be allowed": {
 			admissionv1beta1.Create,
 			[]byte(`{
   				"apiVersion": "servicecatalog.k8s.io/v1beta1",
@@ -100,7 +100,7 @@ func TestAdmissionHandlerAccessToBrokerAllowed(t *testing.T) {
   				}
 			}`),
 		},
-		"Request for Update ServiceBroker should be allowed": {
+		"Request for Update ServiceBroker without AuthInfo should be allowed": {
 			admissionv1beta1.Update,
 			[]byte(`{
   				"apiVersion": "servicecatalog.k8s.io/v1beta1",
@@ -165,7 +165,7 @@ func TestAdmissionHandlerAccessToBrokerAllowed(t *testing.T) {
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
-			// Given
+			// given
 			handler := validation.AdmissionHandler{}
 			handler.CreateValidators = []validation.Validator{&validation.AccessToBroker{}}
 			handler.UpdateValidators = []validation.Validator{&validation.AccessToBroker{}}
@@ -178,17 +178,17 @@ func TestAdmissionHandlerAccessToBrokerAllowed(t *testing.T) {
 			request.AdmissionRequest.Operation = test.operation
 			request.AdmissionRequest.Object.Raw = test.object
 
-			// When
-			response := handler.Handle(context.TODO(), request)
+			// when
+			response := handler.Handle(context.Background(), request)
 
-			// Then
+			// then
 			assert.True(t, response.AdmissionResponse.Allowed)
 		})
 	}
 }
 
 func TestAdmissionHandlerAccessToBrokerDenied(t *testing.T) {
-	//Given
+	// given
 	err := sc.AddToScheme(scheme.Scheme)
 	require.NoError(t, err)
 
@@ -265,7 +265,7 @@ func TestAdmissionHandlerAccessToBrokerDenied(t *testing.T) {
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
-			// Given
+			// given
 			handler := validation.AdmissionHandler{}
 			handler.CreateValidators = []validation.Validator{&validation.AccessToBroker{}}
 			handler.UpdateValidators = []validation.Validator{&validation.AccessToBroker{}}
@@ -280,10 +280,10 @@ func TestAdmissionHandlerAccessToBrokerDenied(t *testing.T) {
 			request.AdmissionRequest.Operation = test.operation
 			request.AdmissionRequest.Object.Raw = test.object
 
-			// When
-			response := handler.Handle(context.TODO(), request)
+			// when
+			response := handler.Handle(context.Background(), request)
 
-			// Then
+			// then
 			assert.False(t, response.AdmissionResponse.Allowed)
 		})
 	}

@@ -38,7 +38,7 @@ const (
 )
 
 func TestAdmissionHandlerServiceInstanceReferenceUpToDate(t *testing.T) {
-	//Given
+	// given
 	namespace := "test-handler"
 	err := sc.AddToScheme(scheme.Scheme)
 	require.NoError(t, err)
@@ -84,17 +84,13 @@ func TestAdmissionHandlerServiceInstanceReferenceUpToDate(t *testing.T) {
 		"Request for Create ServiceBinding should be allowed": {
 			admissionv1beta1.Create,
 		},
-		"Request for Update ServiceBinding should be allowed": {
-			admissionv1beta1.Update,
-		},
 	}
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
-			// Given
+			// given
 			handler := validation.AdmissionHandler{}
 			handler.CreateValidators = []validation.Validator{&validation.ReferenceDeletion{}}
-			handler.UpdateValidators = []validation.Validator{&validation.ReferenceDeletion{}}
 
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ServiceInstance{
 				ObjectMeta: metav1.ObjectMeta{
@@ -110,17 +106,17 @@ func TestAdmissionHandlerServiceInstanceReferenceUpToDate(t *testing.T) {
 
 			request.AdmissionRequest.Operation = test.operation
 
-			// When
-			response := handler.Handle(context.TODO(), request)
+			// when
+			response := handler.Handle(context.Background(), request)
 
-			// Then
+			// then
 			assert.True(t, response.AdmissionResponse.Allowed)
 		})
 	}
 }
 
 func TestAdmissionHandlerServiceInstanceReferenceOutOfDate(t *testing.T) {
-	//Given
+	// given
 	namespace := "test-handler"
 	err := sc.AddToScheme(scheme.Scheme)
 	require.NoError(t, err)
@@ -166,17 +162,13 @@ func TestAdmissionHandlerServiceInstanceReferenceOutOfDate(t *testing.T) {
 		"Request for Create ServiceBinding should be denied": {
 			admissionv1beta1.Create,
 		},
-		"Request for Update ServiceBinding should be denied": {
-			admissionv1beta1.Update,
-		},
 	}
 
 	for desc, test := range tests {
 		t.Run(desc, func(t *testing.T) {
-			// Given
+			// given
 			handler := validation.AdmissionHandler{}
 			handler.CreateValidators = []validation.Validator{&validation.ReferenceDeletion{}}
-			handler.UpdateValidators = []validation.Validator{&validation.ReferenceDeletion{}}
 
 			fakeClient := fake.NewFakeClientWithScheme(sch, &sc.ServiceInstance{
 				ObjectMeta: metav1.ObjectMeta{
@@ -193,10 +185,10 @@ func TestAdmissionHandlerServiceInstanceReferenceOutOfDate(t *testing.T) {
 
 			request.AdmissionRequest.Operation = test.operation
 
-			// When
-			response := handler.Handle(context.TODO(), request)
+			// when
+			response := handler.Handle(context.Background(), request)
 
-			// Then
+			// then
 			assert.False(t, response.AdmissionResponse.Allowed)
 		})
 	}
