@@ -18,7 +18,6 @@ package validation
 
 import (
 	"context"
-	"errors"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/webhookutil"
 	admissionTypes "k8s.io/api/admission/v1beta1"
@@ -97,7 +96,7 @@ func (h *AdmissionHandler) Handle(ctx context.Context, req admission.Request) ad
 		case http.StatusForbidden:
 			return admission.Denied(err.Error())
 		default:
-			return admission.Errored(err.Code(), errors.New(err.Error()))
+			return admission.Errored(err.Code(), err)
 		}
 	}
 
