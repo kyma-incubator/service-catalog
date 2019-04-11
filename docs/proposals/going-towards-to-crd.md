@@ -1,10 +1,10 @@
 # Service Catalog migration to CRDs
 
-In the Service Catalog, we would like to replace the Aggregated API Server with the CustomResourceDefinitions (CRDs) solution. This document presents all the concerns and possible solutions regarding the combination of two approaches (supporting both  Aggregated API Server and CRDs), and the standalone CRDs solution.
+In the Service Catalog, we would like to replace the Aggregated API Server with the CustomResourceDefinitions (CRDs) solution. This document presents all the concerns and possible solutions regarding the combination of two approaches (supporting both Aggregated API Server and CRDs), and the standalone CRDs solution.
 
 ## Support for both Aggregated API Server and CRDs in the same code-base
 
-Below you can find our concerns about having a single executable binary that supports both the Aggregated API Server and CRDs in the same code-base, and changing the behavior by using a feature gate. 
+Below you can find our concerns about having a single executable binary that supports both Aggregated API Server and CRDs in the same code-base, and changing the behavior by using a feature gate. 
 
 ### Business concerns
 
@@ -17,7 +17,7 @@ Another problem is to provide consistent and up-to-date documentation for both s
 
 ### Technical concerns
 
-We need to clearly state that in the Service Catalog, the Aggregated API Server and the CRDs are not only about the underlying storage backend. Around those approaches, we have business logic. Because of that, we will end up with a lot of `if` statements in the following areas:
+We need to clearly state that in the Service Catalog, Aggregated API Server and CRDs are not only about the underlying storage backend. Around those approaches, we have business logic. Because of that, we will end up with a lot of `if` statements in the following areas:
 
 - controller reconcile process 
 
@@ -51,8 +51,8 @@ We need to clearly state that in the Service Catalog, the Aggregated API Server 
 
 - underlying constraint of different Kubernetes versions
 
-As you can see above, the Aggregated API Sever use the validation and mutation in a different way. Sometimes the same logic is split across different pkgs. In CRDs, we unified that and adjusted/copied this validation and mutation logic directly to the webhook domain. If we want to support both the API and CRDs concepts, then we need to invest some time to extract this logic to some common libraries. Then, in both places use generic validation and mutation with an overhead of adjusting the generic interfaces to a custom one. 
-Additionally, after removing the API Server, we need to migrate them back to the domain and make concrete method interfaces. Having this logic extracted will only mess the code and an additional abstraction layer can confuse other developers.
+As you can see above, the Aggregated API Sever use the validation and mutation in a different way. Sometimes the same logic is split across different pkgs. In CRDs, we unified that and adjusted/copied the validation and mutation logic directly to the webhook domain. If we want to support both the API Server and CRDs concepts, we must invest some time to extract this logic to some common libraries. Then, in both places use generic validation and mutation with an overhead of adjusting the generic interfaces to a custom one. 
+Additionally, after removing the API Server, we need to migrate them back to the domain and make concrete method interfaces. Having this logic extracted will only mess the code as the additional abstraction layer can confuse other developers.
  
 > **NOTE:** The described differences are those that we've noticed from the general walkthrough. Finally, there may be even more differences, especially if we will support adding features both for API Server and CRDs.
  
@@ -60,15 +60,15 @@ Additionally, after removing the API Server, we need to migrate them back to the
 
 ## Alternative CRDs solution
 
-Before merging the CRDs solution into the master, create the `release-0.1` branch with the latest release of the Service Catalog with the Aggregated API Server. On the `release-0.1` branch, we still **fix bugs** for this version of Service Catalog, however, new features are not introduced. When some bug will be found then we can fix it and still in an easy way create a release with the `0.1.x` version. 
+Before merging the CRDs solution into the master, create the `release-0.1` branch with the latest release of the Service Catalog with Aggregated API Server. On the `release-0.1` branch, we still **fix bugs** for this version of the Service Catalog but we do not introduce any new features. When any bugs will be found, we can fix them and still easily create a release with the `0.1.x` version. 
 
-In the master branch, we have Service Catalog with the CRDs approach. New releases are created with the `0.2.x` version. On the master branch, we are doing both the bug fixing and adding new features.
+In the master branch, we introduce the Service Catalog with the CRDs approach. We fix bugs and add new features there. New releases are created with the `0.2.x` version.
 
 Such strategy will help us get new CRDs customers fast and will show that the CRDs solution is our new direction.
  
-On the other hand, existing Service Catalog customers will see that the old solution is deprecating and will exist only till a specific date (e.g. January 2020), and that since then all new features will be available with CRDs. Thanks to that, they will consider updating their system to the newest version as soon as possible because the goal is to use the CRDs solution as Kubernetes community recommends that.
+On the other hand, existing Service Catalog customers will see that the old solution is deprecating and will exist only till a specific date (e.g. January 2020), and that since then all new features will be available with CRDs. Thanks to that, they will consider updating their system to the newest version as soon as possible because the goal is to use the CRDs solution recommended by the Kubernetes community.
 
-We can set a reasonable time for supporting bug fixing for the Service Catalog with Aggregated API Server (e.g. Jan 2020).
+We can set a reasonable time for supporting bug fixes for the Service Catalog with Aggregated API Server (e.g. Jan 2020).
 
 The described solution mitigates concerns from the previous section.
      
@@ -76,7 +76,7 @@ The described solution mitigates concerns from the previous section.
 
 We need to create a migration guide/scripts to convince existing customers to use the new Service Catalog version. The migration needs to be as simple as possible.
 
-The migration will be simpler if we will support only bug fixing in the Aggregated API Server.   
+The migration will be simpler if we will support only bug fixing in Aggregated API Server.   
 
 ### Details
 
@@ -101,10 +101,10 @@ Raw scenario:
 
 ## Conclusions
 
-We need to be sure that the customer will exactly know in which direction we want to go and why. Supporting only bug fixing for api-server will simplify adding new features and will give customers time for migration. The migration process will be easier when we will stop developing features in the Aggregated API Server solution. For new contributors, it will be much easier to get familiar with the code base where only one approach is used. 
+We need to be sure that the customer will exactly know in which direction we want to go and why. Supporting only bug fixing for API Server will simplify adding new features and will give customers time for migration. The migration process will be easier when we will stop developing features in Aggregated API Server solution. For new contributors, it will be much easier to get familiar with the code base where only one approach is used. 
 
-From our perspective, supporting both approaches at the same time, with bug fixing and new features, will just postpone the whole process. Sooner or later, we will have to take all these steps and back to the discussion. The only problem with doing that later can be that it will be harder (technical debt, confused customers, etc.)
+From our perspective, supporting both approaches at the same time, with bug fixing and new features, will just postpone the whole process. Sooner or later, we will have to take all these steps and back to the discussion. The later we migrate, the more difficult the whole process will become (technical debt, confused customers, etc.).
 
 What we need:
-- set a date (e.g. Jan 2020) when api-server will be erased from the Service Catalog repository 
-- communicate via Service Catalog SIG and all channels about the decision as soon as possible, provide CRDs solution and migration guide already.
+- set a date (e.g. Jan 2020) when API Server will be erased from the Service Catalog repository 
+- communicate via Service Catalog SIG and all channels about the decision as soon as possible, provide CRDs solution and migration guide beforehand
