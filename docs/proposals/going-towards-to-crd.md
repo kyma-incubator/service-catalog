@@ -51,7 +51,8 @@ We need to clearly state that in the Service Catalog, the Aggregated API Server 
 
 - underlying constraint of different Kubernetes versions
 
-As you can see above, the Aggregated API Sever use the validation and mutation in a different way. Sometimes the same logic is split across different pkgs. In CRDs, we unified that and copied it directly to the webhook domain. If we want to support both the API and CRDs concepts, we need to invest some time to extract it to some common libraries. Then, in both places use it with an overhead of adjusting the generic interfaces to a custom one. Additionally, after removing the API Server, we need to migrate them back to the domain as having it extracted will only mess the code and additional abstraction layer can confuse other developers.  
+As you can see above, the Aggregated API Sever use the validation and mutation in a different way. Sometimes the same logic is split across different pkgs. In CRDs, we unified that and adjusted/copied this validation and mutation logic directly to the webhook domain. If we want to support both the API and CRDs concepts, then we need to invest some time to extract this logic to some common libraries. Then, in both places use generic validation and mutation with an overhead of adjusting the generic interfaces to a custom one. 
+Additionally, after removing the API Server, we need to migrate them back to the domain and make concrete method interfaces. Having this logic extracted will only mess the code and an additional abstraction layer can confuse other developers.
  
 > **NOTE:** The described differences are those that we've noticed from the general walkthrough. Finally, there may be even more differences, especially if we will support adding features both for API Server and CRDs.
  
