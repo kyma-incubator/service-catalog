@@ -1,6 +1,6 @@
 # Service Catalog going towards to CRDs
 
- In Service Catalog we want to replace the Aggregated API with the CRD solution. This document specifies the concerns and possible solutions for supporting Service Catalog with an Aggregated API and the new Custom Resource Definitions (CRDs) approach.
+ In Service Catalog we want to replace the Aggregated API Server with the CRD solution. This document specifies the concerns and possible solutions for supporting Service Catalog with an Aggregated API Server and the new Custom Resource Definitions (CRDs) approach.
 
 ## Support both Aggregated API and CRDs in the same code-base
 
@@ -9,15 +9,15 @@ Below you will find our concerns about having a single executable binary that su
 ### Business concerns
 
 Adding CRDs via feature flag directly in Helm Chart can be misleading for the client. 
-The CRDs it’s not a feature. It is just a new implementation for already existing feature. Leaving configuration [`apiserver.storage.type`: crds/etcd](https://github.com/kubernetes-incubator/service-catalog/blob/master/charts/catalog/values.yaml#L61-L62) is more like extending but not deprecating it. We do not want to make that customer think that **CRD** or **etcd** is an option as storage. Customers should know that the etcd is deprecated and they should consider switching for CRDs approach as soon as possible.  
+The CRDs it’s not a feature. It is just a new implementation for already existing features. Current [`apiserver.storage.type`: crds/etcd](https://github.com/kubernetes-incubator/service-catalog/blob/master/charts/catalog/values.yaml#L61-L62) configuration indicates more extending but not deprecating etcd. We do not want to make customers think that **CRD** or **etcd** is an option as storage. Customers should know that the etcd is deprecated and they should consider switching for CRDs approach as soon as possible.  
 
 Additionally, supporting bugs fixing and adding new features both in Aggregated API and CRDs could slow-down the development process.    
 
-Another problem is to have consistent and up-to-date documentation. When we will support both approaches then we need to maintain documentation for them too. One more time it could be misleading for customers if we will show them that we are going in two directions at the same time.    
+Another problem is to have consistent and up-to-date documentation for both solutions. One more time it could be misleading for customers to see that we are going in two directions at once.
 
 ### Technical concerns
 
-We need to clearly state that in Service Catalog the Aggregated API and the CRDs are not only about the underlying storage backend. Around those approaches, we have business logic. Because of that, we will end up with a lot of `if` statements in:
+We need to clearly state that in the Service Catalog, the Aggregated API and the CRDs are not only about the underlying storage backend. Around those approaches, we have business logic. Because of that, we will end up with a lot of `if` statements in:
 - controller reconcile process 
 
   |                                   | Aggregated API                      | CRDs                                                                                   |
@@ -57,29 +57,29 @@ We need to clearly state that in Service Catalog the Aggregated API and the CRDs
 
 ## Alternative Solution
 
-Before merging the CRDs solution into the master, create a branch `release-0.1` with the last release of Service Catalog with Aggregated API server. 
+Before merging the CRDs solution into the master, create a branch `release-0.1` with the latest release of Service Catalog with Aggregated API Server. 
 On the `release-0.1` branch we are still doing the **bug fixing** for this version of Service Catalog but features are not introduced. When some bug will be found then we can fix it and still in an easy way create a release with version `0.1.x` 
 
 In the master branch, we have Service Catalog with the CRD approach. New releases are created with the `0.2.x` version. On master branch, we are doing both the bug fixing and adding new features.
 
-Such strategy will help us to get new customers cause we will show that the CRD is our new direction on which we want to focus. 
+Above strategy will help us to get new CRD customers fast and will show that the CRD is our new direction.
  
-On the other hand, existing Service Catalog customers will see that the old solution is deprecated and the new features will be available only in the new approach. Thanks to that they will consider updating their system to the newest version as soon as possible cause the goal is to use the CRD solution as Kubernetes community recommends that.
+On the other hand, existing Service Catalog customers will see that the old solution is deprecated and will exists till e.g. January 2020,  and all new features will be available with CRDs. Thanks to that they will consider updating their system to the newest version as soon as possible cause the goal is to use the CRD solution as Kubernetes community recommends that.
 
-We can set a reasonable time for supporting bug fixing for the Service Catalog with Aggregated API, e.g. 1 year.
+We can set a reasonable time for supporting bug fixing for the Service Catalog with Aggregated API, e.g. Jan 2020
 
-With such solution, problems described in the previous section are mitigated.  
+Described solution mitigates concerns from the previous section.
      
 ## Migration Support
 
-If we want to convince existing customers to use the new Service Catalog version then we need to create a migration guide/scripts. The migration needs to be as simple as possible.
+We need to create a migration guide/scripts to convince existing customers to use the new Service Catalog version. The migration needs to be as simple as possible.
 
 The migration will be simpler when we will hardcode for a given functionality in Aggregated API. 
 
 #### Details
 
 The migration logic can be placed in the Service Catalog Helm Chart. 
-When someone wants to upgrade existing Service Catalog to the newest one, then he can execute `helm upgrade {release-name} svc-cat/catalog`
+Customers just need to execute `helm upgrade {release-name} svc-cat/catalog`
 
 Raw scenario:
 - **pre-upgrade hook**
@@ -99,6 +99,10 @@ Raw scenario:
 
 ## Sum up
 
-We need to be sure that customer will exactly know in which direction we want to go. Supporting only bug fixing for api-server could simplify adding new features while we will still provide support for older clients. The migration process will also be easier when we will hardcode for a given functionality in Aggregated API. For new contributors, it will be much easier to get familiar with the code base where only one approach is used. 
+We need to be sure that customer will exactly know in which direction we want to go and why. Supporting only bug fixing for api-server will simplify adding new features and will give time to customers for migration. The migration process will be easier when we will stop developing features in the Aggregated API Server solution. For new contributors, it will be much easier to get familiar with the code base where only one approach is used. 
 
-From our perspective having both approaches at the same time and supporting bug fixing and feature for both of them causing only that we are postponing the whole process. Sooner or later, we will have to take all these steps and back to the discussion. The only problem with doing that later can be that it will be harder (technical debt, confused customers, etc.)
+From our perspective supporting both approaches at the same time with bug fixing and features will just postpone the whole process. Sooner or later, we will have to take all these steps and back to the discussion. The only problem with doing that later can be that it will be harder (technical debt, confused customers, etc.)
+
+What we need:
+- set a date e.g. Jan 2020 when api-server will be erased from Service Catalog repository 
+- as soon as possible communicate via service catalog sig and all channels about above decision, provide CRD solution and migration guide already.
