@@ -1635,7 +1635,7 @@ func (c *controller) handleServiceBindingPollingError(binding *v1beta1.ServiceBi
 	return c.continuePollingServiceBinding(binding)
 }
 
-func getServiceBindingLastConditionState(status v1beta1.ServiceBindingStatus) string{
+func getServiceBindingLastConditionState(status v1beta1.ServiceBindingStatus) string {
 	if len(status.Conditions) > 0 {
 		condition := status.Conditions[len(status.Conditions)-1]
 		if condition.Status == v1beta1.ConditionTrue {

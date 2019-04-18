@@ -1003,7 +1003,6 @@ type ServiceInstanceStatus struct {
 	// UserSpecifiedClassName aggregates cluster or namespace ClassName
 	// It is used for printing in a kubectl output via additionalPrinterColumns
 	UserSpecifiedClassName string `json:"userSpecifiedClassName"`
-
 }
 
 // ServiceInstanceCondition contains condition information about an Instance.

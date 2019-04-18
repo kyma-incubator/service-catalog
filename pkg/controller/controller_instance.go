@@ -786,7 +786,6 @@ func (c *controller) reconcileServiceInstanceUpdate(instance *v1beta1.ServiceIns
 		))
 	}
 
-
 	if c.resolveServiceInstanceUserSpecifiedClassAndPlan(instance) {
 		updatedInstance, err := c.updateServiceInstanceStatus(instance)
 		if err != nil {
@@ -2952,8 +2951,7 @@ func setServiceInstanceLastOperation(instance *v1beta1.ServiceInstance, operatio
 	}
 }
 
-
-func getServiceInstanceLastConditionState(status v1beta1.ServiceInstanceStatus) string{
+func getServiceInstanceLastConditionState(status v1beta1.ServiceInstanceStatus) string {
 	if len(status.Conditions) > 0 {
 		condition := status.Conditions[len(status.Conditions)-1]
 		if condition.Status == v1beta1.ConditionTrue {
@@ -2964,8 +2962,7 @@ func getServiceInstanceLastConditionState(status v1beta1.ServiceInstanceStatus) 
 	return ""
 }
 
-
-func (c *controller)  resolveServiceInstanceUserSpecifiedClassAndPlan(instance *v1beta1.ServiceInstance) bool {
+func (c *controller) resolveServiceInstanceUserSpecifiedClassAndPlan(instance *v1beta1.ServiceInstance) bool {
 	if instance.Status.UserSpecifiedPlanName != "" ||
 		instance.Status.UserSpecifiedClassName != "" {
 		return false
@@ -2978,7 +2975,7 @@ func (c *controller)  resolveServiceInstanceUserSpecifiedClassAndPlan(instance *
 	return true
 }
 
-func getServiceInstanceCommonClassAndPlan(instance v1beta1.ServiceInstance) (string, string){
+func getServiceInstanceCommonClassAndPlan(instance v1beta1.ServiceInstance) (string, string) {
 	var class, plan string
 	if instance.Spec.ClusterServiceClassSpecified() && instance.Spec.ClusterServicePlanSpecified() {
 		class = fmt.Sprintf("ClusterServiceClass/%s", instance.Spec.GetSpecifiedClusterServiceClass())
