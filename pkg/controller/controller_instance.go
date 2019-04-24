@@ -542,15 +542,9 @@ func (c *controller) reconcileServiceInstanceAdd(instance *v1beta1.ServiceInstan
 	if c.resolveServiceInstanceUserSpecifiedClassAndPlan(instance) {
 		updatedInstance, err := c.updateServiceInstanceStatus(instance)
 		if err != nil {
-			// There has been an update to the instance. Start reconciliation
-			// over with a fresh view of the instance.
 			return err
 		}
-		if updatedInstance.ResourceVersion != instance.ResourceVersion {
-			// instance has been updated, we will to continue in the next iteration
-			return nil
-		}
-		instance = updatedInstance
+		instance.ResourceVersion = updatedInstance.ResourceVersion
 	}
 
 	if utilfeature.DefaultFeatureGate.Enabled(scfeatures.ServicePlanDefaults) {
@@ -789,15 +783,9 @@ func (c *controller) reconcileServiceInstanceUpdate(instance *v1beta1.ServiceIns
 	if c.resolveServiceInstanceUserSpecifiedClassAndPlan(instance) {
 		updatedInstance, err := c.updateServiceInstanceStatus(instance)
 		if err != nil {
-			// There has been an update to the instance. Start reconciliation
-			// over with a fresh view of the instance.
 			return err
 		}
-		if updatedInstance.ResourceVersion != instance.ResourceVersion {
-			// instance has been updated, we will to continue in the next iteration
-			return nil
-		}
-		instance = updatedInstance
+		instance.ResourceVersion = updatedInstance.ResourceVersion
 	}
 
 	c.setRetryBackoffRequired(instance)
