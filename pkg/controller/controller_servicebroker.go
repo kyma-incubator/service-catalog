@@ -649,6 +649,8 @@ func updateCommonStatusCondition(pcb *pretty.ContextBuilder, meta metav1.ObjectM
 		now := metav1.NewTime(t)
 		commonStatus.LastCatalogRetrievalTime = &now
 	}
+
+	commonStatus.LastConditionState = getServiceBrokerLastConditionState(*commonStatus)
 }
 
 // updateServiceBrokerCondition updates the ready condition for the given ServiceBroker
@@ -658,7 +660,6 @@ func (c *controller) updateServiceBrokerCondition(broker *v1beta1.ServiceBroker,
 
 	pcb := pretty.NewServiceBrokerContextBuilder(toUpdate)
 	updateCommonStatusCondition(pcb, toUpdate.ObjectMeta, &toUpdate.Status.CommonServiceBrokerStatus, conditionType, status, reason, message)
-	toUpdate.Status.LastConditionState = getServiceBrokerLastConditionState(toUpdate.Status.CommonServiceBrokerStatus)
 
 	klog.V(4).Info(pcb.Messagef("Updating ready condition to %v", status))
 	_, err := c.serviceCatalogClient.ServiceBrokers(broker.Namespace).UpdateStatus(toUpdate)

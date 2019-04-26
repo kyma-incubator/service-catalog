@@ -3841,6 +3841,7 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 		reason                string
 		message               string
 		transitionTimeChanged bool
+		expectedLastCondition string
 	}{
 
 		{
@@ -3849,12 +3850,14 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			status:                v1beta1.ConditionFalse,
 			message:               "message",
 			transitionTimeChanged: true,
+			expectedLastCondition: "",
 		},
 		{
 			name:                  "not ready -> not ready",
 			input:                 getTestServiceInstanceWithStatus(v1beta1.ConditionFalse),
 			status:                v1beta1.ConditionFalse,
 			transitionTimeChanged: false,
+			expectedLastCondition: "",
 		},
 		{
 			name:                  "not ready -> not ready, reason and message change",
@@ -3863,6 +3866,7 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			reason:                "foo",
 			message:               "bar",
 			transitionTimeChanged: false,
+			expectedLastCondition: "foo",
 		},
 		{
 			name:                  "not ready -> ready",
@@ -3870,6 +3874,7 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			status:                v1beta1.ConditionTrue,
 			message:               "message",
 			transitionTimeChanged: true,
+			expectedLastCondition: "Ready",
 		},
 		{
 			name:                  "ready -> ready",
@@ -3877,6 +3882,7 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			status:                v1beta1.ConditionTrue,
 			message:               "message",
 			transitionTimeChanged: false,
+			expectedLastCondition: "Ready",
 		},
 		{
 			name:                  "ready -> not ready",
@@ -3884,6 +3890,7 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			status:                v1beta1.ConditionFalse,
 			message:               "message",
 			transitionTimeChanged: true,
+			expectedLastCondition: "",
 		},
 		{
 			name:                  "message -> message2",
@@ -3891,6 +3898,7 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			status:                v1beta1.ConditionFalse,
 			message:               "message2",
 			transitionTimeChanged: true,
+			expectedLastCondition: "",
 		},
 	}
 
@@ -3905,7 +3913,6 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%v: error updating instance condition: %v", tc.name, err)
 			}
-
 			brokerActions := fakeClusterServiceBrokerClient.Actions()
 			assertNumberOfBrokerActions(t, brokerActions, 0)
 
@@ -3921,6 +3928,10 @@ func TestUpdateServiceInstanceCondition(t *testing.T) {
 			updateActionObject, ok := updatedServiceInstance.(*v1beta1.ServiceInstance)
 			if !ok {
 				t.Fatalf("%v: couldn't convert to instance", tc.name)
+			}
+
+			if updateActionObject.Status.LastConditionState != tc.expectedLastCondition {
+				t.Fatalf("LastConditionState has unexpected value. Expected: %v, got: %v", tc.expectedLastCondition, updateActionObject.Status.LastConditionState)
 			}
 
 			var initialTs metav1.Time
@@ -4816,6 +4827,10 @@ func TestReconcileServiceInstanceUpdateParameters(t *testing.T) {
 	updateObject, ok := updatedServiceInstance.(*v1beta1.ServiceInstance)
 	if !ok {
 		t.Fatalf("couldn't convert to *v1beta1.ServiceInstance")
+	}
+
+	if updateObject.Status.LastConditionState != "Ready" {
+		t.Fatalf("LastConditionState has unexpected value. Expected: %v, got: %v", "Ready", updateObject.Status.LastConditionState)
 	}
 
 	// Verify parameters are what we'd expect them to be, basically name, map with two values in it.
@@ -6401,7 +6416,22 @@ func assertServiceInstanceOperationInProgressWithParameterAndUserSpecifiedFields
 	actions := fakeCatalogClient.Actions()
 	assertNumberOfActions(t, actions, 2)
 
-	updateObject := assertUpdateStatus(t, actions[1], instance)
-	assertServiceInstanceOperationInProgressWithParameters(t, updateObject, operation, planName, planGUID, parameters, parametersChecksum, instance)
-	return updateObject.(*v1beta1.ServiceInstance)
+	updateServiceInstance := assertUpdateStatus(t, actions[1], instance)
+	assertServiceInstanceOperationInProgressWithParameters(t, updateServiceInstance, operation, planName, planGUID, parameters, parametersChecksum, instance)
+
+	updateObject, ok := updateServiceInstance.(*v1beta1.ServiceInstance)
+	if !ok {
+		t.Fatalf("couldn't convert to *v1beta1.ServiceInstance")
+	}
+
+	class, plan := getServiceInstanceCommonClassAndPlan(*updateObject)
+	if updateObject.Status.UserSpecifiedClassName != class {
+		t.Fatalf("Unexpected ClassName: expected %v, got %v", class, updateObject.Status.UserSpecifiedClassName)
+	}
+
+	if updateObject.Status.UserSpecifiedPlanName != plan {
+		t.Fatalf("Unexpected PlanName %v, got %v", plan, updateObject.Status.UserSpecifiedPlanName)
+	}
+
+	return updateObject
 }
