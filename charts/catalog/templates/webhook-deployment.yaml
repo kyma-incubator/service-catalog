@@ -43,6 +43,8 @@ spec:
         - "8080"
         - -v
         - "{{ .Values.webhook.verbosity }}"
+        - --release-name
+        - {{ .Release.Name }}
         - --feature-gates
         - OriginatingIdentity={{.Values.originatingIdentityEnabled}}
         - --feature-gates
@@ -61,7 +63,7 @@ spec:
         readinessProbe:
           httpGet:
             port: 8080
-            path: /healthz
+            path: /healthz/ready
             scheme: HTTP
           failureThreshold: 1
           initialDelaySeconds: 10

@@ -64,7 +64,8 @@ func RunServer(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 }
 
 func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
-	mgr, err := manager.New(config.GetConfigOrDie(), manager.Options{})
+	cfg := config.GetConfigOrDie()
+	mgr, err := manager.New(cfg, manager.Options{})
 	if err != nil {
 		return errors.Wrap(err, "while set up overall controller manager for webhook server")
 	}
@@ -109,6 +110,14 @@ func run(opts *WebhookServerOptions, stopCh <-chan struct{}) error {
 	// setup healthz server
 	healthzSvr := manager.RunnableFunc(func(stopCh <-chan struct{}) error {
 		mux := http.NewServeMux()
+
+		readinessProbe, err := NewReadinessCRDProbe(cfg, opts.ReleaseName)
+		if err != nil {
+			return fmt.Errorf("while register readiness probe: %s", err)
+		}
+		// readiness registered at /healthz/ready indicates if traffic should be routed to this container
+		healthz.InstallPathHandler(mux, "/healthz/ready", readinessProbe)
+
 		// liveness registered at /healthz indicates if the container is responding
 		healthz.InstallHandler(mux, healthz.PingHealthz)
 
