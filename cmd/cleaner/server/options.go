@@ -7,7 +7,6 @@ import (
 
 const (
 	removeCRD                        = "remove-crd"
-	releaseName                      = "release-name"
 	serviceCatalogNamespaceParameter = "service-catalog-namespace"
 	controllerManagerNameParameter   = "controller-manager-deployment"
 )
@@ -15,7 +14,6 @@ const (
 // CleanerOptions holds configuration for cleaner jobs
 type CleanerOptions struct {
 	Command               string
-	ReleaseName           string
 	ReleaseNamespace      string
 	ControllerManagerName string
 }
@@ -28,7 +26,6 @@ func NewCleanerOptions() *CleanerOptions {
 // AddFlags adds flags for a CleanerOptions to the specified FlagSet.
 func (c *CleanerOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&c.Command, "cleaner-command", removeCRD, "Command name to execute")
-	fs.StringVar(&c.ReleaseName, releaseName, "", "Name of ServiceCatalog release used in helm")
 	fs.StringVar(&c.ReleaseNamespace, serviceCatalogNamespaceParameter, "", "Name of namespace where Service Catalog is released")
 	fs.StringVar(&c.ControllerManagerName, controllerManagerNameParameter, "", "Name of controller manager deployment")
 }
@@ -39,7 +36,6 @@ func (c *CleanerOptions) Validate() error {
 		return fmt.Errorf("Command %q is not supported", c.Command)
 	}
 	for name, value := range map[string]string{
-		releaseName:                      c.ReleaseName,
 		serviceCatalogNamespaceParameter: c.ReleaseNamespace,
 		controllerManagerNameParameter:   c.ControllerManagerName,
 	} {

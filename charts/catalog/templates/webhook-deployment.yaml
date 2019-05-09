@@ -43,8 +43,6 @@ spec:
         - "8080"
         - -v
         - "{{ .Values.webhook.verbosity }}"
-        - --release-name
-        - {{ .Release.Name }}
         - --feature-gates
         - OriginatingIdentity={{.Values.originatingIdentityEnabled}}
         - --feature-gates

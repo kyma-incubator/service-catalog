@@ -27,7 +27,6 @@ import (
 
 const (
 	certDirectory            = "/var/run/service-catalog-webhook"
-	releaseName              = "release-name"
 	defaultWebhookServerPort = 8444
 	defaultHealthzServerPort = 8080
 )
@@ -55,7 +54,6 @@ func NewWebhookServerOptions() *WebhookServerOptions {
 // AddFlags adds flags for a WebhookServerOptions to the specified FlagSet.
 func (s *WebhookServerOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.IntVar(&s.HealthzServerBindPort, "healthz-server-bind-port", defaultHealthzServerPort, "The port on which to serve HTTP  /healthz endpoint")
-	fs.StringVar(&s.ReleaseName, releaseName, "", "Name of ServiceCatalog release used in helm")
 
 	s.SecureServingOptions.AddFlags(fs)
 	utilfeature.DefaultFeatureGate.AddFlag(fs)
@@ -69,9 +67,6 @@ func (s *WebhookServerOptions) Validate() error {
 
 	if s.SecureServingOptions.BindPort == s.HealthzServerBindPort {
 		errors = append(errors, fmt.Errorf("validation erorr: --secure-port and --healthz-server-bind-port MUST have different values"))
-	}
-	if s.ReleaseName == "" {
-		errors = append(errors, fmt.Errorf("flag %q cannot be empty", releaseName))
 	}
 
 	return utilerrors.NewAggregate(errors)

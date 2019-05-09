@@ -19,6 +19,10 @@ package server
 import (
 	"fmt"
 	"github.com/kubernetes-incubator/service-catalog/pkg/cleaner"
+	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 // RunCommand executes one of the command from CleanerOptions
@@ -27,10 +31,27 @@ func RunCommand(opt *CleanerOptions) error {
 		return err
 	}
 
-	clr, err := cleaner.NewCleaner()
+	k8sKubeconfig, err := rest.InClusterConfig()
 	if err != nil {
-		return fmt.Errorf("failed get new Cleaner: %s", err)
+		return fmt.Errorf("failed to get Kubernetes client config: %v", err)
 	}
 
-	return clr.RemoveCRDs(opt.ReleaseName, opt.ReleaseNamespace, opt.ControllerManagerName)
+	client, err := kubernetes.NewForConfig(k8sKubeconfig)
+	if err != nil {
+		return fmt.Errorf("failed to get kubernetes client: %s", err)
+	}
+
+	scClient, err := sc.NewForConfig(k8sKubeconfig)
+	if err != nil {
+		return fmt.Errorf("failed to get ServiceCatalog client: %v", err)
+	}
+
+	apiextClient, err := apiextensionsclientset.NewForConfig(k8sKubeconfig)
+	if err != nil {
+		return fmt.Errorf("failed to get Apiextensions client: %v", err)
+	}
+
+	clr := cleaner.New(client, scClient, apiextClient)
+
+	return clr.RemoveCRDs(opt.ReleaseNamespace, opt.ControllerManagerName)
 }
