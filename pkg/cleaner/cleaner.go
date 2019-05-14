@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Kubernetes Authors.
+Copyright 2019 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
+	"log"
 	"time"
 )
 
@@ -46,12 +47,21 @@ func New(
 	}
 }
 
-// RemoveCRDs takes four steps, first scale down controller manager deployment, second removes all ServiceCatalog CRDs,
-// third removes all finalizers from CRs and the last step makes sure all ServiceCatalog CRDs are removed
-func (c *Cleaner) RemoveCRDs(releaseNamespace, controllerManagerName string) error {
+// RemoveCRDs takes five steps,
+// first scale down controller manager deployment,
+// second remove ServiceCatalog WebhookConfigurations
+// third removes all ServiceCatalog CRDs,
+// four removes all finalizers from CRs
+// and the last step makes sure all ServiceCatalog CRDs are removed
+func (c *Cleaner) RemoveCRDs(releaseNamespace, controllerManagerName string, webhookConf []string) error {
 	err := c.scaleDownController(releaseNamespace, controllerManagerName)
 	if err != nil {
 		return fmt.Errorf("failed to scale down controller manager: %v", err)
+	}
+
+	err = c.removeWebhookConfigurations(webhookConf)
+	if err != nil {
+		return fmt.Errorf("failed to remove WebhookConfigurations: %v", err)
 	}
 
 	err = c.removeCRDs(c.apiextensionsClient)
@@ -76,10 +86,7 @@ func (c *Cleaner) RemoveCRDs(releaseNamespace, controllerManagerName string) err
 
 func (c *Cleaner) scaleDownController(namespace, controllerName string) error {
 	klog.V(4).Infof("Fetching deployment %s/%s", namespace, controllerName)
-	deployment, err := c.client.
-		AppsV1beta1().
-		Deployments(namespace).
-		Get(controllerName, v1.GetOptions{})
+	deployment, err := c.client.AppsV1beta1().Deployments(namespace).Get(controllerName, v1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot get deployment %s/%s: %s", namespace, controllerName, err)
 	}
@@ -114,6 +121,52 @@ func (c *Cleaner) scaleDownController(namespace, controllerName string) error {
 	return nil
 }
 
+func (c *Cleaner) removeWebhookConfigurations(names []string) error {
+	klog.V(4).Info("Removing all ServiceCatalog MutatingWebhookConfigurations")
+	listMutating, err := c.client.AdmissionregistrationV1beta1().MutatingWebhookConfigurations().List(v1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to get MutatingWebhookConfiguration list: %v", err)
+	}
+
+	for _, mwc := range listMutating.Items {
+		if !elementExist(mwc.Name, names) {
+			continue
+		}
+		err = c.client.AdmissionregistrationV1beta1().MutatingWebhookConfigurations().Delete(mwc.Name, &v1.DeleteOptions{})
+		if err != nil {
+			return fmt.Errorf("failed to remove MutatingWebhookConfiguration %s: %v", mwc.Name, err)
+		}
+	}
+
+	klog.V(4).Info("Removing all ServiceCatalog ValidatingWebhookConfigurations")
+	listValidating, err := c.client.AdmissionregistrationV1beta1().ValidatingWebhookConfigurations().List(v1.ListOptions{})
+	if err != nil {
+		log.Fatalf("failed to get ValidatingWebhookConfiguration list: %v", err)
+	}
+
+	for _, vwc := range listValidating.Items {
+		if !elementExist(vwc.Name, names) {
+			continue
+		}
+		err = c.client.AdmissionregistrationV1beta1().ValidatingWebhookConfigurations().Delete(vwc.Name, &v1.DeleteOptions{})
+		if err != nil {
+			return fmt.Errorf("failed to remove ValidatingWebhookConfiguration %s: %v", vwc.Name, err)
+		}
+	}
+
+	return nil
+}
+
+func elementExist(needle string, stack []string) bool {
+	for _, element := range stack {
+		if element == needle {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *Cleaner) removeCRDs(apiextensionsClient apiextensionsclientset.Interface) error {
 	klog.V(4).Info("Removing all ServiceCatalog CustomResourceDefinitions")
 	list, err := apiextensionsClient.ApiextensionsV1beta1().CustomResourceDefinitions().List(v1.ListOptions{})
@@ -139,15 +192,15 @@ func (c *Cleaner) checkCRDsNotExist(apiextensionsClient apiextensionsclientset.I
 	if err != nil {
 		return fmt.Errorf("failed to list CustomResourceDefinition: %s", err)
 	}
-	var amount int
+	var crds []string
 	for _, crd := range list.Items {
 		if probe.IsServiceCatalogCustomResourceDefinition(crd) {
-			amount++
+			crds = append(crds, crd.Name)
 		}
 	}
 
-	if amount != 0 {
-		return fmt.Errorf("CustomResourceDefinitions list is not empty. There are %d CRD(s)", amount)
+	if len(crds) != 0 {
+		return fmt.Errorf("CustomResourceDefinitions list is not empty. There are %s CRD(s)", crds)
 	}
 
 	return nil

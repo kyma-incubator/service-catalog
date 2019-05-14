@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Kubernetes Authors.
+Copyright 2019 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,5 +53,5 @@ func RunCommand(opt *CleanerOptions) error {
 
 	clr := cleaner.New(client, scClient, apiextClient)
 
-	return clr.RemoveCRDs(opt.ReleaseNamespace, opt.ControllerManagerName)
+	return clr.RemoveCRDs(opt.ReleaseNamespace, opt.ControllerManagerName, opt.WebhookConfigurationsName())
 }

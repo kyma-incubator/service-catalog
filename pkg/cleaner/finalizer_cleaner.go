@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes Authors.
+Copyright 2019 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kubernetes-incubator/service-catalog/pkg/pretty"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -44,52 +45,52 @@ func NewFinalizerCleaner(scClient sc.Interface) *FinalizerCleaner {
 
 // RemoveFinalizers removes specific finalizers from all ServiceCatalog CRs
 func (fc *FinalizerCleaner) RemoveFinalizers() error {
-	klog.V(4).Info("Removing finalizers from ClusterServiceBrokers")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ClusterServiceBroker)
 	err := removeFinalizerFromClusterServiceBroker(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ClusterServiceBroker finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ClusterServiceBroker, err)
 	}
 
-	klog.V(4).Info("Removing finalizers from ServiceBrokers")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ServiceBroker)
 	err = removeFinalizerFromServiceBroker(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ServiceBroker finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ServiceBroker, err)
 	}
 
-	klog.V(4).Info("Removing finalizers from ClusterServiceClasses")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ClusterServiceClass)
 	err = removeFinalizerFromClusterServiceClass(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ClusterServiceClass finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ClusterServiceClass, err)
 	}
 
-	klog.V(4).Info("Removing finalizers from ServiceClasses")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ServiceClass)
 	err = removeFinalizerFromServiceClass(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ServiceClass finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ServiceClass, err)
 	}
 
-	klog.V(4).Info("Removing finalizers from ClusterServicePlans")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ClusterServicePlan)
 	err = removeFinalizerFromClusterServicePlan(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ClusterServicePlan finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ClusterServicePlan, err)
 	}
 
-	klog.V(4).Info("Removing finalizers from ServicePlans")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ServicePlan)
 	err = removeFinalizerFromServicePlan(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ServicePlan finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ServicePlan, err)
 	}
 
-	klog.V(4).Info("Removing finalizers from ServiceInstances")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ServiceInstance)
 	err = removeFinalizerFromServiceInstance(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ServiceInstance finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ServiceInstance, err)
 	}
 
-	klog.V(4).Info("Removing finalizers from ServiceBindings")
+	klog.V(4).Infof("Removing finalizers from %s", pretty.ServiceBinding)
 	err = removeFinalizerFromServiceBinding(fc.client)
 	if err != nil {
-		return fmt.Errorf("failed during removing ServiceBinding finalizer: %s", err)
+		return fmt.Errorf("failed during removing %s finalizer: %s", pretty.ServiceBinding, err)
 	}
 
 	return nil
@@ -98,7 +99,7 @@ func (fc *FinalizerCleaner) RemoveFinalizers() error {
 func removeFinalizerFromClusterServiceBroker(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ClusterServiceBrokers().List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ClusterServiceBrokers: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ClusterServiceBroker, err)
 	}
 
 	for _, broker := range list.Items {
@@ -107,7 +108,7 @@ func removeFinalizerFromClusterServiceBroker(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ClusterServiceBrokers().Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ClusterServiceBrokers %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ClusterServiceBrokerName(toUpdate.Name), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -125,7 +126,7 @@ func removeFinalizerFromClusterServiceBroker(client sc.Interface) error {
 func removeFinalizerFromServiceBroker(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ServiceBrokers(v1.NamespaceAll).List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ServiceBroker: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ServiceBroker, err)
 	}
 
 	for _, broker := range list.Items {
@@ -134,7 +135,7 @@ func removeFinalizerFromServiceBroker(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ServiceBrokers(toUpdate.Namespace).Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ServiceBroker %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ServiceBrokerName(toUpdate.Name), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -152,7 +153,7 @@ func removeFinalizerFromServiceBroker(client sc.Interface) error {
 func removeFinalizerFromClusterServiceClass(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ClusterServiceClasses().List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ClusterServiceClass: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ClusterServiceClass, err)
 	}
 
 	for _, class := range list.Items {
@@ -161,7 +162,7 @@ func removeFinalizerFromClusterServiceClass(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ClusterServiceClasses().Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ClusterServiceClass %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ClusterServiceClassName(toUpdate), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -179,7 +180,7 @@ func removeFinalizerFromClusterServiceClass(client sc.Interface) error {
 func removeFinalizerFromServiceClass(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ServiceClasses(v1.NamespaceAll).List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ServiceClass: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ServiceClass, err)
 	}
 
 	for _, class := range list.Items {
@@ -188,7 +189,7 @@ func removeFinalizerFromServiceClass(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ServiceClasses(toUpdate.Namespace).Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ClusterServiceClass %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ServiceClassName(toUpdate), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -206,7 +207,7 @@ func removeFinalizerFromServiceClass(client sc.Interface) error {
 func removeFinalizerFromClusterServicePlan(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ClusterServicePlans().List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ClusterServicePlan: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ClusterServicePlan, err)
 	}
 
 	for _, plan := range list.Items {
@@ -215,7 +216,7 @@ func removeFinalizerFromClusterServicePlan(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ClusterServicePlans().Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ClusterServicePlan %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ClusterServicePlanName(toUpdate), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -233,7 +234,7 @@ func removeFinalizerFromClusterServicePlan(client sc.Interface) error {
 func removeFinalizerFromServicePlan(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ServicePlans(v1.NamespaceAll).List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ServicePlan: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ServicePlan, err)
 	}
 
 	for _, plan := range list.Items {
@@ -242,7 +243,7 @@ func removeFinalizerFromServicePlan(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ServicePlans(toUpdate.Namespace).Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ServicePlan %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ServicePlanName(toUpdate), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -260,7 +261,7 @@ func removeFinalizerFromServicePlan(client sc.Interface) error {
 func removeFinalizerFromServiceInstance(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ServiceInstances(v1.NamespaceAll).List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ServiceInstance: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ServiceInstance, err)
 	}
 
 	for _, instance := range list.Items {
@@ -269,7 +270,7 @@ func removeFinalizerFromServiceInstance(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ServiceInstances(toUpdate.Namespace).Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ServiceInstance %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ServiceInstanceName(toUpdate), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -287,7 +288,7 @@ func removeFinalizerFromServiceInstance(client sc.Interface) error {
 func removeFinalizerFromServiceBinding(client sc.Interface) error {
 	list, err := client.ServicecatalogV1beta1().ServiceBindings(v1.NamespaceAll).List(v1.ListOptions{})
 	if err != nil && !errors.IsNotFound(err) {
-		return fmt.Errorf("failed to list ServiceBinding: %s", err)
+		return fmt.Errorf("failed to list %s: %s", pretty.ServiceBinding, err)
 	}
 
 	for _, binding := range list.Items {
@@ -296,7 +297,7 @@ func removeFinalizerFromServiceBinding(client sc.Interface) error {
 		toUpdate.Finalizers = finalizersList
 		_, err := client.ServicecatalogV1beta1().ServiceBindings(toUpdate.Namespace).Update(toUpdate)
 		if err != nil {
-			return fmt.Errorf("failed to update ServiceBinding %q: %s", toUpdate.Name, err)
+			return fmt.Errorf("failed to update %s: %s", pretty.ServiceBindingName(toUpdate), err)
 		}
 		err = wait.Poll(finalizerCheckPerdiodTime, finalizerCheckTimeout, func() (done bool, err error) {
 			klog.V(4).Info("waiting for the finalizer to be removed")
@@ -311,11 +312,11 @@ func removeFinalizerFromServiceBinding(client sc.Interface) error {
 	return nil
 }
 
-type CRWithFinalizer interface {
+type FinalizerGetter interface {
 	GetFinalizers() []string
 }
 
-func checkFinalizerIsRemoved(cr CRWithFinalizer, err error) (bool, error) {
+func checkFinalizerIsRemoved(cr FinalizerGetter, err error) (bool, error) {
 	if errors.IsNotFound(err) {
 		return true, nil
 	}
