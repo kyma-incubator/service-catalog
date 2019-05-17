@@ -34,6 +34,8 @@ const (
 	finalizerCheckTimeout     = 30 * time.Second
 )
 
+// FinalizerCleaner is responsible for removing ServiceCatalog finalizers from ServiceCatalog CRs
+// and makes sure all finalizers from CRs are removed
 type FinalizerCleaner struct {
 	client sc.Interface
 }
@@ -312,6 +314,7 @@ func removeFinalizerFromServiceBinding(client sc.Interface) error {
 	return nil
 }
 
+// FinalizerGetter contract for structs which has finalizers
 type FinalizerGetter interface {
 	GetFinalizers() []string
 }

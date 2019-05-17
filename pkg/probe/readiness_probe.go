@@ -49,6 +49,7 @@ var customResourceDefinitionNames = []string{
 	ServiceBinding,
 }
 
+// ReadinessCRD provides functionality that ensures that all ServiceCatalog CRDs are ready
 type ReadinessCRD struct {
 	client apiextensionsclientset.Interface
 }

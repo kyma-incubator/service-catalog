@@ -29,6 +29,7 @@ import (
 	"time"
 )
 
+// Cleaner provides functionality to remove all ServiceCatalog CRDs/CRs
 type Cleaner struct {
 	client              kubernetes.Interface
 	scClient            sc.Interface
