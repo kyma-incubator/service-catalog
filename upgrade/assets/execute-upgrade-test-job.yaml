@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: execute-upgrade-test-job
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 100
+  template:
+    metadata:
+      labels:
+        upgrade-test-job: "true"
+        execute-test-job: "true"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: upgrade-test-job-account
+      containers:
+        - name: examine
+          image: eu.gcr.io/kyma-project/develop/service-catalog/upgrade-test:0.1
+          imagePullPolicy: IfNotPresent
+          # the names point to development names
+          env:
+            - name: SC_APISERVER
+              value: "catalog-catalog-apiserver"
+            - name: SC_CONTROLLER
+              value: "catalog-catalog-controller-manager"
+            - name: SC_NAMESPACE
+              value: "catalog"
+            - name: TB_NAME
+              value: "test-broker-test-broker"
+            - name: TB_NAMESPACE
+              value: "test-broker"
+          command: ["/bin/sh"]
+          args: ["-c", "/root/upgrade-test --action executeTests"]
