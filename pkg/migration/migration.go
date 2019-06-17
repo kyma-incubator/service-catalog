@@ -30,8 +30,8 @@ import (
 
 	sc "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
-	"sigs.k8s.io/yaml"
 	"github.com/pkg/errors"
+	"sigs.k8s.io/yaml"
 )
 
 // Service provides methods (Backup and Restore) to perform a migration from API Server version (0.2.x) to CRDs version (0.3.0).
