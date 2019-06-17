@@ -285,7 +285,7 @@ test-update-goldenfiles: .init
 build-integration: .generate_files
 	$(DOCKER_CMD) go test -race github.com/kubernetes-sigs/service-catalog/test/integration/... -c
 
-test-integration: .init $(scBuildImageTarget) build build-integration
+test-integration: #.init $(scBuildImageTarget) build build-integration
 	@echo Integration tests are currently DISABLED
 	@echo TODO: After this PR https://github.com/kubernetes-sigs/service-catalog/pull/2596 is merged we can bring them back
 
