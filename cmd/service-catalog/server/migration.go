@@ -30,7 +30,7 @@ func NewMigration() *hyperkube.Server {
 		PrimaryName:     "migration",
 		AlternativeName: "service-catalog-apiserver-to-crd-migration",
 		SimpleUsage:     "migration",
-		Long:            "The migration tool migrate Service Catalog resources from API Server (0.2.x) to CRDs (0.3.0) version",
+		Long:            "The migration tool migrates Service Catalog resources from API Server (0.2.x) to CRDs (0.3.0) version",
 		Run: func(_ *hyperkube.Server, args []string, stopCh <-chan struct{}) error {
 			return migration.RunCommand(opts)
 		},
