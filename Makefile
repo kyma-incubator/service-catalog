@@ -179,8 +179,8 @@ $(BINDIR)/e2e.test: .init
 
 # Regenerate all files if the gen exes changed or any "types.go" files changed
 .generate_files: .init generators $(TYPES_FILES)
-	# generate apiserver deps
-	$(DOCKER_CMD) $(BUILD_DIR)/update-apiserver-gen.sh
+	# generate api deps
+	$(DOCKER_CMD) $(BUILD_DIR)/update-apis-gen.sh
 	# generate all pkg/client contents
 	$(DOCKER_CMD) $(BUILD_DIR)/update-client-gen.sh
 	touch $@
@@ -245,7 +245,7 @@ verify-docs: .init
 	@$(DOCKER_CMD) verify-links.sh -s .pkg -s .bundler -s _plugins -s _includes -t $(SKIP_HTTP) .
 
 verify-generated: .init generators
-	$(DOCKER_CMD) $(BUILD_DIR)/update-apiserver-gen.sh --verify-only
+	$(DOCKER_CMD) $(BUILD_DIR)/update-apis-gen.sh --verify-only
 
 verify-client-gen: .init generators
 	$(DOCKER_CMD) $(BUILD_DIR)/verify-client-gen.sh
@@ -286,11 +286,8 @@ build-integration: .generate_files
 	$(DOCKER_CMD) go test -race github.com/kubernetes-sigs/service-catalog/test/integration/... -c
 
 test-integration: .init $(scBuildImageTarget) build build-integration
-	# test kubectl
-	contrib/hack/setup-kubectl.sh
-	contrib/hack/test-apiserver.sh
-	# golang integration tests
-	$(DOCKER_CMD) ./integration.test -test.v $(INT_TEST_FLAGS)
+	@echo Integration tests are currently DISABLED
+	@echo TODO: After this PR https://github.com/kubernetes-sigs/service-catalog/pull/2596 is merged we can bring them back
 
 clean-e2e: .init $(scBuildImageTarget)
 	$(DOCKER_CMD) rm -f $(BINDIR)/e2e.test
