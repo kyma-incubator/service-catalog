@@ -39,16 +39,15 @@ func RunCommand(opt *Options) error {
 	if err != nil {
 		return fmt.Errorf("failed to get Kubernetes client config: %s", err)
 	}
-
 	scClient, err := sc.NewForConfig(restConfig)
 	if err != nil {
 		return fmt.Errorf("failed to create Service Catalog client: %s", err)
 	}
-	scInterface := scClient.ServicecatalogV1beta1()
 	k8sCli, err := k8sClientSet.NewForConfig(restConfig)
 	if err != nil {
 		return fmt.Errorf("failed to create Kubernetes client: %s", err)
 	}
+	scInterface := scClient.ServicecatalogV1beta1()
 
 	svc := migration.NewMigrationService(scInterface, opt.StoragePath, k8sCli.CoreV1())
 	scalingSvc := migration.NewScalingService(opt.ReleaseNamespace, opt.ControllerManagerName, k8sCli.AppsV1())

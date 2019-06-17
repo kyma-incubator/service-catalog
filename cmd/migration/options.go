@@ -22,15 +22,12 @@ import (
 )
 
 const (
-	removeCRD = "remove-crd"
-
-	webhookConfigurationsNames       = "webhook-configurations"
-	serviceCatalogNamespaceParameter = "service-catalog-namespace"
-	controllerManagerNameParameter   = "controller-manager-deployment"
-	storagePathParameter             = "storage-path"
-
 	backupActionName  = "backup"
 	restoreActionName = "restore"
+
+	storagePathParameter             = "storage-path"
+	controllerManagerNameParameter   = "controller-manager-deployment"
+	serviceCatalogNamespaceParameter = "service-catalog-namespace"
 )
 
 // Options holds configuration for the migration job

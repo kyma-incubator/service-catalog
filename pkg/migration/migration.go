@@ -31,6 +31,7 @@ import (
 	sc "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"sigs.k8s.io/yaml"
+	"github.com/pkg/errors"
 )
 
 // Service provides methods (Backup and Restore) to perform a migration from API Server version (0.2.x) to CRDs version (0.3.0).
@@ -92,11 +93,11 @@ func (r *ServiceCatalogResources) writeMetadata(b *strings.Builder, m metav1.Obj
 func (m *Service) loadResource(filename string, obj interface{}) error {
 	b, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", m.storagePath, filename))
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while reading file %s/%s", m.storagePath, filename)
 	}
 	err = m.unmarshaller(b, obj)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while unmarshalling file %s/%s", m.storagePath, filename)
 	}
 	return nil
 }
@@ -418,7 +419,6 @@ func (m *Service) Cleanup(resources *ServiceCatalogResources) error {
 			return err
 		}
 	}
-
 	for _, obj := range resources.serviceBrokers {
 		err := m.scInterface.ServiceBrokers(obj.Namespace).Delete(obj.Name, &metav1.DeleteOptions{})
 		if err != nil {
@@ -439,9 +439,13 @@ func (m *Service) backupResource(obj interface{}, filePrefix string, uid types.U
 	const perm = 0644
 	b, err := m.marshaller(obj)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while marshalling file %s/%s-%s", m.storagePath, filePrefix, uid)
 	}
-	return ioutil.WriteFile(fmt.Sprintf("%s/%s-%s", m.storagePath, filePrefix, uid), b, perm)
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s-%s", m.storagePath, filePrefix, uid), b, perm)
+	if err != nil {
+		return errors.Wrapf(err, "while writing file %s/%s-%s", m.storagePath, filePrefix, uid)
+	}
+	return nil
 }
 
 // BackupResources saves all Service Catalog resources to files.

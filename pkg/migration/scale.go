@@ -69,12 +69,12 @@ func (s *ScalingService) scaleTo(v int) error {
 		return err
 	}
 
-	err = wait.Poll(time.Second, time.Second*30, func() (bool, error) {
+	err = wait.Poll(time.Second, time.Second*45, func() (bool, error) {
 		deploy, err := s.appInterface.Deployments(s.namespace).Get(s.deploymentName, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}
-		if deploy.Status.Replicas == *deploy.Spec.Replicas {
+		if deploy.Status.ReadyReplicas == *deploy.Spec.Replicas {
 			return true, nil
 		}
 		return false, nil
