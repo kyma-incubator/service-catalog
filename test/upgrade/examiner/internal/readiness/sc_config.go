@@ -1,4 +1,4 @@
-package internal
+package readiness
 
 // ServiceCatalogConfig collects all parameters from env variables required to run upgrade tests
 type ServiceCatalogConfig struct {

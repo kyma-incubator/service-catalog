@@ -15,12 +15,9 @@
 
 set -o errexit
 
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 KUBERNETES_VERSION=1.11.5
 VM_DRIVER=hyperkit
-DISK_SIZE=20g
-MEMORY=8192
+MEMORY=6144
 
 function waitForMinikubeToBeUp() {
     echo "Waiting for minikube to be up..."
@@ -64,14 +61,6 @@ function checkMinikubeStatus() {
     fi
 }
 
-function increaseFsInotifyMaxUserInstances() {
-    # Default value of 128 is not enough to perform “kubectl log -f” from pods, hence increased to 524288
-    if [[ "$VM_DRIVER" != "none" ]]; then
-        minikube ssh -- "sudo sysctl -w fs.inotify.max_user_instances=524288"
-        echo "fs.inotify.max_user_instances is increased"
-    fi
-}
-
 function start() {
     minikube start \
     --memory $MEMORY \
@@ -81,12 +70,9 @@ function start() {
     --extra-config=apiserver.enable-admission-plugins="DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook" \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
-    --disk-size=$DISK_SIZE \
     --bootstrapper=kubeadm
 
     waitForMinikubeToBeUp
-
-    increaseFsInotifyMaxUserInstances
 }
 
 start

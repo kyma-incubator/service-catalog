@@ -2,7 +2,6 @@ package runner
 
 import (
 	"fmt"
-	"k8s.io/klog"
 	"regexp"
 	"strings"
 	"time"
@@ -11,6 +10,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
 )
 
 const (
@@ -19,6 +19,10 @@ const (
 	// https://github.com/kubernetes/apimachinery/blob/98853ca904e81a25e2000cae7f077dc30f81b85f/pkg/util/validation/validation.go#L110
 	regexSanitize = "[^a-z0-9]([^-a-z0-9]*[^a-z0-9])?"
 )
+
+// taskFn is a signature for task function.
+// Required to unify the way how UpgradeTest methods are executed.
+type taskFn func(stopCh <-chan struct{}, namespace string) error
 
 // NamespaceCreator has methods required to create k8s ns.
 type NamespaceCreator interface {
@@ -48,7 +52,6 @@ func NewTestRunner(nsCreator NamespaceCreator, tests map[string]UpgradeTest) (*T
 
 // PrepareData prepares data for all registered upgrade tests
 func (r *TestRunner) PrepareData(stopCh <-chan struct{}) error {
-	var failed bool
 	var count int
 
 	for name, test := range r.tests {
@@ -58,7 +61,7 @@ func (r *TestRunner) PrepareData(stopCh <-chan struct{}) error {
 		}
 	}
 
-	if failed {
+	if count > 0 {
 		return fmt.Errorf("executed %d task and %d of them failed", len(r.tests), count)
 	}
 
@@ -67,7 +70,6 @@ func (r *TestRunner) PrepareData(stopCh <-chan struct{}) error {
 
 // ExecuteTests executes all registered tests
 func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
-	var failed bool
 	var count int
 
 	for name, test := range r.tests {
@@ -77,7 +79,7 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 		}
 	}
 
-	if failed {
+	if count > 0 {
 		return fmt.Errorf("executed %d task and %d of them failed", len(r.tests), count)
 	}
 

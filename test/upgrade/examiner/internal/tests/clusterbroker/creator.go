@@ -1,4 +1,4 @@
-package service_broker
+package clusterbroker
 
 import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -27,11 +27,11 @@ func newCreator(cli ClientGetter, ns string) *creator {
 }
 
 func (c *creator) execute() error {
-	klog.Info("Start prepare resources for ServiceBroker test")
+	klog.Info("Start prepare resources for ClusterServiceBroker test")
 	for _, fn := range []func() error{
-		c.registerServiceBroker,
-		c.checkServiceClass,
-		c.checkServicePlan,
+		c.registerClusterServiceBroker,
+		c.checkClusterServiceClass,
+		c.checkClusterServicePlan,
 		c.createServiceInstance,
 		c.createServiceBinding,
 	} {
@@ -44,22 +44,22 @@ func (c *creator) execute() error {
 	return nil
 }
 
-func (c *creator) registerServiceBroker() error {
-	klog.Infof("Create ServiceBroker %q", serviceBrokerName)
-	if err := c.createServiceBroker(); err != nil {
-		return errors.Wrap(err, "failed during creating ServiceBroker")
+func (c *creator) registerClusterServiceBroker() error {
+	klog.Infof("Create ClusterServiceBroker %q", clusterServiceBrokerName)
+	if err := c.createClusterServiceBroker(); err != nil {
+		return errors.Wrap(err, "failed during creating ClusterServiceBroker")
 	}
 
 	return nil
 }
 
-func (c *creator) createServiceBroker() error {
-	_, err := c.sc.ServiceBrokers(c.namespace).Create(&v1beta1.ServiceBroker{
+func (c *creator) createClusterServiceBroker() error {
+	_, err := c.sc.ClusterServiceBrokers().Create(&v1beta1.ClusterServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      serviceBrokerName,
+			Name:      clusterServiceBrokerName,
 			Namespace: c.namespace,
 		},
-		Spec: v1beta1.ServiceBrokerSpec{
+		Spec: v1beta1.ClusterServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
 				URL: "http://test-broker-test-broker.test-broker.svc.cluster.local",
 			},
@@ -91,8 +91,8 @@ func (c *creator) createDefaultServiceInstance() error {
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
-				ServiceClassExternalName: "test-service-multiple-plans",
-				ServicePlanExternalName:  "default",
+				ClusterServiceClassExternalName: "test-service-multiple-plans",
+				ClusterServicePlanExternalName:  "default",
 			},
 			Parameters: &runtime.RawExtension{
 				Raw: []byte(`{ "param-1":"value-1", "param-2":"value-2" }`),

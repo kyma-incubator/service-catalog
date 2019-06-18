@@ -1,12 +1,13 @@
-package internal
+package readiness
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
-	"time"
 )
 
 const (
@@ -16,11 +17,11 @@ const (
 
 // ClientGetter is an interface to represent structs return kubernetes clientset
 type ClientGetter interface {
-	KubernetesClient() *kubernetes.Clientset
+	KubernetesClient() kubernetes.Interface
 }
 
 type readiness struct {
-	client *kubernetes.Clientset
+	client kubernetes.Interface
 	cfg    ServiceCatalogConfig
 }
 

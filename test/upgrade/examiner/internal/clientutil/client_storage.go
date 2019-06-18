@@ -1,4 +1,4 @@
-package internal
+package clientutil
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 
 // ClientStorage stores all required clients in upgrade tests
 type ClientStorage struct {
-	client   *kubernetes.Clientset
-	scClient *sc.Clientset
+	client   kubernetes.Interface
+	scClient sc.Interface
 }
 
 // NewClientStorage returns pointer to new ClientStorage struct
@@ -31,11 +31,11 @@ func NewClientStorage(k8sKubeconfig *rest.Config) (*ClientStorage, error) {
 }
 
 // KubernetesClient returns kubernetes clientset
-func (cs *ClientStorage) KubernetesClient() *kubernetes.Clientset {
+func (cs *ClientStorage) KubernetesClient() kubernetes.Interface {
 	return cs.client
 }
 
 // ServiceCatalogClient returns ServiceCatalog clientset
-func (cs *ClientStorage) ServiceCatalogClient() *sc.Clientset {
+func (cs *ClientStorage) ServiceCatalogClient() sc.Interface {
 	return cs.scClient
 }

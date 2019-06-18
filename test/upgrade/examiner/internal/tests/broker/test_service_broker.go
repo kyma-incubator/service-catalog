@@ -1,4 +1,4 @@
-package service_broker
+package broker
 
 import (
 	sc "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
@@ -22,7 +22,7 @@ const (
 
 // ClientGetter is an interface to represent structs return kubernetes clientset
 type ClientGetter interface {
-	ServiceCatalogClient() *sc.Clientset
+	ServiceCatalogClient() sc.Interface
 }
 
 // TestBroker represents upgrade test for ServiceBroker
@@ -47,20 +47,6 @@ func (tb *TestBroker) CreateResources(stop <-chan struct{}, namespace string) er
 func (tb *TestBroker) TestResources(stop <-chan struct{}, namespace string) error {
 	c := newTester(tb.client, namespace)
 
-	defer func() {
-		err := tb.clean(stop, namespace)
-		if err != nil {
-			klog.Errorf("failed cleaning process: %s", err)
-		}
-	}()
-
 	klog.Info("Start test process")
 	return c.execute()
-}
-
-func (tb *TestBroker) clean(stop <-chan struct{}, namespace string) error {
-	c := newCleaner(tb.client, namespace)
-
-	klog.Info("Start clean process")
-	return c.clean()
 }

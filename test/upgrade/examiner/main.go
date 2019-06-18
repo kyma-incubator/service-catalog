@@ -4,12 +4,14 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/kubernetes-sigs/service-catalog/upgrade/examiner/internal"
-	"github.com/kubernetes-sigs/service-catalog/upgrade/examiner/internal/runner"
-	"github.com/kubernetes-sigs/service-catalog/upgrade/examiner/pkg/tests/cluster_service_broker"
-	"github.com/kubernetes-sigs/service-catalog/upgrade/examiner/pkg/tests/service_broker"
+	"github.com/kubernetes-sigs/service-catalog/test/upgrade/examiner/internal/clientutil"
+	"github.com/kubernetes-sigs/service-catalog/test/upgrade/examiner/internal/readiness"
+	"github.com/kubernetes-sigs/service-catalog/test/upgrade/examiner/internal/runner"
+	"github.com/kubernetes-sigs/service-catalog/test/upgrade/examiner/internal/tests/broker"
+	"github.com/kubernetes-sigs/service-catalog/test/upgrade/examiner/internal/tests/clusterbroker"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
+	"k8s.io/apiserver/pkg/server"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
@@ -20,19 +22,19 @@ const (
 	executeTestsActionName = "executeTests"
 )
 
-func registeredTests(cs *internal.ClientStorage) map[string]runner.UpgradeTest {
+func registeredTests(cs *clientutil.ClientStorage) map[string]runner.UpgradeTest {
 	return map[string]runner.UpgradeTest{
-		"test-broker":         service_broker.NewTestBroker(cs),
-		"test-cluster-broker": cluster_service_broker.NewTestBroker(cs),
+		"test-broker":         broker.NewTestBroker(cs),
+		"test-cluster-broker": clusterbroker.NewTestBroker(cs),
 	}
 }
 
 // Config collects all parameters from env variables
 type Config struct {
-	Local          bool         `envconfig:"default=false"`
+	Local          bool         `envconfig:"default=true"`
 	KubeconfigPath string       `envconfig:"optional"`
 	KubeConfig     *rest.Config `envconfig:"-"`
-	internal.ServiceCatalogConfig
+	readiness.ServiceCatalogConfig
 }
 
 // ConfigFlag collects all parameters from flags
@@ -45,10 +47,10 @@ func main() {
 	flg := readFlags()
 	cfg, err := readConfig()
 	fatalOnError(err, "while create config")
-	stop := internal.SetupChannel()
+	stop := server.SetupSignalHandler()
 
 	// create client storage - struct with all required clients
-	cs, err := internal.NewClientStorage(cfg.KubeConfig)
+	cs, err := clientutil.NewClientStorage(cfg.KubeConfig)
 	fatalOnError(err, "while create kubernetes client storage")
 
 	// get tests
@@ -62,7 +64,7 @@ func main() {
 	switch flg.Action {
 	case prepareDataActionName:
 		// make sure ServiceCatalog and TestBroker are ready
-		ready := internal.NewReadiness(cs, cfg.ServiceCatalogConfig)
+		ready := readiness.NewReadiness(cs, cfg.ServiceCatalogConfig)
 		err = ready.TestEnvironmentIsReady()
 		fatalOnError(err, "while check ServiceCatalog/TestBroker readiness")
 
@@ -84,7 +86,6 @@ func fatalOnError(err error, context string) {
 }
 
 func readFlags() ConfigFlag {
-	klog.InitFlags(nil)
 	var action string
 
 	flag.StringVar(&action, "action", "", fmt.Sprintf("Define what kind of action runner should execute. Possible values: %s or %s", prepareDataActionName, executeTestsActionName))

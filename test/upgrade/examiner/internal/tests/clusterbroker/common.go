@@ -1,4 +1,4 @@
-package service_broker
+package clusterbroker
 
 import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -15,20 +15,20 @@ type common struct {
 	namespace string
 }
 
-func (c *common) checkServiceClass() error {
-	klog.Info("Check ServiceClasses")
-	if err := c.assertProperAmountOfServiceClasses(); err != nil {
-		return errors.Wrap(err, "failed during list ServiceClasses")
+func (c *common) checkClusterServiceClass() error {
+	klog.Info("Check ClusterServiceClasses")
+	if err := c.assertProperAmountOfClusterServiceClasses(); err != nil {
+		return errors.Wrap(err, "failed during list ClusterServiceClasses")
 	}
 
 	return nil
 }
 
-func (c *common) assertProperAmountOfServiceClasses() error {
+func (c *common) assertProperAmountOfClusterServiceClasses() error {
 	return wait.Poll(waitInterval, timeoutInterval, func() (done bool, err error) {
-		list, err := c.sc.ServiceClasses(c.namespace).List(metav1.ListOptions{})
+		list, err := c.sc.ClusterServiceClasses().List(metav1.ListOptions{})
 		if apiErr.IsNotFound(err) {
-			klog.Info("ServiceClasses not exist")
+			klog.Info("ClusterServiceClasses not exist")
 			return false, nil
 		}
 		if err != nil {
@@ -36,30 +36,30 @@ func (c *common) assertProperAmountOfServiceClasses() error {
 		}
 
 		amount := len(list.Items)
-		if amount == amountOfServiceClasses {
-			klog.Infof("All expected elements (%d) exists: %d items", amountOfServiceClasses, amount)
+		if amount == amountOfClusterServiceClasses {
+			klog.Infof("All expected elements (%d) exists: %d items", amountOfClusterServiceClasses, amount)
 			return true, nil
 		}
 
-		klog.Errorf("There should be %d ServiceClassess, %d are", amountOfServiceClasses, amount)
+		klog.Errorf("There should be %d ClusterServiceClassess, %d are", amountOfClusterServiceClasses, amount)
 		return false, nil
 	})
 }
 
-func (c *common) checkServicePlan() error {
-	klog.Info("Check ServicePlans")
-	if err := c.assertProperAmountOfServicePlans(); err != nil {
-		return errors.Wrap(err, "failed during list ServiceClasses")
+func (c *common) checkClusterServicePlan() error {
+	klog.Info("Check ClusterServicePlans")
+	if err := c.assertProperAmountOfClusterServicePlans(); err != nil {
+		return errors.Wrap(err, "failed during list ClusterServicePlans")
 	}
 
 	return nil
 }
 
-func (c *common) assertProperAmountOfServicePlans() error {
+func (c *common) assertProperAmountOfClusterServicePlans() error {
 	return wait.Poll(waitInterval, timeoutInterval, func() (done bool, err error) {
-		list, err := c.sc.ServicePlans(c.namespace).List(metav1.ListOptions{})
+		list, err := c.sc.ClusterServicePlans().List(metav1.ListOptions{})
 		if apiErr.IsNotFound(err) {
-			klog.Info("ServicePlans not exist")
+			klog.Info("ClusterServicePlans not exist")
 			return false, nil
 		}
 		if err != nil {
@@ -67,12 +67,12 @@ func (c *common) assertProperAmountOfServicePlans() error {
 		}
 
 		amount := len(list.Items)
-		if amount == amountOfServicePlans {
-			klog.Infof("All expected elements (%d) exists: %d items", amountOfServicePlans, amount)
+		if amount == amountOfClusterServicePlans {
+			klog.Infof("All expected elements (%d) exists: %d items", amountOfClusterServicePlans, amount)
 			return true, nil
 		}
 
-		klog.Errorf("There should be %d ServicePlans, %d are", amountOfServicePlans, amount)
+		klog.Errorf("There should be %d ClusterServicePlans, %d are", amountOfClusterServicePlans, amount)
 		return false, nil
 	})
 }
