@@ -1,12 +1,26 @@
-## Overview
+---
+title: Migration from API server to CRDs
+layout: docwithnav
+---
 
-Service Catalog upgrade from version 0.2.x (and earlier) to 0.3.x needs a data migration. This document describes how the migration works and what action must be performed.
+Service Catalog upgrade from version 0.2.x (and earlier) to 0.3.x needs a data migration. 
+This document describes how the migration works and what actions must be performed. 
+
+![Service Catalog upgrade](images/sc-migration-to-crds.svg)
+
+The above picture describes changes in Service Catalog architecture made between versions 0.2.0 and 0.3.0:
+- Custom Resource Definitions (native K8S feature) is now used to store Service Catalog objects 
+- etcd and Aggregated API Server are no longer needed
+- WebHook server was added to perform data validation/mutation using admission Webhooks mechanism
 
 ## Upgrade Service Catalog as a Helm release
 
 The Service Catalog helm release can be upgraded using `helm upgrade` command, which runs all necessary actions.
 
 ### Details of an upgrade and migration
+
+![Service Catalog upgrade steps](images/sc-migration-to-crds-steps.svg)
+
 
 The upgrade to CRDs contains the following steps:
 1. Make API Server read only. Before any backup we should block any resource changes to be sure the backup makes a snapshot. We need to avoid any changes while migration tool is backuping resources.
@@ -22,7 +36,7 @@ These fields are set during an update operation.
 9. Add proper owner reference to all secrets pointed by service bindings.
 10. Scale up controller-manager. 
 
->Note: There is no difference between upgrade Service Catalog using own ETCD or main Kubernetes ETCD.
+>Note: At step 6 there is no difference between upgrade Service Catalog using own ETCD or main Kubernetes ETCD.
 ## Manual Service Catalog upgrade
 
 ### Backup and deleting resources
@@ -43,9 +57,24 @@ Execute `restore action` to restore all resources and scale up the controller.
 
 ```bash
 ./service-catalog migration --action restore --storage-path=data/ --service-catalog-namespace=catalog --controller-manager-deployment=catalog-catalog-controller-manager
-
 ```
+
 ## Migration tool
+
+### Build
+To run the migration tool you first have to compile the `service-catalog` binary by executing the following command:
+```bash
+make build
+```
+
+If you are running on OSX and want to get a native binary add the `PLATFORM` environment variable:
+```bash
+PLATFORM=darwin make build
+```
+
+Resulting executable file can be found in the `bin` subdirectory.
+
+### Execution
 
 The `service-catalog` binary can be run with `migration` parameter which triggers the migration process, for example:
 
