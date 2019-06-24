@@ -17,10 +17,7 @@ The above picture describes changes in the Service Catalog architecture made bet
 
 The Service Catalog helm release can be upgraded using the `helm upgrade` command, which runs all necessary actions.
 
-### Details of an upgrade and migration
-
 ![Service Catalog upgrade steps](images/sc-migration-to-crds-steps.svg)
-
 
 The upgrade to CRDs contains the following steps:
 1. Make API Server read-only. Before any backup, we should block any resource changes to be sure the backup makes a snapshot. We need to avoid any changes when the migration tool is backuping resources.
