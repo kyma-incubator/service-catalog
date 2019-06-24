@@ -8,14 +8,14 @@ This document describes how the migration works and what actions must be perform
 
 ![Service Catalog upgrade](images/sc-migration-to-crds.svg)
 
-The above picture describes changes in Service Catalog architecture made between versions 0.2.0 and 0.3.0:
-- Custom Resource Definitions (native K8S feature) is now used to store Service Catalog objects 
+The above picture describes changes in the Service Catalog architecture made between versions 0.2.0 and 0.3.0:
+- Custom Resource Definitions (native K8S feature) are now used to store Service Catalog objects 
 - etcd and Aggregated API Server are no longer needed
-- WebHook server was added to perform data validation/mutation using admission Webhooks mechanism
+- Webhook server was added to perform data validation/mutation using the admission webhooks mechanism
 
 ## Upgrade Service Catalog as a Helm release
 
-The Service Catalog helm release can be upgraded using `helm upgrade` command, which runs all necessary actions.
+The Service Catalog helm release can be upgraded using the `helm upgrade` command, which runs all necessary actions.
 
 ### Details of an upgrade and migration
 
@@ -23,8 +23,8 @@ The Service Catalog helm release can be upgraded using `helm upgrade` command, w
 
 
 The upgrade to CRDs contains the following steps:
-1. Make API Server read only. Before any backup we should block any resource changes to be sure the backup makes a snapshot. We need to avoid any changes while migration tool is backuping resources.
-2. Scale down controller manager to avoid resources processing, for example secret deletion.
+1. Make API Server read-only. Before any backup, we should block any resource changes to be sure the backup makes a snapshot. We need to avoid any changes when the migration tool is backuping resources.
+2. Scale down the Controller Manager to avoid resources processing, such as secret deletion.
 3. Backup ServiceCatalog custom resources to files in a Persistent Volume.
 4. Remove `OwnerReference` fields in all secrets pointed by any ServiceBinding. This is needed to avoid Secret deletion.
 5. Remove all Service-Catalog resources. This must be done if Service Catalog uses the main Kubernetes ETCD instance.
@@ -34,10 +34,10 @@ The upgrade to CRDs contains the following steps:
 Service instances are created and then updated because of class/plan refs fields. The validation webhooks denies creating service instances if the reference to ClusterServiceClass or ServiceClass is not set: Spec.ClusterServiceClassRef, Spec.ClusterServicePlanRef, Spec.ServiceClassRef, Spec.ServicePlanRef.
 These fields are set during an update operation.
 9. Add proper owner reference to all secrets pointed by service bindings.
-10. Scale up controller-manager. 
+10. Scale up the Controller Manager. 
 
->Note: At step 6 there is no difference between upgrade Service Catalog using own ETCD or main Kubernetes ETCD.
-## Manual Service Catalog upgrade
+>**NOTE:** In step 6, there is no difference between upgrade Service Catalog using your own etcd or the main Kubernetes etcd.
+## Upgrade Service Catalog manually
 
 ### Backup and deleting resources
 
@@ -62,12 +62,12 @@ Execute `restore action` to restore all resources and scale up the controller.
 ## Migration tool
 
 ### Build
-To run the migration tool you first have to compile the `service-catalog` binary by executing the following command:
+To run the migration tool, compile the `service-catalog` binary by executing the following command:
 ```bash
 make build
 ```
 
-If you are running on OSX and want to get a native binary add the `PLATFORM` environment variable:
+If you run the migration tool on OSX and want to get a native binary, add the `PLATFORM` environment variable:
 ```bash
 PLATFORM=darwin make build
 ```
@@ -76,7 +76,7 @@ Resulting executable file can be found in the `bin` subdirectory.
 
 ### Execution
 
-The `service-catalog` binary can be run with `migration` parameter which triggers the migration process, for example:
+You can run the `service-catalog` binary with the `migration` parameter which triggers the migration process. For example, run:
 
 ```bash
 ./service-catalog migration --action restore --storage-path=data/ --service-catalog-namespace=catalog --controller-manager-deployment=catalog-catalog-controller-manager
