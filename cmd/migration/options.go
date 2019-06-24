@@ -71,8 +71,5 @@ func (c *Options) Validate() error {
 	if c.ControllerManagerName == "" {
 		return fmt.Errorf("%s must not be empty", controllerManagerNameParameter)
 	}
-	if c.ApiserverName == "" {
-		return fmt.Errorf("%s must not be empty", apiserverNameParameter)
-	}
 	return nil
 }

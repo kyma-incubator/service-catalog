@@ -46,7 +46,16 @@ rules:
     - "servicebrokers"
     verbs: ["create"]
   - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["clusterservicebrokers/status","clusterserviceclasses/status","clusterserviceplans/status","serviceinstances/status","serviceinstances","servicebindings/status", "servicebrokers/status", "serviceclasses/status", "serviceplans/status"]
+    resources:
+    - "clusterservicebrokers/status"
+    - "clusterserviceclasses/status"
+    - "clusterserviceplans/status"
+    - "serviceinstances/status"
+    - "serviceinstances"
+    - "servicebindings/status"
+    - "servicebrokers/status"
+    - "serviceclasses/status"
+    - "serviceplans/status"
     verbs: ["update"]
 
 ---
@@ -87,7 +96,7 @@ metadata:
     "helm.sh/hook-weight": "1"
     "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
 spec:
-  backoffLimit: 2
+  backoffLimit: 1
   activeDeadlineSeconds: 100
   template:
     metadata:
