@@ -49,11 +49,16 @@ func RunCommand(opt *Options) error {
 	}
 	scInterface := scClient.ServicecatalogV1beta1()
 
-	svc := migration.NewMigrationService(scInterface, opt.StoragePath, k8sCli.CoreV1())
+	svc := migration.NewMigrationService(scInterface, opt.StoragePath, opt.ReleaseNamespace, opt.ApiserverName, k8sCli.CoreV1(), k8sCli.AppsV1())
 	scalingSvc := migration.NewScalingService(opt.ReleaseNamespace, opt.ControllerManagerName, k8sCli.AppsV1())
 
 	switch opt.Action {
 	case backupActionName:
+		if !svc.IsMigrationRequired() {
+			klog.Infoln("Missing Apiserver deployment - skipping the migration")
+			return nil
+		}
+
 		klog.Infoln("Executing backup action")
 		err := scalingSvc.ScaleDown()
 		if err != nil {
