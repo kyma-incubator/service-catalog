@@ -101,9 +101,11 @@ func (t *tester) removeServiceInstance() error {
 	if !exist {
 		return nil
 	}
-	// remove `removeServiceInstanceFinalizer` method if BrokerTest will be fixed and
+	// remove `removeServiceInstanceFinalizer` method if TestBroker will be fixed and
 	// will handle ServiceInstance delete operation
 	// for now BrokerTest failed and ServiceInstance has deprovisioning false status
+	// service patch is available on https://github.com/kubernetes-sigs/service-catalog/pull/2656
+	// method can be removed when PR will be merged and TestBroker will be in version > 0.2.1
 	if err := t.removeServiceInstanceFinalizer(); err != nil {
 		return errors.Wrap(err, "failed during removing ServiceInstance finalizers")
 	}
