@@ -15,14 +15,14 @@ The above picture describes changes in the Service Catalog architecture made bet
 
 ## Upgrade Service Catalog as a Helm release
 
-The Service Catalog helm release can be upgraded using the `helm upgrade` command, which runs all necessary actions.
+The Service Catalog Helm release can be upgraded using the `helm upgrade` command, which runs all necessary actions.
 
 ![Service Catalog upgrade steps](images/sc-migration-to-crds-steps.svg)
 
 The upgrade to CRDs contains the following steps:
 1. Make API Server read-only. Before any backup, we should block any resource changes to be sure the backup makes a snapshot. We need to avoid any changes when the migration tool is backuping resources.
 2. Scale down the Controller Manager to avoid resources processing, such as secret deletion.
-3. Backup ServiceCatalog custom resources to files in a Persistent Volume.
+3. Backup Service Catalog custom resources to files in a Persistent Volume.
 4. Remove `OwnerReference` fields in all secrets pointed by any ServiceBinding. This is needed to avoid Secret deletion.
 5. Remove all Service-Catalog resources. This must be done if Service Catalog uses the main Kubernetes ETCD instance.
 6. Upgrade Service-Catalog: remove API Server, install CRDs, webhook and roll up the controller manager.
