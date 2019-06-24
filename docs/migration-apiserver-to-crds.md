@@ -11,7 +11,7 @@ This document describes how the migration works and what actions must be perform
 The above picture describes changes in the Service Catalog architecture made between versions 0.2.0 and 0.3.0:
 - Custom Resource Definitions (native K8S feature) are now used to store Service Catalog objects 
 - etcd and Aggregated API Server are no longer needed
-- Webhook server was added to perform data validation/mutation using the admission webhooks mechanism
+- Webhook Server was added to perform data validation/mutation using the admission webhooks mechanism
 
 ## Upgrade Service Catalog as a Helm release
 
@@ -36,12 +36,13 @@ These fields are set during an update operation.
 9. Add proper `OwnerReference` to all Secrets pointed by ServiceBindings.
 10. Scale up the Controller Manager. 
 
->**NOTE:** In step 6, there is no difference between upgrade Service Catalog using your own etcd or the main Kubernetes etcd.
+>**NOTE:** In step 6, there is no difference between Service Catalog upgrade using your own etcd or the main Kubernetes etcd.
+
 ## Upgrade Service Catalog manually
 
 ### Backup and deleting resources
 
-Execute the `backup` action to scale down the Controller Manager, remove owner referneces in Secrets and store all resources in a specified folder, then delete all Service Catalog resources.
+Execute the `backup` action to scale down the Controller Manager, remove owner references in Secrets and store all resources in a specified folder, then delete all Service Catalog resources.
 
 ```bash
 ./service-catalog migration --action backup --storage-path=data/ --service-catalog-namespace=catalog --controller-manager-deployment=catalog-catalog-controller-manager
@@ -82,7 +83,7 @@ You can run the `service-catalog` binary with the `migration` parameter which tr
 ./service-catalog migration --action restore --storage-path=data/ --service-catalog-namespace=catalog --controller-manager-deployment=catalog-catalog-controller-manager
 ```
 
-| flag   | Description  |
+| Flag   | Description  |
 | ------------    | ------------ |
 | action | Specifies the action which must be executed. The possible values are `backup` or `restore`.|
 | storage-path | Points to a folder where resources will be saved. |
