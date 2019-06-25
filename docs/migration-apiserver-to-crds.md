@@ -92,9 +92,9 @@ You can run the `service-catalog` binary with the `migration` parameter which tr
 | controller-manager-deployment | Provides the Controller Manager deployment name. |
 | apiserver-deployment | Provides the Apiserver deployment name. It is required only for the `backup` phase. |
 
-### Troubleshooting
+## Troubleshooting
 
-In case your migration job failed you can check its logs using the following commands:
+In case your migration job failed, you can check its logs using the following command:
 
 ```bash
 kubectl logs -n catalog -l migration-job=true
@@ -102,7 +102,7 @@ kubectl logs -n catalog -l migration-job=true
 
 ### Cleanup
 
-You can delete all the migration related resources using this command:
+You can delete all the migration-related resources using this command:
 
 ```bash
 kubectl delete pvc,clusterrole,clusterrolebinding,serviceaccount,job -n catalog -l migration-job=true
