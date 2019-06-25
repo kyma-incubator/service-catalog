@@ -100,7 +100,7 @@ In case your migration job failed, you can check its logs using the following co
 kubectl logs -n catalog -l migration-job=true
 ```
 
-### Cleanup
+## Cleanup
 
 You can delete all the migration-related resources using this command:
 
