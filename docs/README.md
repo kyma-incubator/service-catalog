@@ -42,6 +42,7 @@ If you still use Service Catalog version 0.2.0, read the [migration guide](./mig
 - [Using Namespaced Broker Resources](./namespaced-broker-resources.md)
 - [Filtering Broker Catalogs](./catalog-restrictions.md)
 - [Setting Defaults for Service Instances](./service-plan-defaults.md)
+- [Migrating from API Server to CRDs](./migration-apiserver-to-crds.md)
 
 ## Request for Comments
 
