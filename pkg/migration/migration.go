@@ -230,6 +230,8 @@ func (m *Service) Restore(res *ServiceCatalogResources) error {
 		si.RecalculatePrinterColumnStatusFields()
 		si.ResourceVersion = ""
 
+		instance := si.DeepCopy()
+
 		// ServiceInstance must not have class/plan refs when it is created
 		// These fields must be filled using an update
 		si.Spec.ClusterServiceClassRef = nil
@@ -247,10 +249,10 @@ func (m *Service) Restore(res *ServiceCatalogResources) error {
 			return err
 		}
 
-		updated.Spec.ClusterServiceClassRef = si.Spec.ClusterServiceClassRef
-		updated.Spec.ClusterServicePlanRef = si.Spec.ClusterServicePlanRef
-		updated.Spec.ServiceClassRef = si.Spec.ServiceClassRef
-		updated.Spec.ServicePlanRef = si.Spec.ServicePlanRef
+		updated.Spec.ClusterServiceClassRef = instance.Spec.ClusterServiceClassRef
+		updated.Spec.ClusterServicePlanRef = instance.Spec.ClusterServicePlanRef
+		updated.Spec.ServiceClassRef = instance.Spec.ServiceClassRef
+		updated.Spec.ServicePlanRef = instance.Spec.ServicePlanRef
 
 		_, err = m.scInterface.ServiceInstances(si.Namespace).Update(updated)
 		if err != nil {
