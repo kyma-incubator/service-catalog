@@ -90,7 +90,7 @@ You can run the `service-catalog` binary with the `migration` parameter which tr
 | storage-path | Points to a folder where resources will be saved. |
 | service-catalog-namespace | Specifies the namespace in which the Service Catalog is installed. |
 | controller-manager-deployment | Provides the Controller Manager deployment name. |
-| apiserver-deployment | Provides the Apiserver deployment name. It is required only for `backup` phase |
+| apiserver-deployment | Provides the Apiserver deployment name. It is required only for the `backup` phase. |
 
 ### Troubleshooting
 
