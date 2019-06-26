@@ -54,13 +54,17 @@ func RunCommand(opt *Options) error {
 
 	switch opt.Action {
 	case backupActionName:
-		if !svc.IsMigrationRequired() {
+		isMigrationRequired, err := svc.IsMigrationRequired()
+		if err != nil {
+			return err
+		}
+		if !isMigrationRequired {
 			klog.Infoln("Missing Apiserver deployment - skipping the migration")
 			return nil
 		}
 
 		klog.Infoln("Executing backup action")
-		err := scalingSvc.ScaleDown()
+		err = scalingSvc.ScaleDown()
 		if err != nil {
 			return err
 		}

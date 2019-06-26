@@ -33,6 +33,7 @@ import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/yaml"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // Service provides methods (Backup and Restore) to perform a migration from API Server version (0.2.x) to CRDs version (0.3.0).
@@ -115,11 +116,16 @@ func (m *Service) adjustOwnerReference(om *metav1.ObjectMeta, uidMap map[string]
 	}
 }
 
-func (m *Service) IsMigrationRequired() bool {
-	if _, err := m.appInterface.Deployments(m.releaseNamespace).Get(m.apiserverName, metav1.GetOptions{}); err != nil {
-		return false
+func (m *Service) IsMigrationRequired() (bool, error) {
+	_, err := m.appInterface.Deployments(m.releaseNamespace).Get(m.apiserverName, metav1.GetOptions{});
+	switch {
+	case err == nil:
+	case apiErrors.IsNotFound(err):
+		return false, nil
+	default:
+		return false, fmt.Errorf("other type of error: %s", err)
 	}
-	return true
+	return true, nil
 }
 
 // Restore restores Service Catalog resources and adds necessary owner reference to all secrets pointed by service bindings.
