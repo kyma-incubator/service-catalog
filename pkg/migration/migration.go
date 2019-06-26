@@ -249,18 +249,19 @@ func (m *Service) Restore(res *ServiceCatalogResources) error {
 			return err
 		}
 
-		created.Status = si.Status
-		updated, err := m.scInterface.ServiceInstances(si.Namespace).UpdateStatus(created)
+		created.Spec.ClusterServiceClassRef = instance.Spec.ClusterServiceClassRef
+		created.Spec.ClusterServicePlanRef = instance.Spec.ClusterServicePlanRef
+		created.Spec.ServiceClassRef = instance.Spec.ServiceClassRef
+		created.Spec.ServicePlanRef = instance.Spec.ServicePlanRef
+
+		updated, err := m.scInterface.ServiceInstances(si.Namespace).Update(created)
 		if err != nil {
 			return err
 		}
 
-		updated.Spec.ClusterServiceClassRef = instance.Spec.ClusterServiceClassRef
-		updated.Spec.ClusterServicePlanRef = instance.Spec.ClusterServicePlanRef
-		updated.Spec.ServiceClassRef = instance.Spec.ServiceClassRef
-		updated.Spec.ServicePlanRef = instance.Spec.ServicePlanRef
-
-		_, err = m.scInterface.ServiceInstances(si.Namespace).Update(updated)
+		updated.Status = si.Status
+		updated.Status.ObservedGeneration = updated.Generation
+		updated, err = m.scInterface.ServiceInstances(si.Namespace).UpdateStatus(updated)
 		if err != nil {
 			return err
 		}
