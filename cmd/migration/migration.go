@@ -18,6 +18,7 @@ package migration
 
 import (
 	"fmt"
+	"github.com/kubernetes-sigs/service-catalog/pkg/migration/blocker"
 	"os"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/cleaner"
@@ -27,6 +28,10 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
+)
+
+const (
+	blockerBaseName string = "service-catalog-migration-blocker"
 )
 
 // RunCommand executes migration action
@@ -49,7 +54,7 @@ func RunCommand(opt *Options) error {
 	}
 	scInterface := scClient.ServicecatalogV1beta1()
 
-	svc := migration.NewMigrationService(scInterface, opt.StoragePath, opt.ReleaseNamespace, opt.ApiserverName, k8sCli.CoreV1(), k8sCli.AppsV1())
+	svc := migration.NewMigrationService(scInterface, opt.StoragePath, opt.ReleaseNamespace, opt.ApiserverName, k8sCli)
 	scalingSvc := migration.NewScalingService(opt.ReleaseNamespace, opt.ControllerManagerName, k8sCli.AppsV1())
 
 	switch opt.Action {
@@ -64,15 +69,25 @@ func RunCommand(opt *Options) error {
 		}
 
 		klog.Infoln("Executing backup action")
+
+		svc.DisableBlocker(blockerBaseName)
+		err = svc.EnableBlocker(blockerBaseName)
+		if err != nil {
+			return err
+		}
+
 		err = scalingSvc.ScaleDown()
 		if err != nil {
+			svc.DisableBlocker(blockerBaseName)
 			return err
 		}
 
 		res, err := svc.BackupResources()
 		if err != nil {
+			svc.DisableBlocker(blockerBaseName)
 			return err
 		}
+		svc.DisableBlocker(blockerBaseName)
 
 		err = svc.RemoveOwnerReferenceFromSecrets()
 		if err != nil {
@@ -86,9 +101,12 @@ func RunCommand(opt *Options) error {
 
 		klog.Infoln("Removing finalizers")
 		finalizerCleaner := cleaner.NewFinalizerCleaner(scClient)
-		err = finalizerCleaner.RemoveFinalizers()
+		if err = finalizerCleaner.RemoveFinalizers(); err != nil {
+			return err
+		}
+
 		klog.Infoln("...done")
-		return err
+		return nil
 	case restoreActionName:
 		klog.Infoln("Executing restore action")
 		err := scalingSvc.ScaleDown()
@@ -110,6 +128,14 @@ func RunCommand(opt *Options) error {
 		if err != nil {
 			return err
 		}
+	case startWebhookServerActionName:
+		klog.Infoln("Executing block-changes action")
+		opts := blocker.NewWebhookServerOptions()
+		return blocker.RunServer(opts, nil)
+	case deployBlockerActionName:
+		return svc.EnableBlocker(blockerBaseName)
+	case undeployBlockerActionName:
+		svc.DisableBlocker(blockerBaseName)
 	default:
 		return fmt.Errorf("unknown action %s", opt.Action)
 	}
