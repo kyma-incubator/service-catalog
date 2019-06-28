@@ -42,7 +42,7 @@ func (m *Service) EnableBlocker(baseName string) error {
 	klog.Info("Starting deployment of WriteBlocker")
 
 	klog.Info("Creating ValidationWebhook")
-	webhookConf := getValidationWebhookConfigurationObject(baseName, m.releaseNamespace)
+	webhookConf := getValidationWebhookConfigurationObject(baseName)
 	_, err := m.admInterface.ValidatingWebhookConfigurations().Create(webhookConf)
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func (m *Service) EnableBlocker(baseName string) error {
 	return nil
 }
 
-func getValidationWebhookConfigurationObject(name string, namespace string) *v1beta1.ValidatingWebhookConfiguration {
+func getValidationWebhookConfigurationObject(name string) *v1beta1.ValidatingWebhookConfiguration {
 	path := "/this-endpoint-does-not-have-to-exist"
 	failurePolicy := v1beta1.Fail
 
@@ -67,7 +67,7 @@ func getValidationWebhookConfigurationObject(name string, namespace string) *v1b
 				ClientConfig: v1beta1.WebhookClientConfig{
 					Service: &v1beta1.ServiceReference{
 						Name:      name,
-						Namespace: namespace,
+						Namespace: "dummy",
 						Path:      &path,
 					},
 				},
