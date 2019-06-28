@@ -22,10 +22,10 @@ import (
 )
 
 const (
-	backupActionName             = "backup"
-	restoreActionName            = "restore"
-	deployBlockerActionName      = "deploy-blocker"
-	undeployBlockerActionName    = "undeploy-blocker"
+	backupActionName          = "backup"
+	restoreActionName         = "restore"
+	deployBlockerActionName   = "deploy-blocker"
+	undeployBlockerActionName = "undeploy-blocker"
 
 	storagePathParameter             = "storage-path"
 	apiserverNameParameter           = "apiserver-deployment"

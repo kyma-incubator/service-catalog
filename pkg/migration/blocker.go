@@ -65,7 +65,6 @@ func getValidationWebhookConfigurationObject(name string, namespace string) *v1b
 				Name:          "validating.reject-changes-to-sc-crds.servicecatalog.k8s.io",
 				FailurePolicy: &failurePolicy,
 				ClientConfig: v1beta1.WebhookClientConfig{
-				//	CABundle: []byte(cert.Cert),
 					Service: &v1beta1.ServiceReference{
 						Name:      name,
 						Namespace: namespace,
