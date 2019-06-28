@@ -62,7 +62,7 @@ func getValidationWebhookConfigurationObject(name string) *v1beta1.ValidatingWeb
 		},
 		Webhooks: []v1beta1.Webhook{
 			{
-				Name:          "validating.reject-changes-to-sc-crds.servicecatalog.k8s.io",
+				Name:          "validating.reject-changes-to-service-catalog-crds.servicecatalog.k8s.io",
 				FailurePolicy: &failurePolicy,
 				ClientConfig: v1beta1.WebhookClientConfig{
 					Service: &v1beta1.ServiceReference{
