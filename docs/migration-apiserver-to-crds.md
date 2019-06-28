@@ -7,7 +7,7 @@ Service Catalog upgrade from version 0.2.x (and earlier) to 0.3.x needs a data m
 This document describes how the migration works and what actions must be performed. 
 
 >**NOTE:**
-Before starting the migration make sure that you performed full backup of your cluster.
+Before starting the migration, make sure that you performed a full backup of your cluster.
 You should also test the procedure on a testing environment first.
 
 ![Service Catalog upgrade](images/sc-migration-to-crds.svg)
@@ -67,7 +67,7 @@ Execute `restore action` to restore all resources and scale up the Controller Ma
 
 ## Migration tool
 
-Migration tool is a set of helper functions integrated in the service-catalog binary.
+Migration tool is a set of helper functions integrated into the Service Catalog binary.
 
 ### Build
 To run the migration tool, compile the `service-catalog` binary by executing the following command:
@@ -100,21 +100,21 @@ You can run the `service-catalog` binary with the `migration` parameter which tr
 
 ### Implementation details
 
-In order to get a consistent backup we have to make sure that no resource are modified during the backup process.
-To achieve that at the beginning of backup process migration tool creates a `ValidatingWebhookConfiguration` 
-to intercept and reject all attempts to mutate Service Catalog resources. Because of a limitation of a setup with Agregation API server (used by previous version of Service Catalog) this webhook call fails with a following message:
+In order to get a consistent backup, we have to make sure that no resources are modified during the backup process.
+To achieve that, the migration tool creates `ValidatingWebhookConfiguration` at the beginning of the backup process 
+to intercept and reject all attempts to mutate Service Catalog resources. Because of the limitation of the Aggregated API Server used in the previous version of Service Catalog, this webhook call fails with the following message:
 ```bash
 failed calling webhook "validating.reject-changes-to-sc-crds.servicecatalog.k8s.io": 
 webhook does not accept v1beta1 AdmissionReviewRequest
 ```
-This error message is presented in case of a modification/creation attempt of any of Service Catalog resources during backup process and it means that write protection works as expected.
+This error message is presented in case of a modification or creation attempt of any Service Catalog resource during the backup process, and it means that the write protection works as expected.
 
-To test the mutation blocking feature execute following commands:
-- to enable write protection:
+To test the mutation blocking feature, execute the following commands:
+- to enable the write protection:
   ```bash
   ./service-catalog migration --action deploy-blocker --service-catalog-namespace=default
   ```
-- to disable write protection:
+- to disable the write protection:
   ```bash
   ./service-catalog migration --action undeploy-blocker --service-catalog-namespace=default
   ```
