@@ -24,7 +24,6 @@ import (
 const (
 	backupActionName             = "backup"
 	restoreActionName            = "restore"
-	startWebhookServerActionName = "start-webhook-server"
 	deployBlockerActionName      = "deploy-blocker"
 	undeployBlockerActionName    = "undeploy-blocker"
 
@@ -60,10 +59,10 @@ func (c *Options) AddFlags(fs *pflag.FlagSet) {
 // Validate checks flag has been set and has a proper value
 func (c *Options) Validate() error {
 	switch c.Action {
-	case backupActionName, restoreActionName, deployBlockerActionName, undeployBlockerActionName, startWebhookServerActionName:
+	case backupActionName, restoreActionName, deployBlockerActionName, undeployBlockerActionName:
 		return nil
 	default:
-		return fmt.Errorf("action must be 'restore', 'backup', 'deploy-blocker', 'undeploy-blocker' or 'start-webhook-server', you provided %s", c.Action)
+		return fmt.Errorf("action must be 'restore', 'backup', 'deploy-blocker' or 'undeploy-blocker', you provided %s", c.Action)
 	}
 	if c.StoragePath == "" {
 		return fmt.Errorf("%s must not be empty", storagePathParameter)

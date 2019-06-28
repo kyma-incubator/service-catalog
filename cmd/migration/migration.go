@@ -18,7 +18,6 @@ package migration
 
 import (
 	"fmt"
-	"github.com/kubernetes-sigs/service-catalog/pkg/migration/blocker"
 	"os"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/cleaner"
@@ -76,23 +75,27 @@ func RunCommand(opt *Options) error {
 			return err
 		}
 
+		// This defer is a fail-safe to clean up in case of any issue in backup process
+		// DisableBlocker can be safely called multiple times without generating errors
+		defer svc.DisableBlocker(blockerBaseName)
+
 		err = scalingSvc.ScaleDown()
 		if err != nil {
-			svc.DisableBlocker(blockerBaseName)
 			return err
 		}
 
 		res, err := svc.BackupResources()
 		if err != nil {
-			svc.DisableBlocker(blockerBaseName)
 			return err
 		}
-		svc.DisableBlocker(blockerBaseName)
 
 		err = svc.RemoveOwnerReferenceFromSecrets()
 		if err != nil {
 			return err
 		}
+
+		// Blocker has to be disabled cause we are about to remove protected objects
+		svc.DisableBlocker(blockerBaseName)
 
 		err = svc.Cleanup(res)
 		if err != nil {
@@ -128,10 +131,6 @@ func RunCommand(opt *Options) error {
 		if err != nil {
 			return err
 		}
-	case startWebhookServerActionName:
-		klog.Infoln("Executing block-changes action")
-		opts := blocker.NewWebhookServerOptions()
-		return blocker.RunServer(opts, nil)
 	case deployBlockerActionName:
 		return svc.EnableBlocker(blockerBaseName)
 	case undeployBlockerActionName:
