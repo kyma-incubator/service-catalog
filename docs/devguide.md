@@ -334,7 +334,7 @@ functionality or introduce instability.  See [FeatureGates](feature-gates.md)
 for more details.
 
 When adding a FeatureGate to Helm charts, define the variable
-`fooEnabled` with a value of `false` in [values.yaml](https://github.com/kubernetes-sigs/service-catalog/blob/master/charts/catalog/values.yaml).  
+`fooEnabled` with the `false` value in [values.yaml](https://github.com/kubernetes-sigs/service-catalog/blob/master/charts/catalog/values.yaml).  
 In the [Webhook Server](https://github.com/kubernetes-sigs/service-catalog/blob/master/charts/catalog/templates/webhook-deployment.yaml) and [Controller](https://github.com/kubernetes-sigs/service-catalog/blob/master/charts/catalog/templates/controller-manager-deployment.yaml)
 templates, add the new FeatureGate:
 {% raw %}

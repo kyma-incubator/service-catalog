@@ -14,13 +14,13 @@ This page is an index for the articles in here. We recommend you start by readin
 
 Afterward, see the topics below.
 
-**Note:** Between versions 0.2.0 and 0.3.0 Service Catalog changed its internal storage mechanism.
-Versions 0.2.0 and older used its own API-Server and etcd. 
+**Note:** Between versions 0.2.0 and 0.3.0, Service Catalog changed its internal storage mechanism.
+Versions 0.2.0 and older used its own API Server and etcd. 
 
-Starting from version 0.3.0 Service Catalogs moved to Custom Resource Definitions (native K8S feature).
+Starting from version 0.3.0, Service Catalogs moved to Custom Resource Definitions solution, which is a native K8S feature.
 
-The API-Server implementation will be supported (only by providing bug fixes) for next 9 months.
-If you are an existing user of version 0.2.0 please see the [migration guide](./migration-apiserver-to-crds.md)
+The API Server implementation will be supported by providing bug fixes for the next 9 months.
+If you still use Service Catalog version 0.2.0, read the [migration guide](./migration-apiserver-to-crds.md)
 
 ## Topics for users:
 
