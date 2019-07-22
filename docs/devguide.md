@@ -124,10 +124,10 @@ layout:
     │   └── catalog             # Helm chart for deploying the service catalog
     │   └── ups-broker          # Helm chart for deploying the user-provided service broker
     ├── cmd                     # Contains "main" Go packages for each service catalog component binary
-    │   └── controller-manager  # The service catalog controller manager service-catalog command
+    │   └── controller-manager  # The service catalog controller manager command
     │   └── service-catalog     # The service catalog binary, which is used to run commands
     │   └── svcat               # The command-line interface for interacting with kubernetes service-catalog resources
-    │   └── webhook             # The service catalog webhook server webhook command
+    │   └── webhook             # The service catalog webhook server command
     ├── contrib                 # Contains examples, non-essential golang source, CI configurations, etc
     │   └── build               # Dockerfiles for contrib images (example: ups-broker)
     │   └── cmd                 # Entrypoints for contrib binaries
