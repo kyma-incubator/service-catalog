@@ -3,7 +3,7 @@ title: Install
 layout: docwithnav
 ---
 
-Service Catalog requires Kubernetes at version 1.11 or higher. 
+Service Catalog requires Kubernetes version 1.11 or higher. 
 Starting from version 0.2.x, Service Catalog uses [Admission Webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#what-are-admission-webhooks) 
 to manage custom resources. It uses [Additional Printer Columns](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/#additional-printer-columns) 
 so you can use `kubectl` to interact with Service Catalog.
