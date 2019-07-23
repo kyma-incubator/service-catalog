@@ -29,7 +29,7 @@ func (m *Service) DeletePersistentVolumeClaim(name string) error {
 	err := m.coreInterface.PersistentVolumeClaims(m.releaseNamespace).Delete(name, &metav1.DeleteOptions{})
 	if apiErr.IsNotFound(err) {
 		klog.Info("PersistentVolumeClaim was removed")
-		return err
+		return nil
 	}
 	if err != nil {
 		return errors.Wrap(err, "while deleting PersistentVolumeClaim")
