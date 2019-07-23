@@ -23,8 +23,8 @@ import (
 	"k8s.io/klog"
 )
 
-// DeletePersistentVolumeClaim deletes PVC resource in which backup data will be kept and make sure it was removed
-func (m *Service) DeletePersistentVolumeClaim(name string) error {
+// AssertPersistentVolumeClaimDeleted deletes PVC resource in which backup data will be kept and make sure it was removed
+func (m *Service) AssertPersistentVolumeClaimDeleted(name string) error {
 	klog.Info("Deleting PersistentVolumeClaim")
 	err := m.coreInterface.PersistentVolumeClaims(m.releaseNamespace).Delete(name, &metav1.DeleteOptions{})
 	if apiErr.IsNotFound(err) {

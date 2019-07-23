@@ -138,7 +138,7 @@ func RunCommand(opt *Options) error {
 			return err
 		}
 
-		err = svc.DeletePersistentVolumeClaim(opt.PersistentVolumeClaimName)
+		err = svc.AssertPersistentVolumeClaimDeleted(opt.PersistentVolumeClaimName)
 		if err != nil {
 			return err
 		}
