@@ -3,11 +3,11 @@ title: Serving Certificates, Authentication, and Authorization
 layout: docwithnav
 ---
 
-This document outlines how the service catalog handles authentication and authorization.
+This document outlines how the service catalog handles authentication.
 
 The service catalog Helm chart's defaults paired with most Kubernetes
-distributions will automatically set up all authentication and authorization
-details correctly. This documentation, therefore, exists for the benefit of
+distributions will automatically set up all authentication details correctly. 
+This documentation, therefore, exists for the benefit of
 those who wish to develop and advanced understanding of this topic and those
 who have a need to address various outlying scenarios.
 
@@ -26,31 +26,14 @@ all.  Generally, our client CA certificates will be self-signed, since
 they represent the "root" of our trust relationship: clients must
 inherently trust the CA.
 
-In a full setup of the service Webook Server, there are two
-*different* CAs (and these really should be different):
-
-1. a serving CA: this CA signs "serving" certificates, which are used to
-   encrypt communication over HTTPS.  The same CA used to sign the main
-   Kubernetes API server serving certificate pair may also be used to sign
-   the service catalog serving certificates, but a different CA
-   may also be used.
-
-   The service catalog Helm chart automatically generates this CA. There is
-   generally no need to override this.
-
-2. a client CA: this CA signs client certificates, and is used by the main
-   Kubernetes API server to authenticate users based on the client certificates
-   they submit.
-
-   As an example, the default cluster admin user generated in many
-   Kubernetes distributions uses client certificate authentication.
-   Additionally, controllers or non-human clients running outside the cluster
-   often use certificate-based authentication.
+The service catalog Helm chart automatically generates new CA. 
+This CA signs "serving" certificates, which are used to encrypt communication 
+over HTTPS.There is generally no need to override this.
 
 ### Generating certificates
 
-In the common case, all CA certificates referenced above already
-exist as part of the main Kubernetes cluster setup.
+In the common case  CA certificate referenced above already
+exist as part of the installation.
 
 In case you need to generate any of the CA certificate pairs mentioned
 above yourself, the Kubernetes documentation has [detailed

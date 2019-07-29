@@ -35,6 +35,7 @@ If you still use Service Catalog version 0.2.0, read the [migration guide](./mig
 - [Code conventions](./code-standards.md)
 - [Developer guide](./devguide.md)
 - [Design](./design.md)
+- [Notes on authentication](./auth.md)
 
 ## Topics for operators:
 
