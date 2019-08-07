@@ -287,9 +287,6 @@ build-integration: .generate_files
 	$(DOCKER_CMD) go test --tags="integration" -race github.com/kubernetes-sigs/service-catalog/pkg/controller/... -c
 
 test-integration: .init $(scBuildImageTarget) build build-integration
-	# test kubectl
-	contrib/hack/setup-kubectl.sh
-	contrib/hack/test-apiserver.sh
 #	# golang integration tests
 	$(DOCKER_CMD) ./integration.test -test.v $(INT_TEST_FLAGS)
 	$(DOCKER_CMD) ./controller.test
