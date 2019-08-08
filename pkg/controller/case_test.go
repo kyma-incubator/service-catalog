@@ -45,6 +45,7 @@ import (
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/record"
 	"sync"
+	"github.com/kubernetes-sigs/service-catalog/pkg/webhook/servicecatalog/clusterserviceclass/mutation"
 )
 
 const (
@@ -631,6 +632,19 @@ func (ct *controllerTest) AssertClusterServiceClassAndPlan(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+// AssertClusterServiceClassAndPlan verifies the both the ClusterServiceClass and ClusterServicePlan are present
+func (ct *controllerTest) SetClusterServiceClassLabels() error {
+	csHandler := mutation.CreateUpdateHandler{}
+
+	csc, err := ct.scInterface.ClusterServiceClasses().Get(testClassExternalID, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	csHandler.SyncLabels(csc)
+	_, err = ct.scInterface.ClusterServiceClasses().UpdateStatus(csc)
+	return err
 }
 
 // SetCatalogReactionError sets the catalog call to always return an error

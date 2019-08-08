@@ -283,12 +283,9 @@ test-update-goldenfiles: .init
 	$(DOCKER_CMD) go test ./cmd/svcat/... -update
 
 build-integration: .generate_files
-	$(DOCKER_CMD) go test -race github.com/kubernetes-sigs/service-catalog/test/integration/... -c
 	$(DOCKER_CMD) go test --tags="integration" -race github.com/kubernetes-sigs/service-catalog/pkg/controller/... -c
 
 test-integration: .init $(scBuildImageTarget) build build-integration
-#	# golang integration tests
-	$(DOCKER_CMD) ./integration.test -test.v $(INT_TEST_FLAGS)
 	$(DOCKER_CMD) ./controller.test
 
 clean-e2e: .init $(scBuildImageTarget)
