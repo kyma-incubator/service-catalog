@@ -28,7 +28,7 @@ required = [
 
 [[constraint]]
   name = "github.com/pmorie/go-open-service-broker-client"
-  branch = "master" # latest commit
+  revision = "6988c0983446576f2cefc90112028a66e6137233"
 
 [[constraint]]
   name="sigs.k8s.io/controller-runtime"
