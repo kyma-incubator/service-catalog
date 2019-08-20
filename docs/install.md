@@ -3,9 +3,9 @@ title: Install
 layout: docwithnav
 ---
 
-Service Catalog requires Kubernetes version 1.11 or higher. 
-Starting from version 0.2.x, Service Catalog uses [Admission Webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#what-are-admission-webhooks) 
-to manage custom resources. It uses [Additional Printer Columns](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/#additional-printer-columns) 
+Service Catalog requires Kubernetes version 1.11 or higher.
+Starting from version 0.3.x, Service Catalog uses [Admission Webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#what-are-admission-webhooks)
+to manage custom resources. It uses [Additional Printer Columns](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/#additional-printer-columns)
 so you can use `kubectl` to interact with Service Catalog.
 
 The rest of this document details how to:
@@ -110,7 +110,8 @@ You should see the following output:
 
 ```console
 NAME           	VERSION	DESCRIPTION
-svc-cat/catalog	x,y.z  	service-catalog API server and controller-manag...
+svc-cat-kyma/catalog          0.3.X  service-catalog
+svc-cat-kyma/catalog-v0.2	 0.2.X  service-catalog API server ....
 ```
 
 ## RBAC
@@ -163,6 +164,13 @@ Service Catalog is simple:
 
 ```console
 helm install svc-cat/catalog \
+    --name catalog --namespace catalog
+```
+
+If you want to install older version of service catalog (for instance the  API-server based version from v0.2 branch) append branch name to the chart name:
+
+```console
+helm install svc-cat/catalog-v0.2 \
     --name catalog --namespace catalog
 ```
 
