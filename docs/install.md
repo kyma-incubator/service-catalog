@@ -176,13 +176,12 @@ helm install svc-cat/catalog-v0.2 \
 
 # Installing the Service Catalog CLI
 
-Follow the appropriate instructions for your operating system to install svcat. The binary
-can be used by itself, or as a kubectl plugin.
+Follow the appropriate instructions for your operating system to install svcat. The binary can be used by itself, or as a kubectl plugin.
 
-The snippets below install the latest version of svcat. We also publish binaries for
-our canary (master) builds, and tags using the following prefixes:
+The snippets below install the latest version of svcat. We also publish binaries for our canary (master) builds, and tags using the following prefixes:
 
 * Latest release: https://download.svcat.sh/cli/latest
+* Latest release from v2 branch: https://download.svcat.sh/cli/latest-v2.0
 * Tagged releases: https://download.svcat.sh/cli/VERSION
   where `VERSION` is the release, for example `v0.1.20`.
 * Canary builds: https://download.svcat.sh/cli/canary
