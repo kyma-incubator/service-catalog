@@ -34,7 +34,7 @@ Open Service Broker API project's [Getting Started guide](https://github.com/ope
 
 ### Project Status
 
-Service Catalog recently switched to a new [CRDs-based](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#custom-resources) architecture. The old API Server-based implementation is available on the [v0.2.0 branch](https://github.com/kubernetes-sigs/service-catalog/tree/v0.2.0). We plan to support this implementation by providing bug fixes until July 2020.
+Service Catalog recently switched to a new [CRDs-based](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#custom-resources) architecture. The old API Server-based implementation is available on the [v0.2 branch](https://github.com/kubernetes-sigs/service-catalog/tree/v0.2). We plan to support this implementation by providing bug fixes until July 2020.
 
 We are currently working towards a beta-quality release. See the [milestones list](https://github.com/kubernetes-sigs/service-catalog/milestones?direction=desc&sort=due_date&state=open)
 for information about the issues and PRs in current and future milestones.
