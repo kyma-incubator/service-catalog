@@ -3,9 +3,9 @@ title: Install
 layout: docwithnav
 ---
 
-Service Catalog requires Kubernetes version 1.11 or higher. 
-Starting from version 0.2.x, Service Catalog uses [Admission Webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#what-are-admission-webhooks) 
-to manage custom resources. It uses [Additional Printer Columns](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/#additional-printer-columns) 
+Service Catalog requires Kubernetes version 1.11 or higher.
+Starting from version 0.3.x, Service Catalog uses [Admission Webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#what-are-admission-webhooks)
+to manage custom resources. It uses [Additional Printer Columns](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/#additional-printer-columns)
 so you can use `kubectl` to interact with Service Catalog.
 
 The rest of this document details how to:
@@ -110,7 +110,8 @@ You should see the following output:
 
 ```console
 NAME           	VERSION	DESCRIPTION
-svc-cat/catalog	x,y.z  	service-catalog API server and controller-manag...
+svc-cat-kyma/catalog          0.3.X  service-catalog
+svc-cat-kyma/catalog-v0.2	 0.2.X  service-catalog API server ....
 ```
 
 ## RBAC
@@ -166,15 +167,21 @@ helm install svc-cat/catalog \
     --name catalog --namespace catalog
 ```
 
+If you want to install an older version of Service Catalog (for instance the API Server-based version from the v0.2 branch) follow the branch name with the name of the chart:
+
+```console
+helm install svc-cat/catalog-v0.2 \
+    --name catalog --namespace catalog
+```
+
 # Installing the Service Catalog CLI
 
-Follow the appropriate instructions for your operating system to install svcat. The binary
-can be used by itself, or as a kubectl plugin.
+Follow the appropriate instructions for your operating system to install svcat. The binary can be used by itself, or as a kubectl plugin.
 
-The snippets below install the latest version of svcat. We also publish binaries for
-our canary (master) builds, and tags using the following prefixes:
+The snippets below install the latest version of svcat. We also publish binaries for our canary (master) builds, and tags using the following prefixes:
 
 * Latest release: https://download.svcat.sh/cli/latest
+* Latest release from v2 branch: https://download.svcat.sh/cli/latest-v2.0
 * Tagged releases: https://download.svcat.sh/cli/VERSION
   where `VERSION` is the release, for example `v0.1.20`.
 * Canary builds: https://download.svcat.sh/cli/canary
